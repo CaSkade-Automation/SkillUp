@@ -30,10 +30,10 @@ public class Namespace extends ManagedNamespace {
 		super.onStartup();
 
 		// create a folder and add it to the node manager
-		NodeId folderNodeId = newNodeId("Beispiel");
+		NodeId folderNodeId = newNodeId("Example");
 
-		UaFolderNode folder = new UaFolderNode(getNodeContext(), folderNodeId, newQualifiedName("Beispiel"),
-				LocalizedText.english("Beispiel Ordner"));
+		UaFolderNode folder = new UaFolderNode(getNodeContext(), folderNodeId, newQualifiedName("Example"),
+				LocalizedText.english("Example Method"));
 		getNodeManager().addNode(folder);
 
 		// make sure our new folder shows up under the server's Objects folder.
@@ -45,9 +45,9 @@ public class Namespace extends ManagedNamespace {
 	}
 
 	private void addSimpleMethod(UaFolderNode folder) {
-		UaMethodNode methodNode = UaMethodNode.builder(getNodeContext()).setNodeId(newNodeId("Beispiel/SimpleMethode"))
-				.setBrowseName(newQualifiedName("SimpleMethode"))
-				.setDisplayName(new LocalizedText(null, "SimpleMethode"))
+		UaMethodNode methodNode = UaMethodNode.builder(getNodeContext()).setNodeId(newNodeId("Example/SimpleMethod"))
+				.setBrowseName(newQualifiedName("SimpleMethod"))
+				.setDisplayName(new LocalizedText(null, "SimpleMethod"))
 				.setDescription(LocalizedText.english("This is an simple method.")).build();
 
 		SimpleMethod simpleMethod = new SimpleMethod(methodNode);
