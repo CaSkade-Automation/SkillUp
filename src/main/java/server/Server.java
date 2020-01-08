@@ -28,6 +28,8 @@ import org.eclipse.milo.opcua.stack.core.types.enumerated.MessageSecurityMode;
 import org.eclipse.milo.opcua.stack.core.types.structured.BuildInfo;
 import org.eclipse.milo.opcua.stack.core.util.CertificateUtil;
 import org.eclipse.milo.opcua.stack.server.EndpointConfiguration;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.LoggerFactory;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -35,6 +37,7 @@ import static org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig.USE
 import static org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig.USER_TOKEN_POLICY_USERNAME;
 import static org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig.USER_TOKEN_POLICY_X509;
 
+@Component(immediate=true, service=Server.class)
 public class Server {
 
 	private static final int TCP_BIND_PORT = 4841;
@@ -44,7 +47,8 @@ public class Server {
 		Security.addProvider(new BouncyCastleProvider());
 	}
 
-	public static void main(String[] args) throws Exception {
+	@Activate
+	public void activate() throws Exception {
 		Server server = new Server();
 
 		server.startup().get();
