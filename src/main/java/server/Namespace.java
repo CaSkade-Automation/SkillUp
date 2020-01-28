@@ -14,11 +14,15 @@ import org.eclipse.milo.opcua.stack.core.Identifiers;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 
-public class Namespace extends ManagedNamespace {
+import methodRegistration.MethodRegistration;
+
+public class Namespace extends ManagedNamespace { 
 
 	public static final String URI = "urn:my:server:namespace";
 
 	private final SubscriptionModel subscriptionModel;
+	
+	UaFolderNode folder = null;
 
 	public Namespace(final OpcUaServer server) {
 		super(server, URI);
@@ -32,28 +36,25 @@ public class Namespace extends ManagedNamespace {
 		// create a folder and add it to the node manager
 		NodeId folderNodeId = newNodeId("Example");
 
-		UaFolderNode folder = new UaFolderNode(getNodeContext(), folderNodeId, newQualifiedName("Example"),
+		folder = new UaFolderNode(getNodeContext(), folderNodeId, newQualifiedName("Example"),
 				LocalizedText.english("Example Method"));
 		getNodeManager().addNode(folder);
 
 		// make sure our new folder shows up under the server's Objects folder.
 		folder.addReference(
 				new Reference(folder.getNodeId(), Identifiers.Organizes, Identifiers.ObjectsFolder.expanded(), false));
-
-		// Add the rest of nodes
-		addSimpleMethod(folder);
 	}
 
-	private void addSimpleMethod(UaFolderNode folder) {
-		UaMethodNode methodNode = UaMethodNode.builder(getNodeContext()).setNodeId(newNodeId("Example/SimpleMethod"))
-				.setBrowseName(newQualifiedName("SimpleMethod"))
-				.setDisplayName(new LocalizedText(null, "SimpleMethod"))
+	public void addMethod(UaFolderNode folder, String methodName, MethodRegistration method) {
+		UaMethodNode methodNode = UaMethodNode.builder(getNodeContext()).setNodeId(newNodeId("Example/" + methodName))
+				.setBrowseName(newQualifiedName(methodName))
+				.setDisplayName(new LocalizedText(null, methodName))
 				.setDescription(LocalizedText.english("This is an simple method.")).build();
-
-		SimpleMethod simpleMethod = new SimpleMethod(methodNode);
-		methodNode.setProperty(UaMethodNode.InputArguments, simpleMethod.getInputArguments());
-		methodNode.setProperty(UaMethodNode.OutputArguments, simpleMethod.getOutputArguments());
-		methodNode.setInvocationHandler(simpleMethod);
+		
+		GenericMethod newMethod = new GenericMethod(methodNode, method);
+		methodNode.setProperty(UaMethodNode.InputArguments, newMethod.getInputArguments());
+		methodNode.setProperty(UaMethodNode.OutputArguments, newMethod.getOutputArguments());
+		methodNode.setInvocationHandler(newMethod);
 
 		getNodeManager().addNode(methodNode);
 
@@ -79,5 +80,9 @@ public class Namespace extends ManagedNamespace {
 	@Override
 	public void onMonitoringModeChanged(final List<MonitoredItem> monitoredItems) {
 		this.subscriptionModel.onMonitoringModeChanged(monitoredItems);
+	}
+	
+	public UaFolderNode getFolder() {
+		return folder; 
 	}
 }
