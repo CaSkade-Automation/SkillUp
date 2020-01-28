@@ -23,6 +23,17 @@
 			<artifactId>org.osgi.service.component.annotations</artifactId>
 			<version>1.4.0</version>
 		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.core</artifactId>
+			<version>6.0.0</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>de.hsu-hh.ifa.opcua-method-registration</groupId>
+			<artifactId>opcua-method-registration</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
