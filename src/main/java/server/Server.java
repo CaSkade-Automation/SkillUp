@@ -14,6 +14,7 @@ import org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig;
 import org.eclipse.milo.opcua.sdk.server.identity.CompositeValidator;
 import org.eclipse.milo.opcua.sdk.server.identity.UsernameIdentityValidator;
 import org.eclipse.milo.opcua.sdk.server.identity.X509IdentityValidator;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode;
 import org.eclipse.milo.opcua.sdk.server.util.HostnameUtil;
 import org.eclipse.milo.opcua.stack.core.StatusCodes;
 import org.eclipse.milo.opcua.stack.core.UaRuntimeException;
@@ -25,30 +26,52 @@ import org.eclipse.milo.opcua.stack.core.transport.TransportProfile;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DateTime;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.MessageSecurityMode;
+import org.eclipse.milo.opcua.stack.core.types.structured.Argument;
 import org.eclipse.milo.opcua.stack.core.types.structured.BuildInfo;
 import org.eclipse.milo.opcua.stack.core.util.CertificateUtil;
 import org.eclipse.milo.opcua.stack.server.EndpointConfiguration;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.LoggerFactory;
+
+import methodRegistration.MethodRegistration;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig.USER_TOKEN_POLICY_ANONYMOUS;
 import static org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig.USER_TOKEN_POLICY_USERNAME;
 import static org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig.USER_TOKEN_POLICY_X509;
 
-@Component(immediate=true, service=Server.class)
+@Component(immediate = true, service = Server.class)
 public class Server {
 
 	private static final int TCP_BIND_PORT = 4841;
+	private Namespace namespace;  
 
 	static {
 		// Required for SecurityPolicy.Aes256_Sha256_RsaPss
 		Security.addProvider(new BouncyCastleProvider());
 	}
 
+	@Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+	void bindMethodRegistration(MethodRegistration method) {
+		
+		UaFolderNode folder = namespace.getFolder(); 
+		String methodName = method.getClass().getName();  
+//		Argument[] inputArguments = method.getInputArguments(); 
+//		Argument[] outputArguments = method.getOutputArguments(); 
+		namespace.addMethod(folder, methodName, method);
+	}
+	
+	void unbindMethodRegistration(MethodRegistration method) {
+		System.out.println("Methode entfernen");
+	}
+	
 	@Activate
 	public void activate() throws Exception {
+
 		Server server = new Server();
 
 		server.startup().get();
@@ -57,9 +80,9 @@ public class Server {
 
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> future.complete(null)));
 
-		future.get();
+		// future.get(); rausgenommen damit Activate Methode beendet. 
 	}
-
+	
 	private final OpcUaServer server;
 
 	public Server() throws Exception {
@@ -115,7 +138,7 @@ public class Server {
 
 		server = new OpcUaServer(serverConfig);
 
-		Namespace namespace = new Namespace(server);
+		this.namespace = new Namespace(server);
 		namespace.startup();
 	}
 
