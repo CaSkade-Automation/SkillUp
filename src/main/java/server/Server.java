@@ -15,6 +15,7 @@ import org.eclipse.milo.opcua.sdk.server.identity.CompositeValidator;
 import org.eclipse.milo.opcua.sdk.server.identity.UsernameIdentityValidator;
 import org.eclipse.milo.opcua.sdk.server.identity.X509IdentityValidator;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaMethodNode;
 import org.eclipse.milo.opcua.sdk.server.util.HostnameUtil;
 import org.eclipse.milo.opcua.stack.core.StatusCodes;
 import org.eclipse.milo.opcua.stack.core.UaRuntimeException;
@@ -26,7 +27,6 @@ import org.eclipse.milo.opcua.stack.core.transport.TransportProfile;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DateTime;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.MessageSecurityMode;
-import org.eclipse.milo.opcua.stack.core.types.structured.Argument;
 import org.eclipse.milo.opcua.stack.core.types.structured.BuildInfo;
 import org.eclipse.milo.opcua.stack.core.util.CertificateUtil;
 import org.eclipse.milo.opcua.stack.server.EndpointConfiguration;
@@ -48,7 +48,7 @@ import static org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig.USE
 public class Server {
 
 	private static final int TCP_BIND_PORT = 4841;
-	private Namespace namespace;  
+	private Namespace namespace;
 
 	static {
 		// Required for SecurityPolicy.Aes256_Sha256_RsaPss
@@ -57,32 +57,39 @@ public class Server {
 
 	@Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
 	void bindMethodRegistration(MethodRegistration method) {
-		
-		UaFolderNode folder = namespace.getFolder(); 
-		String methodName = method.getClass().getName();  
-//		Argument[] inputArguments = method.getInputArguments(); 
-//		Argument[] outputArguments = method.getOutputArguments(); 
+
+		UaFolderNode folder = namespace.getFolder();
+		String methodName = method.getClass().getName(); 
+		methodName = methodName.substring(methodName.lastIndexOf(".") + 1); 
 		namespace.addMethod(folder, methodName, method);
 	}
-	
+
 	void unbindMethodRegistration(MethodRegistration method) {
-		System.out.println("Methode entfernen");
+		
+		String methodName = method.getClass().getName(); 
+		List<UaMethodNode> methodNodes = namespace.getFolder().getMethodNodes(); 
+		for (UaMethodNode methodNode : methodNodes) {
+			if(methodNode.getBrowseName().getName().equals(methodName.substring(methodName.lastIndexOf(".") + 1))) {
+				methodNode.delete();
+			}
+		}
 	}
-	
+
+	/*
+	 * Constructor hasn't to be added to activate method, because an osgi bundle
+	 * starts constructor automatically. Without future.get so that the activate
+	 * method doesn't block until the future is reached.
+	 */
 	@Activate
 	public void activate() throws Exception {
-
-		Server server = new Server();
 
 		server.startup().get();
 
 		final CompletableFuture<Void> future = new CompletableFuture<>();
 
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> future.complete(null)));
-
-		// future.get(); rausgenommen damit Activate Methode beendet. 
 	}
-	
+
 	private final OpcUaServer server;
 
 	public Server() throws Exception {
