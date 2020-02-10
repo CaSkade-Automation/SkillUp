@@ -5,16 +5,18 @@ import org.eclipse.milo.opcua.sdk.server.nodes.UaMethodNode;
 import org.eclipse.milo.opcua.stack.core.UaException;
 import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
 import org.eclipse.milo.opcua.stack.core.types.structured.Argument;
-
 import methodRegistration.MethodRegistration;
 
+/**
+ * Class is used to reflect the method to be added to the server <br>
+ */
 public class GenericMethod extends AbstractMethodInvocationHandler {
-	
-	MethodRegistration method; 
+
+	MethodRegistration method;
 
 	public GenericMethod(UaMethodNode node, MethodRegistration method) {
 		super(node);
-		this.method = method; 
+		this.method = method;
 		// TODO Auto-generated constructor stub
 	}
 
@@ -35,5 +37,4 @@ public class GenericMethod extends AbstractMethodInvocationHandler {
 		// TODO Auto-generated method stub
 		return this.method.invoke(invocationContext, inputValues);
 	}
-
 }

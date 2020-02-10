@@ -16,12 +16,12 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 
 import methodRegistration.MethodRegistration;
 
-public class Namespace extends ManagedNamespace { 
+public class Namespace extends ManagedNamespace {
 
 	public static final String URI = "urn:my:server:namespace";
 
 	private final SubscriptionModel subscriptionModel;
-	
+
 	UaFolderNode folder = null;
 
 	public Namespace(final OpcUaServer server) {
@@ -29,6 +29,9 @@ public class Namespace extends ManagedNamespace {
 		subscriptionModel = new SubscriptionModel(server, this);
 	}
 
+	/**
+	 * When namespace is started a new folder for the server is created
+	 */
 	@Override
 	protected void onStartup() {
 		super.onStartup();
@@ -45,12 +48,19 @@ public class Namespace extends ManagedNamespace {
 				new Reference(folder.getNodeId(), Identifiers.Organizes, Identifiers.ObjectsFolder.expanded(), false));
 	}
 
+	/**
+	 * MethodNode is added to the folder by getting input and output arguments as
+	 * well as the invoke method
+	 * 
+	 * @param folder     folder to which method should be added
+	 * @param methodName name of the method to add
+	 * @param method     instance of the method to add
+	 */
 	public void addMethod(UaFolderNode folder, String methodName, MethodRegistration method) {
 		UaMethodNode methodNode = UaMethodNode.builder(getNodeContext()).setNodeId(newNodeId("Example/" + methodName))
-				.setBrowseName(newQualifiedName(methodName))
-				.setDisplayName(new LocalizedText(null, methodName))
+				.setBrowseName(newQualifiedName(methodName)).setDisplayName(new LocalizedText(null, methodName))
 				.setDescription(LocalizedText.english("This is an simple method.")).build();
-		
+
 		GenericMethod newMethod = new GenericMethod(methodNode, method);
 		methodNode.setProperty(UaMethodNode.InputArguments, newMethod.getInputArguments());
 		methodNode.setProperty(UaMethodNode.OutputArguments, newMethod.getOutputArguments());
@@ -81,8 +91,8 @@ public class Namespace extends ManagedNamespace {
 	public void onMonitoringModeChanged(final List<MonitoredItem> monitoredItems) {
 		this.subscriptionModel.onMonitoringModeChanged(monitoredItems);
 	}
-	
+
 	public UaFolderNode getFolder() {
-		return folder; 
+		return folder;
 	}
 }

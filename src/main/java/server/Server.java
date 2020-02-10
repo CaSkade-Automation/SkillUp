@@ -1,6 +1,7 @@
 package server;
 
 import java.io.File;
+import java.io.IOException;
 import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.LinkedHashSet;
@@ -38,12 +39,19 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.LoggerFactory;
 
 import methodRegistration.MethodRegistration;
+import smartModule.SmartModule;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig.USER_TOKEN_POLICY_ANONYMOUS;
 import static org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig.USER_TOKEN_POLICY_USERNAME;
 import static org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig.USER_TOKEN_POLICY_X509;
 
+/**
+ * @Component Indicates that annotated class is intended to be an OSGi
+ *            component. <br>
+ *            immediate=true, component configuration activates immediately <br>
+ *            after becoming satisfied component is registered as a service
+ */
 @Component(immediate = true, service = Server.class)
 public class Server {
 
@@ -55,30 +63,55 @@ public class Server {
 		Security.addProvider(new BouncyCastleProvider());
 	}
 
+	/**
+	 * This method is called to bind a new service to the component and adds
+	 * referenced service as a node to the server
+	 * 
+	 * @Reference used to specify dependency on other services, here:
+	 *            MethodRegistration <br>
+	 *            cardinality=MULTIPLE (0...n), reference is optional and multiple
+	 *            bound services are supported <br>
+	 *            policy=DYNAMIC, SCR(Service Component Runtime) can change the set
+	 *            of bound services without deactivating the Component Configuration
+	 *            -> method can be called while component is active and not only
+	 *            before the activate method <br>
+	 * @param method Service instance of referenced service is passed
+	 */
 	@Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
 	void bindMethodRegistration(MethodRegistration method) {
 
 		UaFolderNode folder = namespace.getFolder();
-		String methodName = method.getClass().getName(); 
-		methodName = methodName.substring(methodName.lastIndexOf(".") + 1); 
+		String methodName = method.getClass().getName();
+		methodName = methodName.substring(methodName.lastIndexOf(".") + 1);
 		namespace.addMethod(folder, methodName, method);
 	}
 
+	/**
+	 * This method is called to unbind a (binded) service and deletes node of
+	 * referenced service from the server
+	 * 
+	 * @param method Service instance of referenced service is passed
+	 */
 	void unbindMethodRegistration(MethodRegistration method) {
-		
-		String methodName = method.getClass().getName(); 
-		List<UaMethodNode> methodNodes = namespace.getFolder().getMethodNodes(); 
+
+		String methodName = method.getClass().getName();
+		List<UaMethodNode> methodNodes = namespace.getFolder().getMethodNodes();
 		for (UaMethodNode methodNode : methodNodes) {
-			if(methodNode.getBrowseName().getName().equals(methodName.substring(methodName.lastIndexOf(".") + 1))) {
+			if (methodNode.getBrowseName().getName().equals(methodName.substring(methodName.lastIndexOf(".") + 1))) {
 				methodNode.delete();
 			}
 		}
 	}
 
-	/*
-	 * Constructor hasn't to be added to activate method, because an osgi bundle
+	/**
+	 * Server is started <br>
+	 * 
+	 * Constructor hasn't to be added to activate method, because an OSGi bundle
 	 * starts constructor automatically. Without future.get so that the activate
 	 * method doesn't block until the future is reached.
+	 * 
+	 * @Activate method that should be called on component activation
+	 * @throws Exception
 	 */
 	@Activate
 	public void activate() throws Exception {
@@ -92,6 +125,13 @@ public class Server {
 
 	private final OpcUaServer server;
 
+	/**
+	 * Constructor uses/creates security file, loads keystoreloader, sets username
+	 * and password and builds server while setting endpoints etc. and starts
+	 * namespace
+	 * 
+	 * @throws Exception
+	 */
 	public Server() throws Exception {
 
 		File securityTempDir = new File(System.getProperty("security-server"), "security");
@@ -149,6 +189,12 @@ public class Server {
 		namespace.startup();
 	}
 
+	/**
+	 * Method creates TCP endpoints with and without security
+	 * 
+	 * @param certificate
+	 * @return
+	 */
 	private Set<EndpointConfiguration> createEndpointConfigurations(X509Certificate certificate) {
 		Set<EndpointConfiguration> endpointConfigurations = new LinkedHashSet<>();
 
