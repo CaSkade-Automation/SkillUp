@@ -63,6 +63,9 @@ public class Server {
 		Security.addProvider(new BouncyCastleProvider());
 	}
 
+	@Reference
+	SmartModule module; 
+	
 	/**
 	 * This method is called to bind a new service to the component and adds
 	 * referenced service as a node to the server
@@ -84,6 +87,10 @@ public class Server {
 		String methodName = method.getClass().getName();
 		methodName = methodName.substring(methodName.lastIndexOf(".") + 1);
 		namespace.addMethod(folder, methodName, method);
+	    String serviceFile = getFileFromResources(method.getClass().getClassLoader(), "DeleteService.rdf");
+	    serviceFile = serviceFile.replace("ServiceName", methodName);
+		serviceFile = serviceFile.replace("PathName", "simple");
+		module.registerService(serviceFile, methodName);
 	}
 
 	/**
@@ -256,5 +263,24 @@ public class Server {
 
 	public CompletableFuture<OpcUaServer> shutdown() {
 		return server.shutdown();
+	}
+	
+	/**
+	 * Method gets the file from resources folder with method of smart module, reads
+	 * it and converts it to a string
+	 * 
+	 * @param classLoader of class to get resources folder of the class
+	 * @param fileName    the name of file which we want from resources folder
+	 * @return returns given file as string
+	 */
+	public String getFileFromResources(ClassLoader classLoader, String fileName) {
+		String file = null;
+		try {
+			file = module.getFileFromResources(classLoader, fileName);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return file;
 	}
 }
