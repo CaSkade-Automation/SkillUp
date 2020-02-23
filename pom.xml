@@ -34,11 +34,11 @@
 			<artifactId>opcua-method-registration</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
-		<dependency>
-			<groupId>de.hsu-hh.ifa.smart-module</groupId>
-			<artifactId>smart-module</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
+<!-- 		<dependency> -->
+<!-- 			<groupId>de.hsu-hh.ifa.smart-module</groupId> -->
+<!-- 			<artifactId>smart-module</artifactId> -->
+<!-- 			<version>0.0.1-SNAPSHOT</version> -->
+<!-- 		</dependency> -->
 	</dependencies>
 	<build>
 		<plugins>

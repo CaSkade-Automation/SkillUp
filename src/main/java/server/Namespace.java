@@ -13,6 +13,7 @@ import org.eclipse.milo.opcua.sdk.server.util.SubscriptionModel;
 import org.eclipse.milo.opcua.stack.core.Identifiers;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
+import org.eclipse.milo.opcua.stack.core.types.structured.Argument;
 
 import methodRegistration.MethodRegistration;
 
@@ -56,12 +57,12 @@ public class Namespace extends ManagedNamespace {
 	 * @param methodName name of the method to add
 	 * @param method     instance of the method to add
 	 */
-	public void addMethod(UaFolderNode folder, String methodName, MethodRegistration method) {
+	public void addMethod(UaFolderNode folder, String methodName, MethodRegistration method, Argument[] inputArguments, Argument[] outputArguments) {
 		UaMethodNode methodNode = UaMethodNode.builder(getNodeContext()).setNodeId(newNodeId("Example/" + methodName))
 				.setBrowseName(newQualifiedName(methodName)).setDisplayName(new LocalizedText(null, methodName))
 				.setDescription(LocalizedText.english("This is an simple method.")).build();
 
-		GenericMethod newMethod = new GenericMethod(methodNode, method);
+		GenericMethod newMethod = new GenericMethod(methodNode, method, inputArguments, outputArguments);
 		methodNode.setProperty(UaMethodNode.InputArguments, newMethod.getInputArguments());
 		methodNode.setProperty(UaMethodNode.OutputArguments, newMethod.getOutputArguments());
 		methodNode.setInvocationHandler(newMethod);
