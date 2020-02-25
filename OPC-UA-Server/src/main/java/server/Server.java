@@ -6,9 +6,9 @@ import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.eclipse.milo.opcua.sdk.server.OpcUaServer;
 import org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig;
@@ -28,14 +28,17 @@ import org.eclipse.milo.opcua.stack.core.transport.TransportProfile;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DateTime;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.MessageSecurityMode;
+import org.eclipse.milo.opcua.stack.core.types.structured.Argument;
 import org.eclipse.milo.opcua.stack.core.types.structured.BuildInfo;
 import org.eclipse.milo.opcua.stack.core.util.CertificateUtil;
 import org.eclipse.milo.opcua.stack.server.EndpointConfiguration;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import methodRegistration.MethodRegistration;
@@ -57,11 +60,16 @@ public class Server {
 
 	private static final int TCP_BIND_PORT = 4841;
 	private Namespace namespace;
+	private AnnotationEvaluation annotationEvaluation = new AnnotationEvaluation();
+	private final Logger logger = LoggerFactory.getLogger(Server.class);
 
 	static {
 		// Required for SecurityPolicy.Aes256_Sha256_RsaPss
 		Security.addProvider(new BouncyCastleProvider());
 	}
+
+	@Reference
+	SmartModule module;
 
 	/**
 	 * This method is called to bind a new service to the component and adds
@@ -80,10 +88,19 @@ public class Server {
 	@Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
 	void bindMethodRegistration(MethodRegistration method) {
 
+		logger.info("OPC-UA-Skill found");
+		Map<String, Argument[]> argumentsMap = annotationEvaluation.evaluateAnnotation(method);
+		Argument[] inputArguments = argumentsMap.get("inputArguments");
+		Argument[] outputArguments = argumentsMap.get("outputArguments");
+
 		UaFolderNode folder = namespace.getFolder();
 		String methodName = method.getClass().getName();
 		methodName = methodName.substring(methodName.lastIndexOf(".") + 1);
-		namespace.addMethod(folder, methodName, method);
+		namespace.addMethod(folder, methodName, method, inputArguments, outputArguments);
+		String serviceFile = getFileFromResources(method.getClass().getClassLoader(), "DeleteService.rdf");
+		serviceFile = serviceFile.replace("ServiceName", methodName);
+		serviceFile = serviceFile.replace("PathName", "simple");
+		module.registerService(serviceFile, methodName);
 	}
 
 	/**
@@ -115,6 +132,8 @@ public class Server {
 	 */
 	@Activate
 	public void activate() throws Exception {
+
+		logger.info("OPC-UA-Server wird aktiviert");
 
 		server.startup().get();
 
@@ -256,5 +275,29 @@ public class Server {
 
 	public CompletableFuture<OpcUaServer> shutdown() {
 		return server.shutdown();
+	}
+
+	/**
+	 * Method gets the file from resources folder with method of smart module, reads
+	 * it and converts it to a string
+	 * 
+	 * @param classLoader of class to get resources folder of the class
+	 * @param fileName    the name of file which we want from resources folder
+	 * @return returns given file as string
+	 */
+	public String getFileFromResources(ClassLoader classLoader, String fileName) {
+		String file = null;
+		try {
+			file = module.getFileFromResources(classLoader, fileName);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return file;
+	}
+
+	@Deactivate
+	public void deactivate() {
+		logger.info("OPC-UA-Server wird deaktiviert");
 	}
 }

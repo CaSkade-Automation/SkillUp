@@ -12,24 +12,28 @@ import methodRegistration.MethodRegistration;
  */
 public class GenericMethod extends AbstractMethodInvocationHandler {
 
-	MethodRegistration method;
+	MethodRegistration method; 
+	Argument[] inputArguments; 
+	Argument[] outputArguments; 
 
-	public GenericMethod(UaMethodNode node, MethodRegistration method) {
+	public GenericMethod(UaMethodNode node, MethodRegistration method, Argument[] inputArguments, Argument[] outputArguments) {
 		super(node);
 		this.method = method;
+		this.inputArguments = inputArguments; 
+		this.outputArguments = outputArguments; 
 		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public Argument[] getInputArguments() {
 		// TODO Auto-generated method stub
-		return this.method.getInputArguments();
+		return inputArguments;
 	}
 
 	@Override
 	public Argument[] getOutputArguments() {
 		// TODO Auto-generated method stub
-		return this.method.getOutputArguments();
+		return outputArguments;
 	}
 
 	@Override
