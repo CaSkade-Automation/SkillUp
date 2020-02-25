@@ -1,6 +1,7 @@
 package server;
 
 import java.io.File;
+import java.io.IOException;
 import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.LinkedHashSet;
@@ -41,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import methodRegistration.MethodRegistration;
+import smartModule.SmartModule;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig.USER_TOKEN_POLICY_ANONYMOUS;
@@ -58,7 +60,7 @@ public class Server {
 
 	private static final int TCP_BIND_PORT = 4841;
 	private Namespace namespace;
-	private AnnotationEvaluation annotationEvaluation = new AnnotationEvaluation(); 
+	private AnnotationEvaluation annotationEvaluation = new AnnotationEvaluation();
 	private final Logger logger = LoggerFactory.getLogger(Server.class);
 
 	static {
@@ -66,8 +68,8 @@ public class Server {
 		Security.addProvider(new BouncyCastleProvider());
 	}
 
-//	@Reference
-//	SmartModule module;
+	@Reference
+	SmartModule module;
 
 	/**
 	 * This method is called to bind a new service to the component and adds
@@ -86,18 +88,19 @@ public class Server {
 	@Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
 	void bindMethodRegistration(MethodRegistration method) {
 
-		Map<String, Argument[]> argumentsMap = annotationEvaluation.evaluateAnnotation(method); 
+		logger.info("OPC-UA-Skill found");
+		Map<String, Argument[]> argumentsMap = annotationEvaluation.evaluateAnnotation(method);
 		Argument[] inputArguments = argumentsMap.get("inputArguments");
 		Argument[] outputArguments = argumentsMap.get("outputArguments");
-		
+
 		UaFolderNode folder = namespace.getFolder();
 		String methodName = method.getClass().getName();
 		methodName = methodName.substring(methodName.lastIndexOf(".") + 1);
 		namespace.addMethod(folder, methodName, method, inputArguments, outputArguments);
-//		    String serviceFile = getFileFromResources(method.getClass().getClassLoader(), "DeleteService.rdf");
-//		    serviceFile = serviceFile.replace("ServiceName", methodName);
-//			serviceFile = serviceFile.replace("PathName", "simple");
-		// module.registerService(serviceFile, methodName);
+		String serviceFile = getFileFromResources(method.getClass().getClassLoader(), "DeleteService.rdf");
+		serviceFile = serviceFile.replace("ServiceName", methodName);
+		serviceFile = serviceFile.replace("PathName", "simple");
+		module.registerService(serviceFile, methodName);
 	}
 
 	/**
@@ -282,16 +285,16 @@ public class Server {
 	 * @param fileName    the name of file which we want from resources folder
 	 * @return returns given file as string
 	 */
-//	public String getFileFromResources(ClassLoader classLoader, String fileName) {
-//		String file = null;
-//		try {
-//			file = module.getFileFromResources(classLoader, fileName);
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		return file;
-//	}
+	public String getFileFromResources(ClassLoader classLoader, String fileName) {
+		String file = null;
+		try {
+			file = module.getFileFromResources(classLoader, fileName);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return file;
+	}
 
 	@Deactivate
 	public void deactivate() {
