@@ -1,4 +1,4 @@
-package method2;
+package skill;
 
 import org.eclipse.milo.opcua.sdk.core.ValueRank;
 import org.eclipse.milo.opcua.sdk.server.api.methods.AbstractMethodInvocationHandler.InvocationContext;
@@ -12,50 +12,50 @@ import org.slf4j.LoggerFactory;
 
 import annotations.InputArgument;
 import annotations.InputArguments;
-import annotations.OpcUaMethod;
+import annotations.OpcUaSkill;
 import annotations.OutputArgument;
 import annotations.OutputArguments;
 import annotations.UaTypes;
-import methodRegistration.MethodRegistration;
+import opcuaSkillRegistration.OPCUASkillRegistration;
 
 /**
  * @Component Indicates that annotated class is intended to be an OSGi
  *            component. <br>
  *            After becoming satisfied component is registered as a service
- *            under MethodRegistration
+ *            under OPCUASkillRegistration
  */
-@OpcUaMethod
+@OpcUaSkill
 @Component
-public class SimpleMethod2 implements MethodRegistration {
+public class SimpleSkill implements OPCUASkillRegistration {
 
-	private final Logger logger = LoggerFactory.getLogger(SimpleMethod2.class);
+	private final Logger logger = LoggerFactory.getLogger(SimpleSkill.class);
 
 	/**
 	 * Method that turns input arguments into output argument
 	 */
 	@Override
 	@InputArguments({
-			@InputArgument(name = "1. Zahl", dataType = UaTypes.Double, valueRank = ValueRank.Scalar, arrayDimensions = "", description = "Minuend"),
-			@InputArgument(name = "2. Zahl", dataType = UaTypes.Double, valueRank = ValueRank.Scalar, arrayDimensions = "", description = "Substrahend") })
+			@InputArgument(name = "1. Zahl", dataType = UaTypes.Double, valueRank = ValueRank.Scalar, arrayDimensions = "", description = "1. Summand"),
+			@InputArgument(name = "2. Zahl", dataType = UaTypes.Double, valueRank = ValueRank.Scalar, arrayDimensions = "", description = "2. Summand") })
 	@OutputArguments({
-			@OutputArgument(name = "Ergebnis", dataType = UaTypes.Double, valueRank = ValueRank.Scalar, arrayDimensions = "", description = "Differenz") })
+			@OutputArgument(name = "Ergebnis", dataType = UaTypes.Double, valueRank = ValueRank.Scalar, arrayDimensions = "", description = "Summe") })
 	public Variant[] invoke(InvocationContext context, Variant[] inputValues) throws UaException {
 		logger.debug("Invoking simpleMethod of objectId={}", context.getObjectId());
 
 		double firstNumber = (double) inputValues[0].getValue();
 		double secondNumber = (double) inputValues[1].getValue();
-		double sum = firstNumber - secondNumber;
+		double sum = firstNumber + secondNumber;
 
 		return new Variant[] { new Variant(sum) };
 	}
 
 	@Activate
 	public void activate() {
-		logger.info("Methode wird aktiviert.");
+		logger.info("Skill zum Addieren wird aktiviert.");
 	}
 
 	@Deactivate
 	public void deactivate() {
-		logger.info("Methode wird deaktiviert.");
+		logger.info("Skill zum Addieren wird deaktiviert.");
 	}
 }

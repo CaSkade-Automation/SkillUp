@@ -41,7 +41,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import methodRegistration.MethodRegistration;
+import opcuaSkillRegistration.OPCUASkillRegistration;
 import smartModule.SmartModule;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -73,7 +73,7 @@ public class Server {
 
 	/**
 	 * This method is called to bind a new service to the component and adds
-	 * referenced service as a node to the server
+	 * referenced skill as a node to the server
 	 * 
 	 * @Reference used to specify dependency on other services, here:
 	 *            MethodRegistration <br>
@@ -83,39 +83,39 @@ public class Server {
 	 *            of bound services without deactivating the Component Configuration
 	 *            -> method can be called while component is active and not only
 	 *            before the activate method <br>
-	 * @param method Service instance of referenced service is passed
+	 * @param skillRegistration Service instance of referenced skill is passed
 	 */
 	@Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-	void bindMethodRegistration(MethodRegistration method) {
+	void bindMethodRegistration(OPCUASkillRegistration skillRegistration) {
 
 		logger.info("OPC-UA-Skill found");
-		Map<String, Argument[]> argumentsMap = annotationEvaluation.evaluateAnnotation(method);
+		Map<String, Argument[]> argumentsMap = annotationEvaluation.evaluateAnnotation(skillRegistration);
 		Argument[] inputArguments = argumentsMap.get("inputArguments");
 		Argument[] outputArguments = argumentsMap.get("outputArguments");
 
 		UaFolderNode folder = namespace.getFolder();
-		String methodName = method.getClass().getName();
-		methodName = methodName.substring(methodName.lastIndexOf(".") + 1);
-		namespace.addMethod(folder, methodName, method, inputArguments, outputArguments);
-		String serviceFile = getFileFromResources(method.getClass().getClassLoader(), "DeleteService.rdf");
-		serviceFile = serviceFile.replace("ServiceName", methodName);
-		serviceFile = serviceFile.replace("PathName", "simple");
-		module.registerService(serviceFile, methodName);
+		String skillName = skillRegistration.getClass().getName();
+		skillName = skillName.substring(skillName.lastIndexOf(".") + 1);
+		namespace.addMethod(folder, skillName, skillRegistration, inputArguments, outputArguments);
+		String skillFile = getFileFromResources(skillRegistration.getClass().getClassLoader(), "DeleteSkill.rdf");
+		skillFile = skillFile.replace("SkillName", skillName);
+		skillFile = skillFile.replace("PathName", "simple");
+		module.registerSkill(skillFile, skillName);
 	}
 
 	/**
-	 * This method is called to unbind a (binded) service and deletes node of
-	 * referenced service from the server
+	 * This method is called to unbind a (bound) service and deletes node of
+	 * referenced skill from the server
 	 * 
-	 * @param method Service instance of referenced service is passed
+	 * @param skillRegistration skill instance of referenced skill is passed
 	 */
-	void unbindMethodRegistration(MethodRegistration method) {
+	void unbindMethodRegistration(OPCUASkillRegistration skillRegistration) {
 
-		String methodName = method.getClass().getName();
-		List<UaMethodNode> methodNodes = namespace.getFolder().getMethodNodes();
-		for (UaMethodNode methodNode : methodNodes) {
-			if (methodNode.getBrowseName().getName().equals(methodName.substring(methodName.lastIndexOf(".") + 1))) {
-				methodNode.delete();
+		String skillName = skillRegistration.getClass().getName();
+		List<UaMethodNode> skillNodes = namespace.getFolder().getMethodNodes();
+		for (UaMethodNode skillNode : skillNodes) {
+			if (skillNode.getBrowseName().getName().equals(skillName.substring(skillName.lastIndexOf(".") + 1))) {
+				skillNode.delete();
 			}
 		}
 	}

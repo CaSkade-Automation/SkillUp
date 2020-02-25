@@ -1,10 +1,10 @@
-package methodRegistration;
+package opcuaSkillRegistration;
 
 import org.eclipse.milo.opcua.sdk.server.api.methods.AbstractMethodInvocationHandler.InvocationContext;
 import org.eclipse.milo.opcua.stack.core.UaException;
 import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
 
-public interface MethodRegistration {
+public interface OPCUASkillRegistration {
 	
 	//public String getMethodName(); 
 	//public String getMethodDescription(); 

@@ -13,11 +13,11 @@ import org.eclipse.milo.opcua.stack.core.types.structured.Argument;
 
 import annotations.InputArgument;
 import annotations.OutputArgument;
-import methodRegistration.MethodRegistration;
+import opcuaSkillRegistration.OPCUASkillRegistration;
 
 public class AnnotationEvaluation {
 
-	public Map<String, Argument[]> evaluateAnnotation(MethodRegistration method) {
+	public Map<String, Argument[]> evaluateAnnotation(OPCUASkillRegistration skillRegistration) {
 
 		UInteger[] arrayDimensions = null;
 
@@ -26,7 +26,7 @@ public class AnnotationEvaluation {
 
 		Method invokeMethod = null;
 
-		Method methods[] = method.getClass().getMethods();
+		Method methods[] = skillRegistration.getClass().getMethods();
 
 		for (int i = 0; i < methods.length; i++) {
 			if (methods[i].getName().equals("invoke")) {

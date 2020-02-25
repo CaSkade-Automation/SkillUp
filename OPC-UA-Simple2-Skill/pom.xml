@@ -2,11 +2,11 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>de.hsu-hh.ifa.opcua-method2</groupId>
-	<artifactId>opcua-method2</artifactId>
+	<groupId>de.hsu-hh.ifa.opcua-skill2</groupId>
+	<artifactId>OPC-UA-Skill2</artifactId>
 	<packaging>bundle</packaging>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>OPC-UA-Method2</name>
+	<name>OPC-UA-Skill2</name>
 	<dependencies>
 		<dependency>
 			<groupId>org.eclipse.milo</groupId>
@@ -24,8 +24,8 @@
 			<version>1.4.0</version>
 		</dependency>
 		<dependency>
-			<groupId>de.hsu-hh.ifa.opcua-method-registration</groupId>
-			<artifactId>opcua-method-registration</artifactId>
+			<groupId>de.hsu-hh.ifa.opcua-skill-registration</groupId>
+			<artifactId>OPC-UA-Skill-Registration</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
