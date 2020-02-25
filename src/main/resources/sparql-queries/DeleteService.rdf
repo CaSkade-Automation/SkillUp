@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+	xmlns="http://www.hsu-ifa.de/WADL#"
+	xmlns:DIN8580="http://www.hsu-ifa.de/ontologies/DIN8580#"
+	xmlns:wgs="http://www.w3.org/2003/01/geo/wgs84_pos#"
+	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+	xmlns:owl="http://www.w3.org/2002/07/owl#"
+	xmlns:gn="http://www.geonames.org/ontology#"
+	xmlns:WADL1="http://www.hsu-ifa.de/ontologies/WADL#"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+	xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+
+<rdf:Description rdf:about="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources">
+	<rdf:type rdf:resource="http://www.hsu-ifa.de/ontologies/WADL#Resources"/>
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#NamedIndividual"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources_ServiceName_Resource">
+	<rdf:type rdf:resource="http://www.hsu-ifa.de/ontologies/WADL#Resource"/>
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#NamedIndividual"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_DeleteElements">
+	<rdf:type rdf:resource="http://www.hsu-ifa.de/ontologies/VDI3682#Process"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources_ServiceName_Resource_Method_DELETE">
+	<rdf:type rdf:resource="http://www.hsu-ifa.de/ontologies/WADL#DELETE"/>
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#NamedIndividual"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources_ServiceName_Resource_Method_DELETE_Request">
+	<rdf:type rdf:resource="http://www.hsu-ifa.de/ontologies/WADL#Request"/>
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#NamedIndividual"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources_ServiceName_Resource_Method_DELETE_Request_QueryParameter_elementType">
+	<rdf:type rdf:resource="http://www.hsu-ifa.de/ontologies/WADL#QueryParameter"/>
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#NamedIndividual"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources_ServiceName_Resource_Method_DELETE_Request_QueryParameter_elementType_Option1">
+	<rdf:type rdf:resource="http://www.hsu-ifa.de/ontologies/WADL#Option"/>
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#NamedIndividual"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources_ServiceName_Resource_Method_DELETE_Request_QueryParameter_elementType_Option2">
+	<rdf:type rdf:resource="http://www.hsu-ifa.de/ontologies/WADL#Option"/>
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#NamedIndividual"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources_ServiceName_Resource_Method_DELETE_Request_QueryParameter_elementName">
+	<rdf:type rdf:resource="http://www.hsu-ifa.de/ontologies/WADL#QueryParameter"/>
+	<rdf:type rdf:resource="http://www.w3.org/2002/07/owl#NamedIndividual"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources">
+	<rdfs:label>Resources</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources_ServiceName_Resource">
+	<rdfs:label>ServiceName_Resource</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_DeleteElements">
+	<rdfs:label>DeleteElements</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources_ServiceName_Resource_Method_DELETE">
+	<rdfs:label>Method_DELETE</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources_ServiceName_Resource_Method_DELETE_Request">
+	<rdfs:label>Request</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources_ServiceName_Resource_Method_DELETE_Request_QueryParameter_elementType">
+	<rdfs:label>QueryParameter_elementType</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources_ServiceName_Resource_Method_DELETE_Request_QueryParameter_elementType_Option1">
+	<rdfs:label>Option1</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources_ServiceName_Resource_Method_DELETE_Request_QueryParameter_elementType_Option2">
+	<rdfs:label>Option2</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources_ServiceName_Resource_Method_DELETE_Request_QueryParameter_elementName">
+	<rdfs:label>QueryParameter_elementName</rdfs:label>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources_ServiceName_Resource">
+	<WADL1:hasMethod rdf:resource="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources_ServiceName_Resource_Method_DELETE"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources_ServiceName_Resource_Method_DELETE_Request">
+	<WADL1:hasParameter rdf:resource="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources_ServiceName_Resource_Method_DELETE_Request_QueryParameter_elementType"/>
+	<WADL1:hasParameter rdf:resource="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources_ServiceName_Resource_Method_DELETE_Request_QueryParameter_elementName"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources_ServiceName_Resource_Method_DELETE_Request_QueryParameter_elementType">
+	<WADL1:hasParameterOption rdf:resource="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources_ServiceName_Resource_Method_DELETE_Request_QueryParameter_elementType_Option1"/>
+	<WADL1:hasParameterOption rdf:resource="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources_ServiceName_Resource_Method_DELETE_Request_QueryParameter_elementType_Option2"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources_ServiceName_Resource_Method_DELETE">
+	<WADL1:hasRequest rdf:resource="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources_ServiceName_Resource_Method_DELETE_Request"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources">
+	<WADL1:hasResource rdf:resource="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources_ServiceName_Resource"/>
+	<WADL1:hasBase>IP-Adresse</WADL1:hasBase>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources_ServiceName_Resource_Method_DELETE_Request_QueryParameter_elementType_Option1">
+	<WADL1:hasOptionValue>module</WADL1:hasOptionValue>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources_ServiceName_Resource_Method_DELETE_Request_QueryParameter_elementType_Option2">
+	<WADL1:hasOptionValue>service</WADL1:hasOptionValue>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources_ServiceName_Resource_Method_DELETE_Request_QueryParameter_elementType">
+	<WADL1:hasParameterName>elementType</WADL1:hasParameterName>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources_ServiceName_Resource_Method_DELETE_Request_QueryParameter_elementName">
+	<WADL1:hasParameterName>elementName</WADL1:hasParameterName>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources_ServiceName_Resource_Method_DELETE_Request_QueryParameter_elementType">
+	<WADL1:hasParameterType>xsd:string</WADL1:hasParameterType>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources_ServiceName_Resource_Method_DELETE_Request_QueryParameter_elementName">
+	<WADL1:hasParameterType>xsd:string</WADL1:hasParameterType>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources_ServiceName_Resource">
+	<WADL1:hasPath>/PathName</WADL1:hasPath>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName">
+	<TechnicalResourceIsAssignedToProcessOperator xmlns="http://www.hsu-ifa.de/ontologies/VDI3682#" rdf:resource="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_DeleteElements"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_DeleteElements">
+	<IsExecutableVia xmlns="http://www.hsu-ifa.de/ontologies/OPS-KnowledgeBase#" rdf:resource="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources_ServiceName_Resource_Method_DELETE"/>
+</rdf:Description>
+
+</rdf:RDF>
