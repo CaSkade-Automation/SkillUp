@@ -118,7 +118,7 @@
 </rdf:Description>
 
 <rdf:Description rdf:about="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources_SkillName_Resource_Method_DELETE_Request_QueryParameter_elementType_Option2">
-	<WADL1:hasOptionValue>service</WADL1:hasOptionValue>
+	<WADL1:hasOptionValue>skill</WADL1:hasOptionValue>
 </rdf:Description>
 
 <rdf:Description rdf:about="http://www.hsu-ifa.de/ontologies/OPS#MAC-Adresse_ModuleName_Resources_SkillName_Resource_Method_DELETE_Request_QueryParameter_elementType">

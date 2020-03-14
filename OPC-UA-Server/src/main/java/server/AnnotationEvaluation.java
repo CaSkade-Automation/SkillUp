@@ -17,14 +17,14 @@ import opcuaSkillRegistration.OPCUASkillRegistration;
 
 public class AnnotationEvaluation {
 
+	private UInteger[] arrayDimensions = null;
+
+	private List<Argument> newInputArguments = new ArrayList<>();
+	private List<Argument> newOutputArguments = new ArrayList<>();
+
+	Method invokeMethod = null;
+
 	public Map<String, Argument[]> evaluateAnnotation(OPCUASkillRegistration skillRegistration) {
-
-		UInteger[] arrayDimensions = null;
-
-		List<Argument> newInputArguments = new ArrayList<>();
-		List<Argument> newOutputArguments = new ArrayList<>();
-
-		Method invokeMethod = null;
 
 		Method methods[] = skillRegistration.getClass().getMethods();
 
@@ -61,11 +61,11 @@ public class AnnotationEvaluation {
 		}
 
 		final Argument[] outputArguments = newOutputArguments.toArray(new Argument[newOutputArguments.size()]);
-		
-		Map<String, Argument[]> argumentsMap = new HashMap<>(); 
-		argumentsMap.put("inputArguments", inputArguments); 
+
+		Map<String, Argument[]> argumentsMap = new HashMap<>();
+		argumentsMap.put("inputArguments", inputArguments);
 		argumentsMap.put("outputArguments", outputArguments);
-		
-		return argumentsMap; 
+
+		return argumentsMap;
 	}
 }

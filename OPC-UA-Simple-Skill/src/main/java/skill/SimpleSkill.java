@@ -51,11 +51,11 @@ public class SimpleSkill implements OPCUASkillRegistration {
 
 	@Activate
 	public void activate() {
-		logger.info("Skill zum Addieren wird aktiviert.");
+		logger.info("OPC-UA-Skill zum Addieren wird aktiviert.");
 	}
 
 	@Deactivate
 	public void deactivate() {
-		logger.info("Skill zum Addieren wird deaktiviert.");
+		logger.info("OPC-UA-Skill zum Addieren wird deaktiviert.");
 	}
 }

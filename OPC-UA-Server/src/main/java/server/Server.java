@@ -86,7 +86,7 @@ public class Server {
 	 * @param skillRegistration Service instance of referenced skill is passed
 	 */
 	@Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-	void bindMethodRegistration(OPCUASkillRegistration skillRegistration) {
+	void bindOPCUASkillRegistration(OPCUASkillRegistration skillRegistration) {
 
 		logger.info("OPC-UA-Skill found");
 		Map<String, Argument[]> argumentsMap = annotationEvaluation.evaluateAnnotation(skillRegistration);
@@ -97,6 +97,7 @@ public class Server {
 		String skillName = skillRegistration.getClass().getName();
 		skillName = skillName.substring(skillName.lastIndexOf(".") + 1);
 		namespace.addMethod(folder, skillName, skillRegistration, inputArguments, outputArguments);
+		
 		String skillFile = getFileFromResources(skillRegistration.getClass().getClassLoader(), "DeleteSkill.rdf");
 		skillFile = skillFile.replace("SkillName", skillName);
 		skillFile = skillFile.replace("PathName", "simple");
@@ -109,7 +110,7 @@ public class Server {
 	 * 
 	 * @param skillRegistration skill instance of referenced skill is passed
 	 */
-	void unbindMethodRegistration(OPCUASkillRegistration skillRegistration) {
+	void unbindOPCUASkillRegistration(OPCUASkillRegistration skillRegistration) {
 
 		String skillName = skillRegistration.getClass().getName();
 		List<UaMethodNode> skillNodes = namespace.getFolder().getMethodNodes();

@@ -38,10 +38,10 @@ public class Namespace extends ManagedNamespace {
 		super.onStartup();
 
 		// create a folder and add it to the node manager
-		NodeId folderNodeId = newNodeId("Example");
+		NodeId folderNodeId = newNodeId("Skills");
 
-		folder = new UaFolderNode(getNodeContext(), folderNodeId, newQualifiedName("Example"),
-				LocalizedText.english("Example Skill"));
+		folder = new UaFolderNode(getNodeContext(), folderNodeId, newQualifiedName("Skills"),
+				LocalizedText.english("Example Skills"));
 		getNodeManager().addNode(folder);
 
 		// make sure our new folder shows up under the server's Objects folder.
@@ -58,7 +58,7 @@ public class Namespace extends ManagedNamespace {
 	 * @param skillRegistration     instance of the skill to add
 	 */
 	public void addMethod(UaFolderNode folder, String methodName, OPCUASkillRegistration skillRegistration, Argument[] inputArguments, Argument[] outputArguments) {
-		UaMethodNode skillNode = UaMethodNode.builder(getNodeContext()).setNodeId(newNodeId("Example/" + methodName))
+		UaMethodNode skillNode = UaMethodNode.builder(getNodeContext()).setNodeId(newNodeId("Skills/" + methodName))
 				.setBrowseName(newQualifiedName(methodName)).setDisplayName(new LocalizedText(null, methodName))
 				.setDescription(LocalizedText.english("This is an simple skill.")).build();
 

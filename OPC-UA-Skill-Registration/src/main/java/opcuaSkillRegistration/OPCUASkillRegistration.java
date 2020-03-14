@@ -6,11 +6,6 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
 
 public interface OPCUASkillRegistration {
 	
-	//public String getMethodName(); 
-	//public String getMethodDescription(); 
-	// oder public String getMethodDescription(); (enthält MethodeName und description)
-	//public String getInputArguments();
-	//public String getOutputArguments();
 	public Variant[] invoke(InvocationContext context, Variant[] inputValues) throws UaException;
 
 }
