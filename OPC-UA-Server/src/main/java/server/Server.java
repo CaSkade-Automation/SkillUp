@@ -1,7 +1,7 @@
 package server;
 
 import java.io.File;
-import java.io.IOException;
+import java.lang.reflect.Method;
 import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.LinkedHashSet;
@@ -12,11 +12,12 @@ import java.util.concurrent.CompletableFuture;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.eclipse.milo.opcua.sdk.server.OpcUaServer;
 import org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig;
+import org.eclipse.milo.opcua.sdk.server.api.nodes.Node;
 import org.eclipse.milo.opcua.sdk.server.identity.CompositeValidator;
 import org.eclipse.milo.opcua.sdk.server.identity.UsernameIdentityValidator;
 import org.eclipse.milo.opcua.sdk.server.identity.X509IdentityValidator;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode;
-import org.eclipse.milo.opcua.sdk.server.nodes.UaMethodNode;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.util.HostnameUtil;
 import org.eclipse.milo.opcua.stack.core.StatusCodes;
 import org.eclipse.milo.opcua.stack.core.UaRuntimeException;
@@ -68,8 +69,8 @@ public class Server {
 		Security.addProvider(new BouncyCastleProvider());
 	}
 
-	@Reference
-	SmartModule module;
+//	@Reference
+//	SmartModule module;
 
 	/**
 	 * This method is called to bind a new service to the component and adds
@@ -88,20 +89,27 @@ public class Server {
 	@Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
 	void bindOPCUASkillRegistration(OPCUASkillRegistration skillRegistration) {
 
-		logger.info("OPC-UA-Skill found");
-		Map<String, Argument[]> argumentsMap = annotationEvaluation.evaluateAnnotation(skillRegistration);
-		Argument[] inputArguments = argumentsMap.get("inputArguments");
-		Argument[] outputArguments = argumentsMap.get("outputArguments");
-
-		UaFolderNode folder = namespace.getFolder();
+		logger.info("OPC-UA-Skill found");   
+		
 		String skillName = skillRegistration.getClass().getName();
 		skillName = skillName.substring(skillName.lastIndexOf(".") + 1);
-		namespace.addMethod(folder, skillName, skillRegistration, inputArguments, outputArguments);
-		
-		String skillFile = getFileFromResources(skillRegistration.getClass().getClassLoader(), "DeleteSkill.rdf");
-		skillFile = skillFile.replace("SkillName", skillName);
-		skillFile = skillFile.replace("PathName", "simple");
-		module.registerSkill(skillFile, skillName);
+		UaFolderNode folder = namespace.addFolder(skillName);
+
+		Map<String, Map<String, Argument[]>> skillMap = annotationEvaluation.evaluateAnnotation(skillRegistration);
+
+		Method[] methods = skillRegistration.getClass().getMethods();
+		for (int i = 0; i < methods.length; i++) {
+			if (skillMap.containsKey(methods[i].getName())) {
+				Argument[] inputArguments = skillMap.get(methods[i].getName()).get("inputArguments");
+				Argument[] outputArguments = skillMap.get(methods[i].getName()).get("outputArguments");
+
+				namespace.addMethod(folder, skillRegistration, methods[i], inputArguments, outputArguments);
+			}
+		}
+//		String skillFile = getFileFromResources(skillRegistration.getClass().getClassLoader(), "DeleteSkill.rdf");
+//		skillFile = skillFile.replace("SkillName", skillName);
+//		skillFile = skillFile.replace("PathName", "simple");
+//		module.registerSkill(skillFile, skillName);
 	}
 
 	/**
@@ -113,9 +121,11 @@ public class Server {
 	void unbindOPCUASkillRegistration(OPCUASkillRegistration skillRegistration) {
 
 		String skillName = skillRegistration.getClass().getName();
-		List<UaMethodNode> skillNodes = namespace.getFolder().getMethodNodes();
-		for (UaMethodNode skillNode : skillNodes) {
-			if (skillNode.getBrowseName().getName().equals(skillName.substring(skillName.lastIndexOf(".") + 1))) {
+		List<Node> organizedNodes = namespace.getFolder().getOrganizesNodes(); 
+		UaNode skillNode = null; 
+		for (Node organizedNode : organizedNodes) {
+			if (organizedNode.getBrowseName().getName().equals(skillName.substring(skillName.lastIndexOf(".") + 1))) {
+				skillNode = (UaNode) organizedNode;
 				skillNode.delete();
 			}
 		}
@@ -286,16 +296,16 @@ public class Server {
 	 * @param fileName    the name of file which we want from resources folder
 	 * @return returns given file as string
 	 */
-	public String getFileFromResources(ClassLoader classLoader, String fileName) {
-		String file = null;
-		try {
-			file = module.getFileFromResources(classLoader, fileName);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return file;
-	}
+//	public String getFileFromResources(ClassLoader classLoader, String fileName) {
+//		String file = null;
+//		try {
+//			file = module.getFileFromResources(classLoader, fileName);
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		return file;
+//	}
 
 	@Deactivate
 	public void deactivate() {
