@@ -1,5 +1,6 @@
 package server;
 
+import java.lang.reflect.Method;
 import java.util.List;
 
 import org.eclipse.milo.opcua.sdk.core.Reference;
@@ -49,20 +50,40 @@ public class Namespace extends ManagedNamespace {
 				new Reference(folder.getNodeId(), Identifiers.Organizes, Identifiers.ObjectsFolder.expanded(), false));
 	}
 
+	public UaFolderNode addFolder(String folderName) {
+
+		UaFolderNode parentFolder = getFolder();
+
+		// create a folder and add it to the node manager
+		NodeId folderNodeId = newNodeId("Skills/" + folderName);
+
+		UaFolderNode folder = new UaFolderNode(getNodeContext(), folderNodeId, newQualifiedName(folderName),
+				LocalizedText.english(folderName));
+		getNodeManager().addNode(folder);
+
+		// make sure our new folder shows up under the Skills folder.
+		folder.addReference(
+				new Reference(folder.getNodeId(), Identifiers.Organizes, parentFolder.getNodeId().expanded(), false));
+
+		return folder;
+	}
+
 	/**
 	 * SkillNode is added to the folder by getting input and output arguments as
 	 * well as the invoke method
 	 * 
-	 * @param folder     folder to which skill should be added
-	 * @param methodName name of the skill to add
-	 * @param skillRegistration     instance of the skill to add
+	 * @param folder            folder to which skill should be added
+	 * @param methodName        name of the skill to add
+	 * @param skillRegistration instance of the skill to add
 	 */
-	public void addMethod(UaFolderNode folder, String methodName, OPCUASkillRegistration skillRegistration, Argument[] inputArguments, Argument[] outputArguments) {
-		UaMethodNode skillNode = UaMethodNode.builder(getNodeContext()).setNodeId(newNodeId("Skills/" + methodName))
-				.setBrowseName(newQualifiedName(methodName)).setDisplayName(new LocalizedText(null, methodName))
-				.setDescription(LocalizedText.english("This is an simple skill.")).build();
+	public void addMethod(UaFolderNode folder, OPCUASkillRegistration skillRegistration, Method method, Argument[] inputArguments, Argument[] outputArguments) {
+		UaMethodNode skillNode = UaMethodNode.builder(getNodeContext())
+				.setNodeId(newNodeId(folder.getBrowseName() + "/" + method.getName()))
+				.setBrowseName(newQualifiedName(method.getName()))
+				.setDisplayName(new LocalizedText(null, method.getName()))
+				.setDescription(LocalizedText.english(method.getName())).build();
 
-		GenericMethod newSkill = new GenericMethod(skillNode, skillRegistration, inputArguments, outputArguments);
+		GenericMethod newSkill = new GenericMethod(skillNode, skillRegistration, method, inputArguments, outputArguments);
 		skillNode.setProperty(UaMethodNode.InputArguments, newSkill.getInputArguments());
 		skillNode.setProperty(UaMethodNode.OutputArguments, newSkill.getOutputArguments());
 		skillNode.setInvocationHandler(newSkill);
