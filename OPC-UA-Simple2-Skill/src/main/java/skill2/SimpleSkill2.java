@@ -6,13 +6,10 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import annotations.SkillParameter;
-import annotations.SkillReturn;
+import annotations.Completing;
+import annotations.Execute;
 import annotations.Starting;
-import annotations.Stopping;
 import opcuaSkillRegistration.OPCUASkillRegistration;
-import statemachine.StateMachine;
-import statemachine.StateMachineBuilder;
 
 /**
  * @Component Indicates that annotated class is intended to be an OSGi
@@ -24,19 +21,21 @@ import statemachine.StateMachineBuilder;
 public class SimpleSkill2 implements OPCUASkillRegistration {
 
 	private final Logger logger = LoggerFactory.getLogger(SimpleSkill2.class);
-
+	private int i = 0; 
+	
 	@Starting
-	public @SkillReturn(name = "Ergebnis", description = "Differenz") double start(
-			@SkillParameter(name = "1. Zahl", description = "Minuend") double a,
-			@SkillParameter(name = "2. Zahl", description = "Substrahend") double b) {
-
-		return a - b;
+	public void starting() {
+		System.out.println("Starting, i = " + i);
 	}
 
-	@Stopping
-	public String stop(String stop) {
-
-		return stop;
+	@Execute
+	public void execute() {
+		i = i + 5; 
+	}
+	
+	@Completing
+	public void completing() {
+		System.out.println("Completing, i = " + i);
 	}
 
 	@Activate
