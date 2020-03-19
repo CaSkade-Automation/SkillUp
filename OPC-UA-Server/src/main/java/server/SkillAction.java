@@ -8,13 +8,11 @@ import states.IStateAction;
 public class SkillAction implements IStateAction{
 
 	Method method; 
-	Object object; 
-	Object args; 
+	Object object;  
 	
-	public SkillAction(Method method, Object object, Object args) {
+	public SkillAction(Method method, Object object) {
 		this.method = method; 
 		this.object	= object; 
-		this.args = args; 
 	}
 	
 	
@@ -22,10 +20,14 @@ public class SkillAction implements IStateAction{
 	public void execute() {
 		// TODO Auto-generated method stub
 		try {
-			method.invoke(object, args);
+			this.method.invoke(object);
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 
-	}	
+	}
+	
+	public String getName() {
+		return this.method.getName(); 
+	}
 }
