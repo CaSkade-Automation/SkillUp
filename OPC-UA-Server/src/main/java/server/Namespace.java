@@ -1,8 +1,6 @@
 package server;
 
-import java.lang.reflect.Method;
 import java.util.List;
-
 import org.eclipse.milo.opcua.sdk.core.Reference;
 import org.eclipse.milo.opcua.sdk.server.OpcUaServer;
 import org.eclipse.milo.opcua.sdk.server.api.DataItem;
@@ -14,9 +12,9 @@ import org.eclipse.milo.opcua.sdk.server.util.SubscriptionModel;
 import org.eclipse.milo.opcua.stack.core.Identifiers;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
-import org.eclipse.milo.opcua.stack.core.types.structured.Argument;
 
-import opcuaSkillRegistration.OPCUASkillRegistration;
+import annotations.Transitions;
+import statemachine.StateMachine;
 
 public class Namespace extends ManagedNamespace {
 
@@ -76,22 +74,24 @@ public class Namespace extends ManagedNamespace {
 	 * @param methodName        name of the skill to add
 	 * @param skillRegistration instance of the skill to add
 	 */
-	public void addMethod(UaFolderNode folder, OPCUASkillRegistration skillRegistration, Method method, Argument[] inputArguments, Argument[] outputArguments) {
-		UaMethodNode skillNode = UaMethodNode.builder(getNodeContext())
-				.setNodeId(newNodeId(folder.getBrowseName() + "/" + method.getName()))
-				.setBrowseName(newQualifiedName(method.getName()))
-				.setDisplayName(new LocalizedText(null, method.getName()))
-				.setDescription(LocalizedText.english(method.getName())).build();
+	public void addMethod(UaFolderNode folder, StateMachine stateMachine) {
 
-		GenericMethod newSkill = new GenericMethod(skillNode, skillRegistration, method, inputArguments, outputArguments);
-		skillNode.setProperty(UaMethodNode.InputArguments, newSkill.getInputArguments());
-		skillNode.setProperty(UaMethodNode.OutputArguments, newSkill.getOutputArguments());
-		skillNode.setInvocationHandler(newSkill);
+		for (Transitions transitionType : Transitions.values()) {
+			
+			UaMethodNode skillNode = UaMethodNode.builder(getNodeContext())
+					.setNodeId(newNodeId(folder.getBrowseName() + "/" + transitionType.getKey()))
+					.setBrowseName(newQualifiedName(transitionType.getKey()))
+					.setDisplayName(new LocalizedText(null, transitionType.getKey()))
+					.setDescription(LocalizedText.english(transitionType.getKey())).build();
 
-		getNodeManager().addNode(skillNode);
+			GenericMethod newSkill = new GenericMethod(skillNode, stateMachine, transitionType.getKey());
 
-		skillNode.addReference(
-				new Reference(skillNode.getNodeId(), Identifiers.HasComponent, folder.getNodeId().expanded(), false));
+			skillNode.setInvocationHandler(newSkill);
+			getNodeManager().addNode(skillNode);
+
+			skillNode.addReference(new Reference(skillNode.getNodeId(), Identifiers.HasComponent,
+					folder.getNodeId().expanded(), false));
+		}
 	}
 
 	@Override
