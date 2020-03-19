@@ -9,11 +9,6 @@
 	<name>OPC-UA-Server</name>
 	<dependencies>
 		<dependency>
-			<groupId>org.eclipse.milo</groupId>
-			<artifactId>sdk-server</artifactId>
-			<version>0.3.6</version>
-		</dependency>
-		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
 			<version>1.7.28</version>
@@ -22,12 +17,6 @@
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.service.component.annotations</artifactId>
 			<version>1.4.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.core</artifactId>
-			<version>6.0.0</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>de.hsu-hh.ifa.smart-module</groupId>
