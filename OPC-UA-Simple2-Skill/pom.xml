@@ -24,8 +24,8 @@
 			<version>1.4.0</version>
 		</dependency>
 		<dependency>
-			<groupId>de.hsu-hh.ifa.opcua-skill-registration</groupId>
-			<artifactId>OPC-UA-Skill-Registration</artifactId>
+			<groupId>de.hsu-hh.ifa.opcua-skill-registration-interface</groupId>
+			<artifactId>OPC-UA-Skill-Registration-Interface</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>

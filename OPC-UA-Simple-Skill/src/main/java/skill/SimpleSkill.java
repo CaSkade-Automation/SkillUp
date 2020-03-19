@@ -16,7 +16,7 @@ import annotations.OpcUaSkill;
 import annotations.OutputArgument;
 import annotations.OutputArguments;
 import annotations.UaTypes;
-import opcuaSkillRegistration.OPCUASkillRegistration;
+import opcuaSkillRegistrationInterface.OPCUASkillRegistrationInterface;
 
 /**
  * @Component Indicates that annotated class is intended to be an OSGi
@@ -26,7 +26,7 @@ import opcuaSkillRegistration.OPCUASkillRegistration;
  */
 @OpcUaSkill
 @Component
-public class SimpleSkill implements OPCUASkillRegistration {
+public class SimpleSkill implements OPCUASkillRegistrationInterface {
 
 	private final Logger logger = LoggerFactory.getLogger(SimpleSkill.class);
 

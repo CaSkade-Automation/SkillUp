@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import annotations.Completing;
 import annotations.Execute;
 import annotations.Starting;
-import opcuaSkillRegistration.OPCUASkillRegistration;
+import opcuaSkillRegistrationInterface.OPCUASkillRegistrationInterface;
 
 /**
  * @Component Indicates that annotated class is intended to be an OSGi
@@ -18,7 +18,7 @@ import opcuaSkillRegistration.OPCUASkillRegistration;
  *            under OPCUASkillRegistration
  */
 @Component
-public class SimpleSkill2 implements OPCUASkillRegistration {
+public class SimpleSkill2 implements OPCUASkillRegistrationInterface {
 
 	private final Logger logger = LoggerFactory.getLogger(SimpleSkill2.class);
 	private int i = 0; 
