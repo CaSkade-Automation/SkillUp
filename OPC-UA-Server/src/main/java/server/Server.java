@@ -1,12 +1,10 @@
 package server;
 
 import java.io.File;
-import java.lang.reflect.Method;
 import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -29,7 +27,6 @@ import org.eclipse.milo.opcua.stack.core.transport.TransportProfile;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DateTime;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.MessageSecurityMode;
-import org.eclipse.milo.opcua.stack.core.types.structured.Argument;
 import org.eclipse.milo.opcua.stack.core.types.structured.BuildInfo;
 import org.eclipse.milo.opcua.stack.core.util.CertificateUtil;
 import org.eclipse.milo.opcua.stack.server.EndpointConfiguration;
@@ -44,6 +41,7 @@ import org.slf4j.LoggerFactory;
 
 import opcuaSkillRegistration.OPCUASkillRegistration;
 import smartModule.SmartModule;
+import statemachine.StateMachine;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig.USER_TOKEN_POLICY_ANONYMOUS;
@@ -89,23 +87,16 @@ public class Server {
 	@Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
 	void bindOPCUASkillRegistration(OPCUASkillRegistration skillRegistration) {
 
-		logger.info("OPC-UA-Skill found");   
-		
+		logger.info("OPC-UA-Skill found");
+
 		String skillName = skillRegistration.getClass().getName();
 		skillName = skillName.substring(skillName.lastIndexOf(".") + 1);
 		UaFolderNode folder = namespace.addFolder(skillName);
 
-		Map<String, Map<String, Argument[]>> skillMap = annotationEvaluation.evaluateAnnotation(skillRegistration);
-
-		Method[] methods = skillRegistration.getClass().getMethods();
-		for (int i = 0; i < methods.length; i++) {
-			if (skillMap.containsKey(methods[i].getName())) {
-				Argument[] inputArguments = skillMap.get(methods[i].getName()).get("inputArguments");
-				Argument[] outputArguments = skillMap.get(methods[i].getName()).get("outputArguments");
-
-				namespace.addMethod(folder, skillRegistration, methods[i], inputArguments, outputArguments);
-			}
-		}
+		StateMachine stateMachine = annotationEvaluation.evaluateAnnotation(skillRegistration); 
+		
+		namespace.addMethod(folder, stateMachine);
+	
 //		String skillFile = getFileFromResources(skillRegistration.getClass().getClassLoader(), "DeleteSkill.rdf");
 //		skillFile = skillFile.replace("SkillName", skillName);
 //		skillFile = skillFile.replace("PathName", "simple");
@@ -121,8 +112,8 @@ public class Server {
 	void unbindOPCUASkillRegistration(OPCUASkillRegistration skillRegistration) {
 
 		String skillName = skillRegistration.getClass().getName();
-		List<Node> organizedNodes = namespace.getFolder().getOrganizesNodes(); 
-		UaNode skillNode = null; 
+		List<Node> organizedNodes = namespace.getFolder().getOrganizesNodes();
+		UaNode skillNode = null;
 		for (Node organizedNode : organizedNodes) {
 			if (organizedNode.getBrowseName().getName().equals(skillName.substring(skillName.lastIndexOf(".") + 1))) {
 				skillNode = (UaNode) organizedNode;
