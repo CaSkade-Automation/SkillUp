@@ -10,12 +10,9 @@ import java.util.concurrent.CompletableFuture;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.eclipse.milo.opcua.sdk.server.OpcUaServer;
 import org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig;
-import org.eclipse.milo.opcua.sdk.server.api.nodes.Node;
 import org.eclipse.milo.opcua.sdk.server.identity.CompositeValidator;
 import org.eclipse.milo.opcua.sdk.server.identity.UsernameIdentityValidator;
 import org.eclipse.milo.opcua.sdk.server.identity.X509IdentityValidator;
-import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode;
-import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.util.HostnameUtil;
 import org.eclipse.milo.opcua.stack.core.StatusCodes;
 import org.eclipse.milo.opcua.stack.core.UaRuntimeException;
@@ -33,15 +30,8 @@ import org.eclipse.milo.opcua.stack.server.EndpointConfiguration;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import opcuaSkillRegistration.OPCUASkillRegistration;
-import smartModule.SmartModule;
-import statemachine.StateMachine;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig.USER_TOKEN_POLICY_ANONYMOUS;
@@ -59,7 +49,6 @@ public class Server {
 
 	private static final int TCP_BIND_PORT = 4841;
 	private Namespace namespace;
-	private AnnotationEvaluation annotationEvaluation = new AnnotationEvaluation();
 	private final Logger logger = LoggerFactory.getLogger(Server.class);
 
 	static {
@@ -69,58 +58,6 @@ public class Server {
 
 //	@Reference
 //	SmartModule module;
-
-	/**
-	 * This method is called to bind a new service to the component and adds
-	 * referenced skill as a node to the server
-	 * 
-	 * @Reference used to specify dependency on other services, here:
-	 *            MethodRegistration <br>
-	 *            cardinality=MULTIPLE (0...n), reference is optional and multiple
-	 *            bound services are supported <br>
-	 *            policy=DYNAMIC, SCR(Service Component Runtime) can change the set
-	 *            of bound services without deactivating the Component Configuration
-	 *            -> method can be called while component is active and not only
-	 *            before the activate method <br>
-	 * @param skillRegistration Service instance of referenced skill is passed
-	 */
-	@Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-	void bindOPCUASkillRegistration(OPCUASkillRegistration skillRegistration) {
-
-		logger.info("OPC-UA-Skill found");
-
-		String skillName = skillRegistration.getClass().getName();
-		skillName = skillName.substring(skillName.lastIndexOf(".") + 1);
-		UaFolderNode folder = namespace.addFolder(skillName);
-
-		StateMachine stateMachine = annotationEvaluation.evaluateAnnotation(skillRegistration); 
-		
-		namespace.addMethod(folder, stateMachine);
-	
-//		String skillFile = getFileFromResources(skillRegistration.getClass().getClassLoader(), "DeleteSkill.rdf");
-//		skillFile = skillFile.replace("SkillName", skillName);
-//		skillFile = skillFile.replace("PathName", "simple");
-//		module.registerSkill(skillFile, skillName);
-	}
-
-	/**
-	 * This method is called to unbind a (bound) service and deletes node of
-	 * referenced skill from the server
-	 * 
-	 * @param skillRegistration skill instance of referenced skill is passed
-	 */
-	void unbindOPCUASkillRegistration(OPCUASkillRegistration skillRegistration) {
-
-		String skillName = skillRegistration.getClass().getName();
-		List<Node> organizedNodes = namespace.getFolder().getOrganizesNodes();
-		UaNode skillNode = null;
-		for (Node organizedNode : organizedNodes) {
-			if (organizedNode.getBrowseName().getName().equals(skillName.substring(skillName.lastIndexOf(".") + 1))) {
-				skillNode = (UaNode) organizedNode;
-				skillNode.delete();
-			}
-		}
-	}
 
 	/**
 	 * Server is started <br>
@@ -269,6 +206,10 @@ public class Server {
 
 	public OpcUaServer getServer() {
 		return server;
+	}
+	
+	public Namespace getNamespace() {
+		return namespace; 
 	}
 
 	public CompletableFuture<OpcUaServer> startup() {
