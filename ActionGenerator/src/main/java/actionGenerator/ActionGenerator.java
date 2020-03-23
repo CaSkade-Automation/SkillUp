@@ -23,15 +23,7 @@ public class ActionGenerator {
 				if (methods[i].isAnnotationPresent(state.getKey())) {
 
 					SkillAction action = new SkillAction(methods[i], skillRegistration);
-					if (state.toString().equals("Starting")) {
-						stateMachineBuilder.withActionInStarting(action); 
-					}
-					else if (state.toString().equals("Execute")) {
-						stateMachineBuilder.withActionInExecute(action);
-					}
-					else if (state.toString().equals("Completing")) {
-						stateMachineBuilder.withActionInCompleting(action);
-					}
+					stateMachineBuilder.withAction(action, state.getStateName()); 
 				}
 			}
 		}

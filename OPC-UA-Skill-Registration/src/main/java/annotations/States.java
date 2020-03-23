@@ -1,17 +1,28 @@
 package annotations;
 
+import states.ActiveStateName;
+
 public enum States {
-	Aborting(Aborting.class), Clearing(Clearing.class), Completing(Completing.class), Execute(Execute.class),
-	Holding(Holding.class), Resetting(Resetting.class), Starting(Starting.class), Stopping(Stopping.class),
-	Suspending(Suspending.class), Unholding(Unholding.class), Unsuspending(Unsuspending.class);
+	Aborting(Aborting.class, ActiveStateName.Aborting), Clearing(Clearing.class, ActiveStateName.Clearing),
+	Completing(Completing.class, ActiveStateName.Completing), Execute(Execute.class, ActiveStateName.Execute),
+	Holding(Holding.class, ActiveStateName.Holding), Resetting(Resetting.class, ActiveStateName.Resetting),
+	Starting(Starting.class, ActiveStateName.Starting), Stopping(Stopping.class, ActiveStateName.Stopping),
+	Suspending(Suspending.class, ActiveStateName.Suspending), Unholding(Unholding.class, ActiveStateName.Unholding),
+	Unsuspending(Unsuspending.class, ActiveStateName.Unsuspending);
 
 	private final Class key;
+	private final ActiveStateName stateName;
 
-	States(Class key) {
+	States(Class key, ActiveStateName stateName) {
 		this.key = key;
+		this.stateName = stateName;
 	}
 
 	public Class getKey() {
 		return key;
+	}
+
+	public ActiveStateName getStateName() {
+		return stateName;
 	}
 }
