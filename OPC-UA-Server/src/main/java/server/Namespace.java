@@ -13,8 +13,8 @@ import org.eclipse.milo.opcua.stack.core.Identifiers;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 
-import annotations.Transitions;
 import statemachine.StateMachine;
+import states.TransitionName;
 
 public class Namespace extends ManagedNamespace {
 
@@ -76,15 +76,15 @@ public class Namespace extends ManagedNamespace {
 	 */
 	public void addMethod(UaFolderNode folder, StateMachine stateMachine) {
 
-		for (Transitions transitionType : Transitions.values()) {
+		for(TransitionName transition : TransitionName.values()) {
 			
 			UaMethodNode skillNode = UaMethodNode.builder(getNodeContext())
-					.setNodeId(newNodeId(folder.getBrowseName() + "/" + transitionType.getKey()))
-					.setBrowseName(newQualifiedName(transitionType.getKey()))
-					.setDisplayName(new LocalizedText(null, transitionType.getKey()))
-					.setDescription(LocalizedText.english(transitionType.getKey())).build();
+					.setNodeId(newNodeId(folder.getBrowseName() + "/" + transition.toString()))
+					.setBrowseName(newQualifiedName(transition.toString()))
+					.setDisplayName(new LocalizedText(null, transition.toString()))
+					.setDescription(LocalizedText.english(transition.toString())).build();
 
-			GenericMethod newSkill = new GenericMethod(skillNode, stateMachine, transitionType.getKey());
+			GenericMethod newSkill = new GenericMethod(skillNode, stateMachine, transition);
 
 			skillNode.setInvocationHandler(newSkill);
 			getNodeManager().addNode(skillNode);
