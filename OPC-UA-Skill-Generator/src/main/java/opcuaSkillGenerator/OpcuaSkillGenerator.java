@@ -8,33 +8,36 @@ import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-import opcuaSkillRegistrationInterface.OPCUASkillRegistrationInterface;
-import server.Server; 
+import server.Server;
+import skillGeneratorInterface.SkillGeneratorInterface;
 import statemachine.StateMachine;
 
-@Component(immediate = true, service=OpcuaSkillGenerator.class)
-public class OpcuaSkillGenerator {
+@Component(immediate = true)
+public class OpcuaSkillGenerator implements SkillGeneratorInterface {
 	
 	@Reference
 	Server server; 
 
-	public void generateOpcUaSkill(OPCUASkillRegistrationInterface skillRegistration, StateMachine stateMachine) {
+	@Override
+	public void generateSkill(Object skill, StateMachine stateMachine) {
+		// TODO Auto-generated method stub
 		
-		String skillName = skillRegistration.getClass().getName();
-		skillName = skillName.substring(skillName.lastIndexOf(".") + 1);
+		String skillName = skill.getClass().getSimpleName();
 		
 		UaFolderNode folder = server.getNamespace().addFolder(skillName);
 		
 		server.getNamespace().addMethod(folder, stateMachine);
 	}
-	
-	public void deleteOpcUaSkill(OPCUASkillRegistrationInterface skillRegistration) {
+
+	@Override
+	public void deleteSkill(Object skill) {
+		// TODO Auto-generated method stub
 		
-		String skillName = skillRegistration.getClass().getName();
+		String skillName = skill.getClass().getSimpleName();
 		List<Node> organizedNodes = server.getNamespace().getFolder().getOrganizesNodes();
 		UaNode skillNode = null;
 		for (Node organizedNode : organizedNodes) {
-			if (organizedNode.getBrowseName().getName().equals(skillName.substring(skillName.lastIndexOf(".") + 1))) {
+			if (organizedNode.getBrowseName().getName().equals(skillName)) {
 				skillNode = (UaNode) organizedNode;
 				skillNode.delete();
 			}
