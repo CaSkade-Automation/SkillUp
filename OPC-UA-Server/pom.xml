@@ -9,9 +9,19 @@
 	<name>OPC-UA-Server</name>
 	<dependencies>
 		<dependency>
+			<groupId>org.eclipse.milo</groupId>
+			<artifactId>sdk-server</artifactId>
+			<version>0.3.6</version>
+		</dependency>
+		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
 			<version>1.7.28</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.aljoshakoecher</groupId>
+			<artifactId>isa88-state-machine</artifactId>
+			<version>1.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
@@ -21,11 +31,6 @@
 		<dependency>
 			<groupId>de.hsu-hh.ifa.smart-module</groupId>
 			<artifactId>Smart-Module</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>de.hsu-hh.ifa.opcua-skill-registration-interface</groupId>
-			<artifactId>OPC-UA-Skill-Registration-Interface</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
