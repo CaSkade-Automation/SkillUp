@@ -8,8 +8,9 @@ import org.slf4j.LoggerFactory;
 
 import annotations.Completing;
 import annotations.Execute;
+import annotations.Skill;
+import annotations.Skills;
 import annotations.Starting;
-import opcuaSkillRegistrationInterface.OPCUASkillRegistrationInterface;
 
 /**
  * @Component Indicates that annotated class is intended to be an OSGi
@@ -17,12 +18,13 @@ import opcuaSkillRegistrationInterface.OPCUASkillRegistrationInterface;
  *            After becoming satisfied component is registered as a service
  *            under OPCUASkillRegistration
  */
-@Component
-public class SimpleSkill2 implements OPCUASkillRegistrationInterface {
+@Skill(Skills.OPCUASkill)
+@Component(factory = "skill.factory")
+public class SimpleSkill2 {
 
 	private final Logger logger = LoggerFactory.getLogger(SimpleSkill2.class);
-	private int i = 0; 
-	
+	private int i = 0;
+
 	@Starting
 	public void starting() {
 		System.out.println("Starting, i = " + i);
@@ -30,9 +32,9 @@ public class SimpleSkill2 implements OPCUASkillRegistrationInterface {
 
 	@Execute
 	public void execute() {
-		i = i + 5; 
+		i = i + 5;
 	}
-	
+
 	@Completing
 	public void completing() {
 		System.out.println("Completing, i = " + i);
@@ -40,7 +42,7 @@ public class SimpleSkill2 implements OPCUASkillRegistrationInterface {
 
 	@Activate
 	public void activate() {
-		logger.info("OPC-UA-Skill zum Subtrahieren wird aktiviert."); 
+		logger.info("OPC-UA-Skill zum Subtrahieren wird aktiviert.");
 	}
 
 	@Deactivate

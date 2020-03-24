@@ -14,13 +14,8 @@
 			<version>1.7.28</version>
 		</dependency>
 		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.service.component.annotations</artifactId>
-			<version>1.4.0</version>
-		</dependency>
-		<dependency>
-			<groupId>de.hsu-hh.ifa.opcua-skill-registration-interface</groupId>
-			<artifactId>OPC-UA-Skill-Registration-Interface</artifactId>
+			<groupId>de.hsu-hh.ifa.action-generator</groupId>
+			<artifactId>Action-Generator</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
@@ -43,11 +38,6 @@
 						<_dsannotations>*</_dsannotations>
 					</instructions>
 				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<version>1.6.0</version>
 			</plugin>
 		</plugins>
 	</build>
