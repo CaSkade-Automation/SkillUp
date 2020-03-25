@@ -26,7 +26,7 @@ public class OpcuaSkillGenerator implements SkillGeneratorInterface {
 		
 		UaFolderNode folder = server.getNamespace().addFolder(skillName);
 		
-		server.getNamespace().addMethod(folder, stateMachine);
+		server.getNamespace().addAllSkillMethods(folder, stateMachine);
 	}
 
 	@Override

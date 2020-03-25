@@ -74,7 +74,7 @@ public class Namespace extends ManagedNamespace {
 	 * @param methodName        name of the skill to add
 	 * @param skillRegistration instance of the skill to add
 	 */
-	public void addMethod(UaFolderNode folder, StateMachine stateMachine) {
+	public void addAllSkillMethods(UaFolderNode folder, StateMachine stateMachine) {
 
 		for(TransitionName transition : TransitionName.values()) {
 			
