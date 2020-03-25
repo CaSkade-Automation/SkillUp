@@ -7,7 +7,6 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface InputArguments {
+public @interface Resetting {
 
-	public InputArgument[] value();  
 }

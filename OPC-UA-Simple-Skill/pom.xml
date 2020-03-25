@@ -9,23 +9,13 @@
 	<name>OPC-UA-Skill</name>
 	<dependencies>
 		<dependency>
-			<groupId>org.eclipse.milo</groupId>
-			<artifactId>sdk-server</artifactId>
-			<version>0.3.6</version>
-		</dependency>
-		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
 			<version>1.7.28</version>
 		</dependency>
 		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.service.component.annotations</artifactId>
-			<version>1.4.0</version>
-		</dependency>
-		<dependency>
-			<groupId>de.hsu-hh.ifa.opcua-skill-registration</groupId>
-			<artifactId>OPC-UA-Skill-Registration</artifactId>
+			<groupId>de.hsu-hh.ifa.action-generator</groupId>
+			<artifactId>Action-Generator</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
@@ -48,11 +38,6 @@
 						<_dsannotations>*</_dsannotations>
 					</instructions>
 				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<version>1.6.0</version>
 			</plugin>
 		</plugins>
 	</build>

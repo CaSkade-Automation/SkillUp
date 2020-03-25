@@ -1,7 +1,6 @@
 package server;
 
 import java.util.List;
-
 import org.eclipse.milo.opcua.sdk.core.Reference;
 import org.eclipse.milo.opcua.sdk.server.OpcUaServer;
 import org.eclipse.milo.opcua.sdk.server.api.DataItem;
@@ -13,9 +12,9 @@ import org.eclipse.milo.opcua.sdk.server.util.SubscriptionModel;
 import org.eclipse.milo.opcua.stack.core.Identifiers;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
-import org.eclipse.milo.opcua.stack.core.types.structured.Argument;
 
-import opcuaSkillRegistration.OPCUASkillRegistration;
+import statemachine.StateMachine;
+import states.TransitionName;
 
 public class Namespace extends ManagedNamespace {
 
@@ -49,28 +48,50 @@ public class Namespace extends ManagedNamespace {
 				new Reference(folder.getNodeId(), Identifiers.Organizes, Identifiers.ObjectsFolder.expanded(), false));
 	}
 
+	public UaFolderNode addFolder(String folderName) {
+
+		UaFolderNode parentFolder = getFolder();
+
+		// create a folder and add it to the node manager
+		NodeId folderNodeId = newNodeId("Skills/" + folderName);
+
+		UaFolderNode folder = new UaFolderNode(getNodeContext(), folderNodeId, newQualifiedName(folderName),
+				LocalizedText.english(folderName));
+		getNodeManager().addNode(folder);
+
+		// make sure our new folder shows up under the Skills folder.
+		folder.addReference(
+				new Reference(folder.getNodeId(), Identifiers.Organizes, parentFolder.getNodeId().expanded(), false));
+
+		return folder;
+	}
+
 	/**
 	 * SkillNode is added to the folder by getting input and output arguments as
 	 * well as the invoke method
 	 * 
-	 * @param folder     folder to which skill should be added
-	 * @param methodName name of the skill to add
-	 * @param skillRegistration     instance of the skill to add
+	 * @param folder            folder to which skill should be added
+	 * @param methodName        name of the skill to add
+	 * @param skillRegistration instance of the skill to add
 	 */
-	public void addMethod(UaFolderNode folder, String methodName, OPCUASkillRegistration skillRegistration, Argument[] inputArguments, Argument[] outputArguments) {
-		UaMethodNode skillNode = UaMethodNode.builder(getNodeContext()).setNodeId(newNodeId("Skills/" + methodName))
-				.setBrowseName(newQualifiedName(methodName)).setDisplayName(new LocalizedText(null, methodName))
-				.setDescription(LocalizedText.english("This is an simple skill.")).build();
+	public void addAllSkillMethods(UaFolderNode folder, StateMachine stateMachine) {
 
-		GenericMethod newSkill = new GenericMethod(skillNode, skillRegistration, inputArguments, outputArguments);
-		skillNode.setProperty(UaMethodNode.InputArguments, newSkill.getInputArguments());
-		skillNode.setProperty(UaMethodNode.OutputArguments, newSkill.getOutputArguments());
-		skillNode.setInvocationHandler(newSkill);
+		for(TransitionName transition : TransitionName.values()) {
+			
+			UaMethodNode skillNode = UaMethodNode.builder(getNodeContext())
+					.setNodeId(newNodeId(folder.getBrowseName() + "/" + transition.toString()))
+					.setBrowseName(newQualifiedName(transition.toString()))
+					.setDisplayName(new LocalizedText(null, transition.toString()))
+					.setDescription(LocalizedText.english(transition.toString())).build();
 
-		getNodeManager().addNode(skillNode);
+			GenericMethod newSkill = new GenericMethod(skillNode, stateMachine, transition);
 
-		skillNode.addReference(
-				new Reference(skillNode.getNodeId(), Identifiers.HasComponent, folder.getNodeId().expanded(), false));
+			skillNode.setInvocationHandler(newSkill);
+			getNodeManager().addNode(skillNode);
+
+			skillNode.addReference(new Reference(skillNode.getNodeId(), Identifiers.HasComponent,
+					folder.getNodeId().expanded(), false));
+		}
 	}
 
 	@Override

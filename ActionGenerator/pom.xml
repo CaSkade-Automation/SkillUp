@@ -2,21 +2,21 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>de.hsu-hh.ifa.opcua-skill2</groupId>
-	<artifactId>OPC-UA-Skill2</artifactId>
+	<groupId>de.hsu-hh.ifa.action-generator</groupId>
+	<artifactId>Action-Generator</artifactId>
 	<packaging>bundle</packaging>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>OPC-UA-Skill2</name>
+	<name>Action Generator</name>
 	<dependencies>
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-			<version>1.7.28</version>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.service.component.annotations</artifactId>
+			<version>1.4.0</version>
 		</dependency>
 		<dependency>
-			<groupId>de.hsu-hh.ifa.action-generator</groupId>
-			<artifactId>Action-Generator</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<groupId>com.github.aljoshakoecher</groupId>
+			<artifactId>isa88-state-machine</artifactId>
+			<version>1.1.0</version>
 		</dependency>
 	</dependencies>
 	<build>

@@ -1,12 +1,10 @@
 package server;
 
 import java.io.File;
-import java.io.IOException;
 import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -15,8 +13,6 @@ import org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig;
 import org.eclipse.milo.opcua.sdk.server.identity.CompositeValidator;
 import org.eclipse.milo.opcua.sdk.server.identity.UsernameIdentityValidator;
 import org.eclipse.milo.opcua.sdk.server.identity.X509IdentityValidator;
-import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode;
-import org.eclipse.milo.opcua.sdk.server.nodes.UaMethodNode;
 import org.eclipse.milo.opcua.sdk.server.util.HostnameUtil;
 import org.eclipse.milo.opcua.stack.core.StatusCodes;
 import org.eclipse.milo.opcua.stack.core.UaRuntimeException;
@@ -28,21 +24,14 @@ import org.eclipse.milo.opcua.stack.core.transport.TransportProfile;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DateTime;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.MessageSecurityMode;
-import org.eclipse.milo.opcua.stack.core.types.structured.Argument;
 import org.eclipse.milo.opcua.stack.core.types.structured.BuildInfo;
 import org.eclipse.milo.opcua.stack.core.util.CertificateUtil;
 import org.eclipse.milo.opcua.stack.server.EndpointConfiguration;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import opcuaSkillRegistration.OPCUASkillRegistration;
-import smartModule.SmartModule;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig.USER_TOKEN_POLICY_ANONYMOUS;
@@ -60,7 +49,6 @@ public class Server {
 
 	private static final int TCP_BIND_PORT = 4841;
 	private Namespace namespace;
-	private AnnotationEvaluation annotationEvaluation = new AnnotationEvaluation();
 	private final Logger logger = LoggerFactory.getLogger(Server.class);
 
 	static {
@@ -68,58 +56,8 @@ public class Server {
 		Security.addProvider(new BouncyCastleProvider());
 	}
 
-	@Reference
-	SmartModule module;
-
-	/**
-	 * This method is called to bind a new service to the component and adds
-	 * referenced skill as a node to the server
-	 * 
-	 * @Reference used to specify dependency on other services, here:
-	 *            MethodRegistration <br>
-	 *            cardinality=MULTIPLE (0...n), reference is optional and multiple
-	 *            bound services are supported <br>
-	 *            policy=DYNAMIC, SCR(Service Component Runtime) can change the set
-	 *            of bound services without deactivating the Component Configuration
-	 *            -> method can be called while component is active and not only
-	 *            before the activate method <br>
-	 * @param skillRegistration Service instance of referenced skill is passed
-	 */
-	@Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-	void bindOPCUASkillRegistration(OPCUASkillRegistration skillRegistration) {
-
-		logger.info("OPC-UA-Skill found");
-		Map<String, Argument[]> argumentsMap = annotationEvaluation.evaluateAnnotation(skillRegistration);
-		Argument[] inputArguments = argumentsMap.get("inputArguments");
-		Argument[] outputArguments = argumentsMap.get("outputArguments");
-
-		UaFolderNode folder = namespace.getFolder();
-		String skillName = skillRegistration.getClass().getName();
-		skillName = skillName.substring(skillName.lastIndexOf(".") + 1);
-		namespace.addMethod(folder, skillName, skillRegistration, inputArguments, outputArguments);
-		
-		String skillFile = getFileFromResources(skillRegistration.getClass().getClassLoader(), "DeleteSkill.rdf");
-		skillFile = skillFile.replace("SkillName", skillName);
-		skillFile = skillFile.replace("PathName", "simple");
-		module.registerSkill(skillFile, skillName);
-	}
-
-	/**
-	 * This method is called to unbind a (bound) service and deletes node of
-	 * referenced skill from the server
-	 * 
-	 * @param skillRegistration skill instance of referenced skill is passed
-	 */
-	void unbindOPCUASkillRegistration(OPCUASkillRegistration skillRegistration) {
-
-		String skillName = skillRegistration.getClass().getName();
-		List<UaMethodNode> skillNodes = namespace.getFolder().getMethodNodes();
-		for (UaMethodNode skillNode : skillNodes) {
-			if (skillNode.getBrowseName().getName().equals(skillName.substring(skillName.lastIndexOf(".") + 1))) {
-				skillNode.delete();
-			}
-		}
-	}
+//	@Reference
+//	SmartModule module;
 
 	/**
 	 * Server is started <br>
@@ -269,6 +207,10 @@ public class Server {
 	public OpcUaServer getServer() {
 		return server;
 	}
+	
+	public Namespace getNamespace() {
+		return namespace; 
+	}
 
 	public CompletableFuture<OpcUaServer> startup() {
 		return server.startup();
@@ -286,16 +228,16 @@ public class Server {
 	 * @param fileName    the name of file which we want from resources folder
 	 * @return returns given file as string
 	 */
-	public String getFileFromResources(ClassLoader classLoader, String fileName) {
-		String file = null;
-		try {
-			file = module.getFileFromResources(classLoader, fileName);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return file;
-	}
+//	public String getFileFromResources(ClassLoader classLoader, String fileName) {
+//		String file = null;
+//		try {
+//			file = module.getFileFromResources(classLoader, fileName);
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		return file;
+//	}
 
 	@Deactivate
 	public void deactivate() {

@@ -5,40 +5,46 @@ import org.eclipse.milo.opcua.sdk.server.nodes.UaMethodNode;
 import org.eclipse.milo.opcua.stack.core.UaException;
 import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
 import org.eclipse.milo.opcua.stack.core.types.structured.Argument;
-import opcuaSkillRegistration.OPCUASkillRegistration;
+import statemachine.StateMachine;
+import states.TransitionName;
 
 /**
  * Class is used to reflect the skill to be added to the server <br>
  */
 public class GenericMethod extends AbstractMethodInvocationHandler {
 
-	OPCUASkillRegistration skillRegistration; 
-	Argument[] inputArguments; 
-	Argument[] outputArguments; 
+	StateMachine stateMachine;
+	TransitionName transition;
 
-	public GenericMethod(UaMethodNode node, OPCUASkillRegistration skillRegistration, Argument[] inputArguments, Argument[] outputArguments) {
+	public GenericMethod(UaMethodNode node, StateMachine stateMachine, TransitionName transition) {
 		super(node);
-		this.skillRegistration = skillRegistration;
-		this.inputArguments = inputArguments; 
-		this.outputArguments = outputArguments; 
-		// TODO Auto-generated constructor stub
+		this.stateMachine = stateMachine;
+		this.transition = transition;
 	}
 
 	@Override
 	public Argument[] getInputArguments() {
 		// TODO Auto-generated method stub
-		return inputArguments;
+		// important!! new Argument[0], because AbstractMethodInvocationHandler checks
+		// in line 63 if length of inputValues == length of Argument
+		// and by returning null it occurs an error. Then
+		// AbstractMethodInvocationHandler sets inputValues to new Variant[0] if
+		// inputValues are null
+		return new Argument[0];
 	}
 
 	@Override
 	public Argument[] getOutputArguments() {
 		// TODO Auto-generated method stub
-		return outputArguments;
+		return new Argument[0];
 	}
 
 	@Override
-	protected Variant[] invoke(InvocationContext invocationContext, Variant[] inputValues) throws UaException {
+	protected Variant[] invoke(InvocationContext invocationContext, Variant[] inputs) throws UaException {
 		// TODO Auto-generated method stub
-		return this.skillRegistration.invoke(invocationContext, inputValues);
+
+		stateMachine.invokeTransition(transition);
+
+		return null;
 	}
 }
