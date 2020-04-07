@@ -12,7 +12,7 @@ import server.Server;
 import skillGeneratorInterface.SkillGeneratorInterface;
 import statemachine.StateMachine;
 
-@Component(immediate = true)
+@Component(immediate = true, property = "name=OpcUa")
 public class OpcuaSkillGenerator implements SkillGeneratorInterface {
 	
 	@Reference

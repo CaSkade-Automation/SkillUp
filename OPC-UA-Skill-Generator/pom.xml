@@ -17,7 +17,7 @@
 			<groupId>de.hsu-hh.ifa.skill-generator-interface</groupId>
 			<artifactId>Skill-Generator-Interface</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-		</dependency>		
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
