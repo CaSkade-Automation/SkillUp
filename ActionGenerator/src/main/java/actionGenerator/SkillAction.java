@@ -26,8 +26,4 @@ public class SkillAction implements IStateAction{
 			e.printStackTrace();
 		} 
 	}
-	
-	public String getName() {
-		return this.method.getName(); 
-	}
 }

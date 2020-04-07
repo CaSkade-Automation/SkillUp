@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import annotations.Completing;
 import annotations.Execute;
 import annotations.Skill;
-import annotations.Skills;
 import annotations.Starting;
 
 /**
@@ -18,7 +17,7 @@ import annotations.Starting;
  *            After becoming satisfied component is registered as a service
  *            under OPCUASkillRegistration
  */
-@Skill(Skills.OPCUASkill)
+@Skill("OpcUaSkill")
 @Component(factory = "skill.factory")
 public class SimpleSkill2 {
 

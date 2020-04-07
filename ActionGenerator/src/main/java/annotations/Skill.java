@@ -9,5 +9,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface Skill {
 
-	public Skills value() default Skills.OPCUASkill; 
+	public String value() default "OpcUaSkill"; 
 }
