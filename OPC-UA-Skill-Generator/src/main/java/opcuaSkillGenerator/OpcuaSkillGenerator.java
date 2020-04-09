@@ -25,6 +25,8 @@ public class OpcuaSkillGenerator implements SkillGeneratorInterface {
 		String skillName = skill.getClass().getSimpleName();
 		
 		UaFolderNode folder = server.getNamespace().addFolder(skillName);
+
+		server.getNamespace().addVariableNodes(skill, folder);
 		
 		server.getNamespace().addAllSkillMethods(folder, stateMachine);
 	}
