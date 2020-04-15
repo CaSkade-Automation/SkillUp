@@ -158,15 +158,15 @@ public class Namespace extends ManagedNamespace {
 				NodeId typeId = new NodeId(0, BuiltinDataType.getBuiltinTypeId(type));
 
 				String fieldName; 
-				if (!field.getAnnotation(SkillInput.class).name().isEmpty()) {
-					fieldName = field.getAnnotation(SkillInput.class).name();
+				if (!field.getAnnotation(SkillOutput.class).name().isEmpty()) {
+					fieldName = field.getAnnotation(SkillOutput.class).name();
 				} else {
 					fieldName = field.getName();
 				}
 				
 				String fieldDescription; 
-				if (!field.getAnnotation(SkillInput.class).description().isEmpty()) {
-					fieldDescription = field.getAnnotation(SkillInput.class).description();
+				if (!field.getAnnotation(SkillOutput.class).description().isEmpty()) {
+					fieldDescription = field.getAnnotation(SkillOutput.class).description();
 				} else {
 					fieldDescription = field.getName();
 				}
