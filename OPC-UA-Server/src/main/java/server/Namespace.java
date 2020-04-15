@@ -22,11 +22,10 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
-
 import annotations.SkillInput;
+import annotations.SkillOutput;
 
 import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.ubyte;
-
 import statemachine.StateMachine;
 import states.TransitionName;
 
@@ -37,6 +36,8 @@ public class Namespace extends ManagedNamespace {
 	private final SubscriptionModel subscriptionModel;
 
 	UaFolderNode folder = null;
+
+	private UaVariableNode skillOutput;
 
 	public Namespace(final OpcUaServer server) {
 		super(server, URI);
@@ -84,15 +85,32 @@ public class Namespace extends ManagedNamespace {
 
 		Field[] fields = skill.getClass().getDeclaredFields();
 		for (Field field : fields) {
+
 			Variant variant = null;
 			if (field.isAnnotationPresent(SkillInput.class)) {
 
+				field.setAccessible(true);
 				Class<?> type = field.getType();
-
 				NodeId typeId = new NodeId(0, BuiltinDataType.getBuiltinTypeId(type));
 
+				String fieldName; 
+				if (!field.getAnnotation(SkillInput.class).name().isEmpty()) {
+					fieldName = field.getAnnotation(SkillInput.class).name();
+				} else {
+					fieldName = field.getName();
+				} 
+				
+				String fieldDescription; 
+				if (!field.getAnnotation(SkillInput.class).description().isEmpty()) {
+					fieldDescription = field.getAnnotation(SkillInput.class).description();
+				} else {
+					fieldDescription = field.getName();
+				}
+				
+				// field.getClass().isArray();
+
 				try {
-					variant = getVariant(field, skill, type);
+					variant = new Variant(field.get(skill));
 				} catch (IllegalArgumentException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -102,11 +120,11 @@ public class Namespace extends ManagedNamespace {
 				}
 
 				UaVariableNode node = new UaVariableNode.UaVariableNodeBuilder(getNodeContext())
-						.setNodeId(newNodeId(folder.getBrowseName() + "/" + field.getName()))
+						.setNodeId(newNodeId(folder.getBrowseName() + "/" + fieldName))
 						.setAccessLevel(ubyte(AccessLevel.getMask(AccessLevel.READ_WRITE)))
 						.setUserAccessLevel(ubyte(AccessLevel.getMask(AccessLevel.READ_WRITE)))
-						.setBrowseName(newQualifiedName(field.getName()))
-						.setDisplayName(LocalizedText.english(field.getName())).setDataType(typeId)
+						.setBrowseName(newQualifiedName(fieldName))
+						.setDisplayName(LocalizedText.english(fieldDescription)).setDataType(typeId)
 						.setTypeDefinition(Identifiers.BaseDataVariableType).build();
 
 				node.setValue(new DataValue(variant));
@@ -131,27 +149,52 @@ public class Namespace extends ManagedNamespace {
 				getNodeManager().addNode(node);
 				folder.addOrganizes(node);
 			}
-		}
-	}
 
-	public Variant getVariant(Field field, Object skill, Class<?> type)
-			throws IllegalArgumentException, IllegalAccessException {
-		if (type == boolean.class) {
-			return new Variant(field.getBoolean(skill));
-		} else if (type == byte.class) {
-			return new Variant(field.getByte(skill));
-		} else if (type == short.class) {
-			return new Variant(field.getShort(skill));
-		} else if (type == int.class) {
-			return new Variant(field.getInt(skill));
-		} else if (type == long.class) {
-			return new Variant(field.getLong(skill));
-		} else if (type == float.class) {
-			return new Variant(field.getFloat(skill));
-		} else if (type == double.class) {
-			return new Variant(field.getDouble(skill));
-		} else {
-			return null;
+			if (field.isAnnotationPresent(SkillOutput.class)) {
+				
+				field.setAccessible(true);
+				Class<?> type = field.getType();
+
+				NodeId typeId = new NodeId(0, BuiltinDataType.getBuiltinTypeId(type));
+
+				String fieldName; 
+				if (!field.getAnnotation(SkillInput.class).name().isEmpty()) {
+					fieldName = field.getAnnotation(SkillInput.class).name();
+				} else {
+					fieldName = field.getName();
+				}
+				
+				String fieldDescription; 
+				if (!field.getAnnotation(SkillInput.class).description().isEmpty()) {
+					fieldDescription = field.getAnnotation(SkillInput.class).description();
+				} else {
+					fieldDescription = field.getName();
+				}
+				
+				try {
+					variant = new Variant(field.get(skill));
+				} catch (IllegalArgumentException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IllegalAccessException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+
+				UaVariableNode node = new UaVariableNode.UaVariableNodeBuilder(getNodeContext())
+						.setNodeId(newNodeId(folder.getBrowseName() + "/" + fieldName))
+						.setAccessLevel(ubyte(AccessLevel.getMask(AccessLevel.READ_ONLY)))
+						.setUserAccessLevel(ubyte(AccessLevel.getMask(AccessLevel.READ_ONLY)))
+						.setBrowseName(newQualifiedName(fieldName))
+						.setDisplayName(LocalizedText.english(fieldDescription)).setDataType(typeId)
+						.setTypeDefinition(Identifiers.BaseDataVariableType).build();
+
+				node.setValue(new DataValue(variant));
+
+				getNodeManager().addNode(node);
+				folder.addOrganizes(node);
+				skillOutput = node;
+			}
 		}
 	}
 
@@ -182,7 +225,7 @@ public class Namespace extends ManagedNamespace {
 	 * @param methodName        name of the skill to add
 	 * @param skillRegistration instance of the skill to add
 	 */
-	public void addAllSkillMethods(UaFolderNode folder, StateMachine stateMachine) {
+	public void addAllSkillMethods(UaFolderNode folder, StateMachine stateMachine, Object skill) {
 
 		for (TransitionName transition : TransitionName.values()) {
 
@@ -192,16 +235,35 @@ public class Namespace extends ManagedNamespace {
 					.setDisplayName(new LocalizedText(null, transition.toString()))
 					.setDescription(LocalizedText.english(transition.toString())).build();
 
-			GenericMethod newSkill = new GenericMethod(skillNode, stateMachine, transition);
+			GenericMethod newSkill = new GenericMethod(skillNode, stateMachine, transition, skillOutput, skill);
 
 			skillNode.setInvocationHandler(newSkill);
 			getNodeManager().addNode(skillNode);
 
 			skillNode.addReference(new Reference(skillNode.getNodeId(), Identifiers.HasComponent,
 					folder.getNodeId().expanded(), false));
+
 		}
+
+		addGetResultMethod(folder, skill);
 	}
 
+	public void addGetResultMethod(UaFolderNode folder, Object skill) {
+
+		UaMethodNode skillNode = UaMethodNode.builder(getNodeContext())
+				.setNodeId(newNodeId(folder.getBrowseName() + "/" + "getResult"))
+				.setBrowseName(newQualifiedName("getResult")).setDisplayName(new LocalizedText(null, "getResult"))
+				.setDescription(LocalizedText.english("getResult")).build();
+
+		GetResultMethod newSkill = new GetResultMethod(skillNode, skill);
+		skillNode.setProperty(UaMethodNode.OutputArguments, newSkill.getOutputArguments());
+		skillNode.setInvocationHandler(newSkill);
+		getNodeManager().addNode(skillNode);
+
+		skillNode.addReference(
+				new Reference(skillNode.getNodeId(), Identifiers.HasComponent, folder.getNodeId().expanded(), false));
+	}
+	
 	@Override
 	public void onDataItemsCreated(final List<DataItem> dataItems) {
 		this.subscriptionModel.onDataItemsCreated(dataItems);

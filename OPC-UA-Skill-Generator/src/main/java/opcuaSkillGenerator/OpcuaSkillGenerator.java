@@ -28,7 +28,7 @@ public class OpcuaSkillGenerator implements SkillGeneratorInterface {
 
 		server.getNamespace().addVariableNodes(skill, folder);
 		
-		server.getNamespace().addAllSkillMethods(folder, stateMachine);
+		server.getNamespace().addAllSkillMethods(folder, stateMachine, skill);
 	}
 
 	@Override
