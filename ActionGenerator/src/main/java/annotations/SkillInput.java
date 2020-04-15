@@ -9,4 +9,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface SkillInput {
 
+	public String name() default "";   
+	public String description() default "";  
 }

@@ -75,7 +75,7 @@ public class SkillRegistration {
 
 									if (skillAnnotation.value().equals("OpcUaSkill")) {
 										logger.info("Add OPC-UA-Skill");
-
+										
 										opcUaSkillGenerator.generateSkill(skillObj, stateMachine);
 
 									} else if (skillAnnotation.value().equals("RestSkill")) {
