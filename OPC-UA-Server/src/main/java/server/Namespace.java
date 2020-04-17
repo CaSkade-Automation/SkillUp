@@ -26,6 +26,7 @@ import annotations.SkillInput;
 import annotations.SkillOutput;
 
 import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.ubyte;
+
 import statemachine.StateMachine;
 import states.TransitionName;
 
@@ -38,6 +39,7 @@ public class Namespace extends ManagedNamespace {
 	UaFolderNode folder = null;
 
 	private UaVariableNode skillOutput;
+	private GenericMethod newSkill;
 
 	public Namespace(final OpcUaServer server) {
 		super(server, URI);
@@ -93,20 +95,20 @@ public class Namespace extends ManagedNamespace {
 				Class<?> type = field.getType();
 				NodeId typeId = new NodeId(0, BuiltinDataType.getBuiltinTypeId(type));
 
-				String fieldName; 
+				String fieldName;
 				if (!field.getAnnotation(SkillInput.class).name().isEmpty()) {
 					fieldName = field.getAnnotation(SkillInput.class).name();
 				} else {
 					fieldName = field.getName();
-				} 
-				
-				String fieldDescription; 
+				}
+
+				String fieldDescription;
 				if (!field.getAnnotation(SkillInput.class).description().isEmpty()) {
 					fieldDescription = field.getAnnotation(SkillInput.class).description();
 				} else {
 					fieldDescription = field.getName();
 				}
-				
+
 				// field.getClass().isArray();
 
 				try {
@@ -136,6 +138,9 @@ public class Namespace extends ManagedNamespace {
 						DataValue dataValue = (DataValue) value;
 						try {
 							setField(field, type, dataValue, skill);
+							System.out.println(
+									"Input Paramter " + field.getName() + " of " + skill.getClass().getSimpleName()
+											+ " has changed, new Value is: " + dataValue.getValue().getValue());
 						} catch (IllegalArgumentException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -151,26 +156,26 @@ public class Namespace extends ManagedNamespace {
 			}
 
 			if (field.isAnnotationPresent(SkillOutput.class)) {
-				
+
 				field.setAccessible(true);
 				Class<?> type = field.getType();
 
 				NodeId typeId = new NodeId(0, BuiltinDataType.getBuiltinTypeId(type));
 
-				String fieldName; 
+				String fieldName;
 				if (!field.getAnnotation(SkillOutput.class).name().isEmpty()) {
 					fieldName = field.getAnnotation(SkillOutput.class).name();
 				} else {
 					fieldName = field.getName();
 				}
-				
-				String fieldDescription; 
+
+				String fieldDescription;
 				if (!field.getAnnotation(SkillOutput.class).description().isEmpty()) {
 					fieldDescription = field.getAnnotation(SkillOutput.class).description();
 				} else {
 					fieldDescription = field.getName();
 				}
-				
+
 				try {
 					variant = new Variant(field.get(skill));
 				} catch (IllegalArgumentException e1) {
@@ -235,7 +240,7 @@ public class Namespace extends ManagedNamespace {
 					.setDisplayName(new LocalizedText(null, transition.toString()))
 					.setDescription(LocalizedText.english(transition.toString())).build();
 
-			GenericMethod newSkill = new GenericMethod(skillNode, stateMachine, transition, skillOutput, skill);
+			newSkill = new GenericMethod(skillNode, stateMachine, transition, skillOutput, skill);
 
 			skillNode.setInvocationHandler(newSkill);
 			getNodeManager().addNode(skillNode);
@@ -263,7 +268,7 @@ public class Namespace extends ManagedNamespace {
 		skillNode.addReference(
 				new Reference(skillNode.getNodeId(), Identifiers.HasComponent, folder.getNodeId().expanded(), false));
 	}
-	
+
 	@Override
 	public void onDataItemsCreated(final List<DataItem> dataItems) {
 		this.subscriptionModel.onDataItemsCreated(dataItems);
@@ -286,5 +291,9 @@ public class Namespace extends ManagedNamespace {
 
 	public UaFolderNode getFolder() {
 		return folder;
+	}
+
+	public GenericMethod getGenericMethod() {
+		return newSkill;
 	}
 }
