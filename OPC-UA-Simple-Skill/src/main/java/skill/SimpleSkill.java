@@ -3,13 +3,16 @@ package skill;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import annotations.Capability;
 import annotations.Completing;
+import annotations.DIN8580;
 import annotations.Execute;
 import annotations.SkillInput;
 import annotations.SkillOutput;
 import annotations.Skill;
 import annotations.Starting;
 
+@Capability(value = DIN8580.Fräsen)
 @Skill
 public class SimpleSkill {
 
