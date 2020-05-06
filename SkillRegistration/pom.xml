@@ -34,6 +34,16 @@
 			<artifactId>Action-Generator</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>de.hsu-hh.ifa.skill-description-generator-interface</groupId>
+			<artifactId>Skill-Description-Generator-Interface</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>de.hsu-hh.ifa.smart-module</groupId>
+			<artifactId>Smart-Module</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>

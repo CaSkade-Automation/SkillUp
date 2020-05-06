@@ -21,7 +21,10 @@ import org.slf4j.LoggerFactory;
 
 import actionGenerator.ActionGenerator;
 import annotations.Skill;
+import server.Server;
+import skillDescriptionGeneratorInterface.SkillDescriptionGenerator;
 import skillGeneratorInterface.SkillGeneratorInterface;
+import smartModule.SmartModule;
 import statemachine.StateMachine;
 
 @Component(immediate = true)
@@ -40,6 +43,12 @@ public class SkillRegistration {
 
 	@Reference(target = "(name=Rest)", cardinality = ReferenceCardinality.OPTIONAL)
 	volatile SkillGeneratorInterface restSkillGenerator;
+
+	@Reference
+	SkillDescriptionGenerator skillDescriptionGenerator;
+
+	@Reference
+	SmartModule module;
 
 	@Activate
 	public void activate(BundleContext context) {
@@ -75,8 +84,11 @@ public class SkillRegistration {
 
 									if (skillAnnotation.value().equals("OpcUaSkill")) {
 										logger.info("Add OPC-UA-Skill");
-										
-										opcUaSkillGenerator.generateSkill(skillObj, stateMachine);
+
+										Server server = opcUaSkillGenerator.generateSkill(skillObj, stateMachine);
+										String skillDescription = skillDescriptionGenerator
+												.generateOpcUaDescription(server, skillObj, stateMachine);
+										module.registerSkill(skillDescription, skillObj.getClass().getSimpleName());
 
 									} else if (skillAnnotation.value().equals("RestSkill")) {
 										logger.info("Add REST-Skill");
