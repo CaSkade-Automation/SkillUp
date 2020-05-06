@@ -22,6 +22,7 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
+
 import annotations.SkillInput;
 import annotations.SkillOutput;
 
@@ -42,7 +43,7 @@ public class Namespace extends ManagedNamespace {
 	private GenericMethod newSkill;
 
 	public Namespace(final OpcUaServer server) {
-		super(server, URI);
+		super(server, URI); 
 		subscriptionModel = new SubscriptionModel(server, this);
 	}
 
@@ -66,8 +67,8 @@ public class Namespace extends ManagedNamespace {
 	}
 
 	public UaFolderNode addFolder(String folderName) {
-
-		UaFolderNode parentFolder = getFolder();
+		
+		UaFolderNode parentFolder = getFolder(); 
 
 		// create a folder and add it to the node manager
 		NodeId folderNodeId = newNodeId("Skills/" + folderName);
@@ -75,7 +76,6 @@ public class Namespace extends ManagedNamespace {
 		UaFolderNode folder = new UaFolderNode(getNodeContext(), folderNodeId, newQualifiedName(folderName),
 				LocalizedText.english(folderName));
 		getNodeManager().addNode(folder);
-
 		// make sure our new folder shows up under the Skills folder.
 		folder.addReference(
 				new Reference(folder.getNodeId(), Identifiers.Organizes, parentFolder.getNodeId().expanded(), false));

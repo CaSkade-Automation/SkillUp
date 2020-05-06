@@ -1,12 +1,15 @@
 package server;
 
 import java.io.File;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.eclipse.milo.opcua.sdk.server.OpcUaServer;
 import org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig;
@@ -30,8 +33,12 @@ import org.eclipse.milo.opcua.stack.server.EndpointConfiguration;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import smartModule.SmartModule;
+import states.IState;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig.USER_TOKEN_POLICY_ANONYMOUS;
@@ -56,8 +63,8 @@ public class Server {
 		Security.addProvider(new BouncyCastleProvider());
 	}
 
-//	@Reference
-//	SmartModule module;
+	@Reference
+	SmartModule module;
 
 	/**
 	 * Server is started <br>
@@ -133,8 +140,8 @@ public class Server {
 		Set<EndpointConfiguration> endpointConfigurations = createEndpointConfigurations(certificate);
 
 		OpcUaServerConfig serverConfig = OpcUaServerConfig.builder().setApplicationUri(applicationUri)
-				.setApplicationName(LocalizedText.english("OPC UA Server")).setEndpoints(endpointConfigurations)
-				.setBuildInfo(new BuildInfo("urn:my:server:", "HSU", "OPC UA Server", OpcUaServer.SDK_VERSION, "",
+				.setApplicationName(LocalizedText.english("OPC_UA_Server")).setEndpoints(endpointConfigurations)
+				.setBuildInfo(new BuildInfo("urn:my:server:", "HSU", "OPC_UA_Server", OpcUaServer.SDK_VERSION, "",
 						DateTime.now()))
 				.setCertificateManager(certificateManager).setTrustListManager(trustListManager)
 				.setCertificateValidator(certificateValidator)
@@ -160,8 +167,14 @@ public class Server {
 		bindAddresses.add("0.0.0.0");
 
 		Set<String> hostnames = new LinkedHashSet<>();
-		hostnames.add(HostnameUtil.getHostname());
-		hostnames.addAll(HostnameUtil.getHostnames("0.0.0.0"));
+//		hostnames.add(HostnameUtil.getHostname());
+//		hostnames.addAll(HostnameUtil.getHostnames("0.0.0.0"));
+		try {
+			hostnames.add(InetAddress.getLocalHost().getHostAddress());
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
 
 		for (String bindAddress : bindAddresses) {
 			for (String hostname : hostnames) {
@@ -199,6 +212,10 @@ public class Server {
 
 		return endpointConfigurations;
 	}
+	
+//	public void informOps(Object skill, IState state) {
+//		module.stateChanged(skill, state); 
+//	}
 
 	private static EndpointConfiguration buildTcpEndpoint(EndpointConfiguration.Builder base) {
 		return base.copy().setTransportProfile(TransportProfile.TCP_UASC_UABINARY).setBindPort(TCP_BIND_PORT).build();
@@ -219,25 +236,6 @@ public class Server {
 	public CompletableFuture<OpcUaServer> shutdown() {
 		return server.shutdown();
 	}
-
-	/**
-	 * Method gets the file from resources folder with method of smart module, reads
-	 * it and converts it to a string
-	 * 
-	 * @param classLoader of class to get resources folder of the class
-	 * @param fileName    the name of file which we want from resources folder
-	 * @return returns given file as string
-	 */
-//	public String getFileFromResources(ClassLoader classLoader, String fileName) {
-//		String file = null;
-//		try {
-//			file = module.getFileFromResources(classLoader, fileName);
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		return file;
-//	}
 
 	@Deactivate
 	public void deactivate() {
