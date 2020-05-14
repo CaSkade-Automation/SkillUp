@@ -2,6 +2,7 @@ package skillRegistration;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,6 +50,9 @@ public class SkillRegistration {
 
 	@Reference
 	SmartModule module;
+	
+	@Reference
+	Server server; 
 
 	@Activate
 	public void activate(BundleContext context) {
@@ -85,9 +89,10 @@ public class SkillRegistration {
 									if (skillAnnotation.value().equals("OpcUaSkill")) {
 										logger.info("Add OPC-UA-Skill");
 
-										Server server = opcUaSkillGenerator.generateSkill(skillObj, stateMachine);
+										opcUaSkillGenerator.generateSkill(skillObj, stateMachine);
+										Enumeration<String> userSnippets = bundle.getEntryPaths("ExampleSnippet");
 										String skillDescription = skillDescriptionGenerator
-												.generateOpcUaDescription(server, skillObj, stateMachine);
+												.generateOpcUaDescription(server, skillObj, stateMachine, userSnippets);
 										module.registerSkill(skillDescription, skillObj.getClass().getSimpleName());
 
 									} else if (skillAnnotation.value().equals("RestSkill")) {
