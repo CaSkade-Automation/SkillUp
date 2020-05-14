@@ -9,6 +9,7 @@ import java.net.SocketException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.milo.opcua.sdk.server.OpcUaServer;
@@ -22,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import annotations.Capability;
-import annotations.DIN8580;
+import enums.DIN8580;
 import server.Server;
 import statemachine.StateMachine;
 
@@ -94,7 +95,7 @@ public class SkillDescriptionGenerator {
 
 	private String moduleName;
 	private String capabilityName;
-	private String macAdress;
+	private String macAddress;
 	private String prefix;
 	private List<String> serverNames = new ArrayList<String>();
 
@@ -106,8 +107,8 @@ public class SkillDescriptionGenerator {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		macAdress = getMacAddress();
-		String module = moduleSnippet.replace("${ModuleName}", moduleName).replace("${MACAdress}", macAdress);
+		macAddress = getMacAddress();
+		String module = moduleSnippet.replace("${ModuleName}", moduleName).replace("${MACAdress}", macAddress);
 
 		if (prefix != null) {
 			String moduleDescription = prefix + module;
@@ -126,29 +127,37 @@ public class SkillDescriptionGenerator {
 		}
 	}
 
-	public String generateOpcUaDescription(Server server, Object skill, StateMachine stateMachine) {
+	public String generateOpcUaDescription(Server server, Object skill, StateMachine stateMachine,
+			Enumeration<String> userFiles) {
 
-		String modulePrefix = modulePrefixSnippet; 
+		String modulePrefix = modulePrefixSnippet;
 		String opcUaServerDescription = null;
-		if (serverNames.isEmpty()) {
+		if (serverNames.isEmpty()
+				|| !serverNames.contains(server.getServer().getConfig().getApplicationName().getText())) {
 			serverNames.add(server.getServer().getConfig().getApplicationName().getText());
 			opcUaServerDescription = generateOpcUaServerDescription(server);
-		} else {
-			for (String serverName : serverNames) {
-				if (!server.getServer().getConfig().getApplicationName().getText().equals(serverName)) {
-					serverNames.add(server.getServer().getConfig().getApplicationName().getText());
-					opcUaServerDescription = generateOpcUaServerDescription(server);
-				}
-			}
 		}
+
 		String capabilityDescription = generateCapabilityDescription(skill);
 		String opcUaSkillDescription = generateOpcUaSkillDescription(skill.getClass().getSimpleName(), stateMachine,
 				server);
 		String stateMachineDescription = generateStateMachineDescription(stateMachine);
 
+		String userSnippet = "";
+		if (userFiles != null) {
+			for (Iterator<String> it = userFiles.asIterator(); it.hasNext();) {
+				try {
+					userSnippet = userSnippet + getFileFromResources(skill.getClass().getClassLoader(), it.next());
+					userSnippet = userSnippet.replace("${Prefix}", "module");
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
 		String completeSkillDescription = prefix + modulePrefix + opcUaServerDescription + capabilityDescription
-				+ opcUaSkillDescription + stateMachineDescription;
-		completeSkillDescription = completeSkillDescription.replace("${MACAdress}", macAdress)
+				+ opcUaSkillDescription + stateMachineDescription + userSnippet;
+		completeSkillDescription = completeSkillDescription.replace("${MACAdress}", macAddress)
 				.replace("${ModuleName}", moduleName)
 				.replace("${ServerName}", server.getServer().getConfig().getApplicationName().getText())
 				.replace("${CapabilityName}", capabilityName).replace("${SkillName}", skill.getClass().getSimpleName());
@@ -204,9 +213,6 @@ public class SkillDescriptionGenerator {
 		} else {
 			this.capabilityName = skill.getClass().getSimpleName();
 		}
-
-		// if Bedingung: falls in- und outputs für capability existieren, die auch
-		// reinmachen. Vllt mit Annotation in- und outputs festlegen
 
 		return capabilityDescription;
 	}
@@ -368,5 +374,12 @@ public class SkillDescriptionGenerator {
 			}
 		}
 		return macAdress;
+	}
+
+	public String getModuleIri() {
+		String moduleIri = modulePrefixSnippet.substring(modulePrefixSnippet.indexOf("<") + 1,
+				modulePrefixSnippet.indexOf(">"));
+		moduleIri = moduleIri.replace("${MACAdress}", macAddress).replace("${ModuleName}", moduleName);
+		return moduleIri;
 	}
 }
