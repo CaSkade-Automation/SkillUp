@@ -13,11 +13,6 @@
 			<artifactId>isa88-state-machine</artifactId>
 			<version>1.2.0</version>
 		</dependency>
-		<dependency>
-			<groupId>de.hsu-hh.ifa.opcua-server</groupId>
-			<artifactId>OPC-UA-Server</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
 	</dependencies>
 	<build>
 		<plugins>

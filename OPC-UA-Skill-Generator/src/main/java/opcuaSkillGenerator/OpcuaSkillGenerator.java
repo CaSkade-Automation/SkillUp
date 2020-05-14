@@ -19,7 +19,7 @@ public class OpcuaSkillGenerator implements SkillGeneratorInterface {
 	Server server; 
 
 	@Override
-	public Server generateSkill(Object skill, StateMachine stateMachine) {
+	public void generateSkill(Object skill, StateMachine stateMachine) {
 		// TODO Auto-generated method stub
 		
 		String skillName = skill.getClass().getSimpleName();
@@ -31,8 +31,6 @@ public class OpcuaSkillGenerator implements SkillGeneratorInterface {
 		server.getNamespace().addAllSkillMethods(folder, stateMachine, skill);
 		
 		stateMachine.addStateChangeObserver(server.getNamespace().getGenericMethod());
-		
-		return server; 
 	}
 
 	@Override
