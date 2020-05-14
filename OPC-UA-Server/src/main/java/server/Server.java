@@ -240,5 +240,6 @@ public class Server {
 	@Deactivate
 	public void deactivate() {
 		logger.info("OPC-UA-Server wird deaktiviert");
+		//hier server.shutdown(); 
 	}
 }

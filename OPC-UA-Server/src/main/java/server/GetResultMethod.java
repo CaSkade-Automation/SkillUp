@@ -22,7 +22,7 @@ public class GetResultMethod extends AbstractMethodInvocationHandler {
 
 	private final Logger logger = LoggerFactory.getLogger(GetResultMethod.class);
 	private Object skill;
-	
+
 	public GetResultMethod(UaMethodNode node, Object skill) {
 		super(node);
 		// TODO Auto-generated constructor stub
@@ -39,8 +39,8 @@ public class GetResultMethod extends AbstractMethodInvocationHandler {
 	public Argument[] getOutputArguments() {
 		// TODO Auto-generated method stub
 		List<Argument> outputArgumentsList = createOutputArgument();
-		final Argument[] outputArguments = outputArgumentsList.toArray(new Argument[outputArgumentsList.size()]); 
-		return outputArguments; 
+		final Argument[] outputArguments = outputArgumentsList.toArray(new Argument[outputArgumentsList.size()]);
+		return outputArguments;
 	}
 
 	public List<Argument> createOutputArgument() {
@@ -50,18 +50,15 @@ public class GetResultMethod extends AbstractMethodInvocationHandler {
 			if (field.isAnnotationPresent(SkillOutput.class)) {
 
 				field.setAccessible(true);
-
 				Class<?> type = field.getType();
-
 				NodeId typeId = new NodeId(0, BuiltinDataType.getBuiltinTypeId(type));
-
 				Argument outputArgument = new Argument(field.getName(), typeId, ValueRanks.Scalar, null,
 						new LocalizedText(field.getName()));
-				
-				outputArgumentsList.add(outputArgument); 
+
+				outputArgumentsList.add(outputArgument);
 			}
 		}
-		return outputArgumentsList; 
+		return outputArgumentsList;
 	}
 
 	@Override
@@ -69,15 +66,15 @@ public class GetResultMethod extends AbstractMethodInvocationHandler {
 		// TODO Auto-generated method stub
 		Field[] fields = skill.getClass().getDeclaredFields();
 		List<Variant> variants = new ArrayList<Variant>();
-		
+
 		for (Field field : fields) {
 			if (field.isAnnotationPresent(SkillOutput.class)) {
 
 				field.setAccessible(true);
 				try {
 					logger.info("Output: " + field.get(skill));
-					Variant variant = new Variant(field.get(skill)); 
-					variants.add(variant); 
+					Variant variant = new Variant(field.get(skill));
+					variants.add(variant);
 				} catch (IllegalArgumentException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -87,7 +84,7 @@ public class GetResultMethod extends AbstractMethodInvocationHandler {
 				}
 			}
 		}
-		return variants.toArray(new Variant[variants.size()]); 
+		return variants.toArray(new Variant[variants.size()]);
 	}
 
 }

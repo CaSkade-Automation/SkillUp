@@ -4,7 +4,7 @@ import java.lang.reflect.Method;
 
 import org.osgi.service.component.annotations.Component;
 
-import annotations.States;
+import enums.States;
 import statemachine.StateMachine;
 import statemachine.StateMachineBuilder;
 

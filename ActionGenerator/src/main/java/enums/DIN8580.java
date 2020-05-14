@@ -1,4 +1,4 @@
-package annotations;
+package enums;
 
 public enum DIN8580 {
 	Putzen_oder_Verputzen, Anstreichen_oder_Lackieren, Beschichten_durch_Gießen, Beschriften, Drucken_oder_Bedrucken,
