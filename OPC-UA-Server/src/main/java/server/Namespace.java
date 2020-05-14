@@ -43,7 +43,7 @@ public class Namespace extends ManagedNamespace {
 	private GenericMethod newSkill;
 
 	public Namespace(final OpcUaServer server) {
-		super(server, URI); 
+		super(server, URI);
 		subscriptionModel = new SubscriptionModel(server, this);
 	}
 
@@ -67,8 +67,8 @@ public class Namespace extends ManagedNamespace {
 	}
 
 	public UaFolderNode addFolder(String folderName) {
-		
-		UaFolderNode parentFolder = getFolder(); 
+
+		UaFolderNode parentFolder = getFolder();
 
 		// create a folder and add it to the node manager
 		NodeId folderNodeId = newNodeId("Skills/" + folderName);
@@ -88,48 +88,20 @@ public class Namespace extends ManagedNamespace {
 		Field[] fields = skill.getClass().getDeclaredFields();
 		for (Field field : fields) {
 
-			Variant variant = null;
 			if (field.isAnnotationPresent(SkillInput.class)) {
 
-				field.setAccessible(true);
-				Class<?> type = field.getType();
-				NodeId typeId = new NodeId(0, BuiltinDataType.getBuiltinTypeId(type));
-
-				String fieldName;
-				if (!field.getAnnotation(SkillInput.class).name().isEmpty()) {
-					fieldName = field.getAnnotation(SkillInput.class).name();
-				} else {
-					fieldName = field.getName();
-				}
-
-				String fieldDescription;
-				if (!field.getAnnotation(SkillInput.class).description().isEmpty()) {
-					fieldDescription = field.getAnnotation(SkillInput.class).description();
-				} else {
-					fieldDescription = field.getName();
-				}
-
-				// field.getClass().isArray();
-
-				try {
-					variant = new Variant(field.get(skill));
-				} catch (IllegalArgumentException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (IllegalAccessException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+				MethodDescription methodDescription = setMethodDescription(field, skill, true);
 
 				UaVariableNode node = new UaVariableNode.UaVariableNodeBuilder(getNodeContext())
-						.setNodeId(newNodeId(folder.getBrowseName() + "/" + fieldName))
+						.setNodeId(newNodeId(folder.getBrowseName() + "/" + methodDescription.getMethodName()))
 						.setAccessLevel(ubyte(AccessLevel.getMask(AccessLevel.READ_WRITE)))
 						.setUserAccessLevel(ubyte(AccessLevel.getMask(AccessLevel.READ_WRITE)))
-						.setBrowseName(newQualifiedName(fieldName))
-						.setDisplayName(LocalizedText.english(fieldDescription)).setDataType(typeId)
-						.setTypeDefinition(Identifiers.BaseDataVariableType).build();
+						.setBrowseName(newQualifiedName(methodDescription.getMethodName()))
+						.setDisplayName(LocalizedText.english(methodDescription.getMethodDescription()))
+						.setDataType(methodDescription.getNodeId()).setTypeDefinition(Identifiers.BaseDataVariableType)
+						.build();
 
-				node.setValue(new DataValue(variant));
+				node.setValue(new DataValue(methodDescription.getVariant()));
 				node.addAttributeObserver(new AttributeObserver() {
 
 					@Override
@@ -137,7 +109,7 @@ public class Namespace extends ManagedNamespace {
 						// TODO Auto-generated method stub
 						DataValue dataValue = (DataValue) value;
 						try {
-							setField(field, type, dataValue, skill);
+							setField(field, field.getType(), dataValue, skill);
 							System.out.println(
 									"Input Paramter " + field.getName() + " of " + skill.getClass().getSimpleName()
 											+ " has changed, new Value is: " + dataValue.getValue().getValue());
@@ -157,44 +129,18 @@ public class Namespace extends ManagedNamespace {
 
 			if (field.isAnnotationPresent(SkillOutput.class)) {
 
-				field.setAccessible(true);
-				Class<?> type = field.getType();
-
-				NodeId typeId = new NodeId(0, BuiltinDataType.getBuiltinTypeId(type));
-
-				String fieldName;
-				if (!field.getAnnotation(SkillOutput.class).name().isEmpty()) {
-					fieldName = field.getAnnotation(SkillOutput.class).name();
-				} else {
-					fieldName = field.getName();
-				}
-
-				String fieldDescription;
-				if (!field.getAnnotation(SkillOutput.class).description().isEmpty()) {
-					fieldDescription = field.getAnnotation(SkillOutput.class).description();
-				} else {
-					fieldDescription = field.getName();
-				}
-
-				try {
-					variant = new Variant(field.get(skill));
-				} catch (IllegalArgumentException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (IllegalAccessException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+				MethodDescription methodDescription = setMethodDescription(field, skill, false);
 
 				UaVariableNode node = new UaVariableNode.UaVariableNodeBuilder(getNodeContext())
-						.setNodeId(newNodeId(folder.getBrowseName() + "/" + fieldName))
+						.setNodeId(newNodeId(folder.getBrowseName() + "/" + methodDescription.getMethodName()))
 						.setAccessLevel(ubyte(AccessLevel.getMask(AccessLevel.READ_ONLY)))
 						.setUserAccessLevel(ubyte(AccessLevel.getMask(AccessLevel.READ_ONLY)))
-						.setBrowseName(newQualifiedName(fieldName))
-						.setDisplayName(LocalizedText.english(fieldDescription)).setDataType(typeId)
-						.setTypeDefinition(Identifiers.BaseDataVariableType).build();
+						.setBrowseName(newQualifiedName(methodDescription.getMethodName()))
+						.setDisplayName(LocalizedText.english(methodDescription.getMethodDescription()))
+						.setDataType(methodDescription.getNodeId()).setTypeDefinition(Identifiers.BaseDataVariableType)
+						.build();
 
-				node.setValue(new DataValue(variant));
+				node.setValue(new DataValue(methodDescription.getVariant()));
 
 				getNodeManager().addNode(node);
 				folder.addOrganizes(node);
@@ -222,6 +168,54 @@ public class Namespace extends ManagedNamespace {
 		}
 	}
 
+	public MethodDescription setMethodDescription(Field field, Object skill, boolean skillInput) {
+		Variant variant = null;
+		field.setAccessible(true);
+		Class<?> type = field.getType();
+
+		NodeId typeId = new NodeId(0, BuiltinDataType.getBuiltinTypeId(type));
+
+		try {
+			variant = new Variant(field.get(skill));
+		} catch (IllegalArgumentException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IllegalAccessException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+		String fieldName;
+		String fieldDescription;
+		if (skillInput) {
+			if (!field.getAnnotation(SkillInput.class).name().isEmpty()) {
+				fieldName = field.getAnnotation(SkillInput.class).name();
+			} else {
+				fieldName = field.getName();
+			}
+
+			if (!field.getAnnotation(SkillInput.class).description().isEmpty()) {
+				fieldDescription = field.getAnnotation(SkillInput.class).description();
+			} else {
+				fieldDescription = field.getName();
+			}
+		} else {
+			if (!field.getAnnotation(SkillOutput.class).name().isEmpty()) {
+				fieldName = field.getAnnotation(SkillOutput.class).name();
+			} else {
+				fieldName = field.getName();
+			}
+
+			if (!field.getAnnotation(SkillOutput.class).description().isEmpty()) {
+				fieldDescription = field.getAnnotation(SkillOutput.class).description();
+			} else {
+				fieldDescription = field.getName();
+			}
+		}
+		MethodDescription methodDescription = new MethodDescription(typeId, fieldName, fieldDescription, variant);
+		return methodDescription;
+	}
+
 	/**
 	 * SkillNode is added to the folder by getting input and output arguments as
 	 * well as the invoke method
@@ -234,12 +228,7 @@ public class Namespace extends ManagedNamespace {
 
 		for (TransitionName transition : TransitionName.values()) {
 
-			UaMethodNode skillNode = UaMethodNode.builder(getNodeContext())
-					.setNodeId(newNodeId(folder.getBrowseName() + "/" + transition.toString()))
-					.setBrowseName(newQualifiedName(transition.toString()))
-					.setDisplayName(new LocalizedText(null, transition.toString()))
-					.setDescription(LocalizedText.english(transition.toString())).build();
-
+			UaMethodNode skillNode = createMethodNode(folder, transition.toString());
 			newSkill = new GenericMethod(skillNode, stateMachine, transition, skillOutput, skill);
 
 			skillNode.setInvocationHandler(newSkill);
@@ -247,19 +236,13 @@ public class Namespace extends ManagedNamespace {
 
 			skillNode.addReference(new Reference(skillNode.getNodeId(), Identifiers.HasComponent,
 					folder.getNodeId().expanded(), false));
-
 		}
-
 		addGetResultMethod(folder, skill);
 	}
 
 	public void addGetResultMethod(UaFolderNode folder, Object skill) {
 
-		UaMethodNode skillNode = UaMethodNode.builder(getNodeContext())
-				.setNodeId(newNodeId(folder.getBrowseName() + "/" + "getResult"))
-				.setBrowseName(newQualifiedName("getResult")).setDisplayName(new LocalizedText(null, "getResult"))
-				.setDescription(LocalizedText.english("getResult")).build();
-
+		UaMethodNode skillNode = createMethodNode(folder, "getResult");
 		GetResultMethod newSkill = new GetResultMethod(skillNode, skill);
 		skillNode.setProperty(UaMethodNode.OutputArguments, newSkill.getOutputArguments());
 		skillNode.setInvocationHandler(newSkill);
@@ -267,6 +250,15 @@ public class Namespace extends ManagedNamespace {
 
 		skillNode.addReference(
 				new Reference(skillNode.getNodeId(), Identifiers.HasComponent, folder.getNodeId().expanded(), false));
+	}
+
+	public UaMethodNode createMethodNode(UaFolderNode folder, String methodName) {
+		UaMethodNode skillNode = UaMethodNode.builder(getNodeContext())
+				.setNodeId(newNodeId(folder.getBrowseName() + "/" + methodName))
+				.setBrowseName(newQualifiedName(methodName)).setDisplayName(new LocalizedText(null, methodName))
+				.setDescription(LocalizedText.english(methodName)).build();
+
+		return skillNode;
 	}
 
 	@Override
