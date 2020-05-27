@@ -1,5 +1,16 @@
-package annotations;
+package enums;
 
+import annotations.Aborting;
+import annotations.Clearing;
+import annotations.Completing;
+import annotations.Execute;
+import annotations.Holding;
+import annotations.Resetting;
+import annotations.Starting;
+import annotations.Stopping;
+import annotations.Suspending;
+import annotations.Unholding;
+import annotations.Unsuspending;
 import states.ActiveStateName;
 
 public enum States {

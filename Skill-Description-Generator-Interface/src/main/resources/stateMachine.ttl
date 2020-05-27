@@ -1,0 +1,181 @@
+module:_${SkillName}OpcUaSkill_StateMachine a stateMachine:StateMachine.  
+module:_${SkillName}OpcUaSkill_StateMachine_Aborting a stateMachine:Aborting, 
+													owl:NamedIndividual; 
+											stateMachine:State_is_connected_with_Transition module:_${SkillName}OpcUaSkill_StateMachine_Aborting_State_Complete.  
+module:_${SkillName}OpcUaSkill_StateMachine_Clearing a stateMachine:Clearing,
+													owl:NamedIndividual;
+											stateMachine:State_is_connected_with_Transition module:_${SkillName}OpcUaSkill_StateMachine_Abort_Command,
+													module:_${SkillName}OpcUaSkill_StateMachine_Clearing_State_Complete. 
+module:_${SkillName}OpcUaSkill_StateMachine_Complete a stateMachine:Complete,
+													owl:NamedIndividual;
+											stateMachine:State_is_connected_with_Transition module:_${SkillName}OpcUaSkill_StateMachine_Abort_Command,
+													module:_${SkillName}OpcUaSkill_StateMachine_Reset_Command, 
+													module:_${SkillName}OpcUaSkill_StateMachine_Stop_Command. 
+module:_${SkillName}OpcUaSkill_StateMachine_Completing a stateMachine:Completing,
+													owl:NamedIndividual;
+											stateMachine:State_is_connected_with_Transition module:_${SkillName}OpcUaSkill_StateMachine_Abort_Command,
+											module:_${SkillName}OpcUaSkill_StateMachine_Completing_State_Complete, 
+											module:_${SkillName}OpcUaSkill_StateMachine_Stop_Command. 
+module:_${SkillName}OpcUaSkill_StateMachine_Execute a stateMachine:Execute,
+													owl:NamedIndividual;
+											stateMachine:State_is_connected_with_Transition module:_${SkillName}OpcUaSkill_StateMachine_Abort_Command,
+													module:_${SkillName}OpcUaSkill_StateMachine_Execute_State_Complete, 
+													module:_${SkillName}OpcUaSkill_StateMachine_Hold_Command,
+													module:_${SkillName}OpcUaSkill_StateMachine_Stop_Command, 
+													module:_${SkillName}OpcUaSkill_StateMachine_Suspend_Command. 
+module:_${SkillName}OpcUaSkill_StateMachine_Holding a stateMachine:Holding,
+													owl:NamedIndividual;
+											stateMachine:State_is_connected_with_Transition module:_${SkillName}OpcUaSkill_StateMachine_Abort_Command,
+													module:_${SkillName}OpcUaSkill_StateMachine_Holding_State_Complete, 
+													module:_${SkillName}OpcUaSkill_StateMachine_Stop_Command. 
+module:_${SkillName}OpcUaSkill_StateMachine_Resetting a stateMachine:Resetting,
+													owl:NamedIndividual;
+											stateMachine:State_is_connected_with_Transition module:_${SkillName}OpcUaSkill_StateMachine_Abort_Command,
+													module:_${SkillName}OpcUaSkill_StateMachine_Resetting_State_Complete, 
+													module:_${SkillName}OpcUaSkill_StateMachine_Stop_Command. 
+module:_${SkillName}OpcUaSkill_StateMachine_Starting a stateMachine:Starting,
+													owl:NamedIndividual;
+											stateMachine:State_is_connected_with_Transition module:_${SkillName}OpcUaSkill_StateMachine_Abort_Command,
+													module:_${SkillName}OpcUaSkill_StateMachine_Starting_State_Complete, 
+													module:_${SkillName}OpcUaSkill_StateMachine_Stop_Command. 
+module:_${SkillName}OpcUaSkill_StateMachine_Stopping a stateMachine:Stopping,
+													owl:NamedIndividual;
+											stateMachine:State_is_connected_with_Transition module:_${SkillName}OpcUaSkill_StateMachine_Abort_Command,
+													module:_${SkillName}OpcUaSkill_StateMachine_Stopping_State_Complete. 
+module:_${SkillName}OpcUaSkill_StateMachine_Suspending a stateMachine:Suspending,
+													owl:NamedIndividual;
+											stateMachine:State_is_connected_with_Transition module:_${SkillName}OpcUaSkill_StateMachine_Abort_Command,
+													module:_${SkillName}OpcUaSkill_StateMachine_Stop_Command, 
+													module:_${SkillName}OpcUaSkill_StateMachine_Suspending_State_Complete. 
+module:_${SkillName}OpcUaSkill_StateMachine_Unholding a stateMachine:Unholding,
+													owl:NamedIndividual;
+											stateMachine:State_is_connected_with_Transition module:_${SkillName}OpcUaSkill_StateMachine_Abort_Command,
+													module:_${SkillName}OpcUaSkill_StateMachine_Stop_Command, 
+													module:_${SkillName}OpcUaSkill_StateMachine_Unholding_State_Complete. 
+module:_${SkillName}OpcUaSkill_StateMachine_Unsuspending a stateMachine:Unsuspending,
+													owl:NamedIndividual;
+											stateMachine:State_is_connected_with_Transition module:_${SkillName}OpcUaSkill_StateMachine_Abort_Command,
+													module:_${SkillName}OpcUaSkill_StateMachine_Stop_Command, 
+													module:_${SkillName}OpcUaSkill_StateMachine_Unsuspending_State_Complete. 
+module:_${SkillName}OpcUaSkill_StateMachine_Aborted a stateMachine:Aborted,
+													owl:NamedIndividual;
+											stateMachine:State_is_connected_with_Transition module:_${SkillName}OpcUaSkill_StateMachine_Clear_Command. 
+module:_${SkillName}OpcUaSkill_StateMachine_Held a stateMachine:Held,
+													owl:NamedIndividual;
+											stateMachine:State_is_connected_with_Transition module:_${SkillName}OpcUaSkill_StateMachine_Abort_Command,
+													module:_${SkillName}OpcUaSkill_StateMachine_Stop_Command, 
+													module:_${SkillName}OpcUaSkill_StateMachine_Unhold_Command. 
+module:_${SkillName}OpcUaSkill_StateMachine_Idle a stateMachine:Idle,
+													owl:NamedIndividual;
+											stateMachine:State_is_connected_with_Transition module:_${SkillName}OpcUaSkill_StateMachine_Abort_Command,
+													module:_${SkillName}OpcUaSkill_StateMachine_Start_Command, 
+													module:_${SkillName}OpcUaSkill_StateMachine_Stop_Command. 
+module:_${SkillName}OpcUaSkill_StateMachine_Stopped a stateMachine:Stopped,
+													owl:NamedIndividual;
+											stateMachine:State_is_connected_with_Transition module:_${SkillName}OpcUaSkill_StateMachine_Abort_Command,
+													module:_${SkillName}OpcUaSkill_StateMachine_Reset_Command. 
+module:_${SkillName}OpcUaSkill_StateMachine_Suspended a stateMachine:Suspended,
+													owl:NamedIndividual;
+											stateMachine:State_is_connected_with_Transition module:_${SkillName}OpcUaSkill_StateMachine_Abort_Command,
+													module:_${SkillName}OpcUaSkill_StateMachine_Stop_Command, 
+													module:_${SkillName}OpcUaSkill_StateMachine_Unsuspend_Command. 
+													
+module:_${SkillName}OpcUaSkill_StateMachine_Abort_Command a stateMachine:Abort_Command,
+													owl:NamedIndividual;
+											stateMachine:Transition_is_connected_with_State module:_${SkillName}OpcUaSkill_StateMachine_Aborting. 
+module:_${SkillName}OpcUaSkill_StateMachine_Clear_Command a stateMachine:Clear_Command,
+													owl:NamedIndividual;
+											stateMachine:Transition_is_connected_with_State module:_${SkillName}OpcUaSkill_StateMachine_Clearing. 
+module:_${SkillName}OpcUaSkill_StateMachine_Hold_Command a stateMachine:Hold_Command,
+													owl:NamedIndividual;
+											stateMachine:Transition_is_connected_with_State module:_${SkillName}OpcUaSkill_StateMachine_Holding. 
+module:_${SkillName}OpcUaSkill_StateMachine_Reset_Command a stateMachine:Reset_Command,
+													owl:NamedIndividual;
+											stateMachine:Transition_is_connected_with_State module:_${SkillName}OpcUaSkill_StateMachine_Resetting. 
+module:_${SkillName}OpcUaSkill_StateMachine_Start_Command a stateMachine:Start_Command,
+													owl:NamedIndividual;
+											stateMachine:Transition_is_connected_with_State module:_${SkillName}OpcUaSkill_StateMachine_Starting. 
+module:_${SkillName}OpcUaSkill_StateMachine_Stop_Command a stateMachine:Stop_Command,
+													owl:NamedIndividual;
+											stateMachine:Transition_is_connected_with_State module:_${SkillName}OpcUaSkill_StateMachine_Stopping. 
+module:_${SkillName}OpcUaSkill_StateMachine_Suspend_Command a stateMachine:Suspend_Command,
+													owl:NamedIndividual;
+											stateMachine:Transition_is_connected_with_State module:_${SkillName}OpcUaSkill_StateMachine_Suspending. 
+module:_${SkillName}OpcUaSkill_StateMachine_Unhold_Command a stateMachine:Un-Hold_Command,
+													owl:NamedIndividual;
+											stateMachine:Transition_is_connected_with_State module:_${SkillName}OpcUaSkill_StateMachine_Unholding. 
+module:_${SkillName}OpcUaSkill_StateMachine_Unsuspend_Command a stateMachine:Unsuspend_Command,
+													owl:NamedIndividual;
+											stateMachine:Transition_is_connected_with_State module:_${SkillName}OpcUaSkill_StateMachine_Unsuspending. 
+
+module:_${SkillName}OpcUaSkill_StateMachine_Aborting_State_Complete a stateMachine:Aborting_State_Complete,
+													owl:NamedIndividual;
+											stateMachine:Transition_is_connected_with_State module:_${SkillName}OpcUaSkill_StateMachine_Aborted. 
+module:_${SkillName}OpcUaSkill_StateMachine_Clearing_State_Complete a stateMachine:Clearing_State_Complete,
+													owl:NamedIndividual;
+											stateMachine:Transition_is_connected_with_State module:_${SkillName}OpcUaSkill_StateMachine_Stopped. 
+module:_${SkillName}OpcUaSkill_StateMachine_Completing_State_Complete a stateMachine:Completing_State_Complete,
+													owl:NamedIndividual;
+											stateMachine:Transition_is_connected_with_State module:_${SkillName}OpcUaSkill_StateMachine_Complete. 
+module:_${SkillName}OpcUaSkill_StateMachine_Execute_State_Complete a stateMachine:Execute_State_Complete,
+													owl:NamedIndividual;
+											stateMachine:Transition_is_connected_with_State module:_${SkillName}OpcUaSkill_StateMachine_Completing. 
+module:_${SkillName}OpcUaSkill_StateMachine_Holding_State_Complete a stateMachine:Holding_State_Complete,
+													owl:NamedIndividual;
+											stateMachine:Transition_is_connected_with_State module:_${SkillName}OpcUaSkill_StateMachine_Held. 
+module:_${SkillName}OpcUaSkill_StateMachine_Resetting_State_Complete a stateMachine:Resetting_State_Complete,
+													owl:NamedIndividual;
+											stateMachine:Transition_is_connected_with_State module:_${SkillName}OpcUaSkill_StateMachine_Idle. 
+module:_${SkillName}OpcUaSkill_StateMachine_Starting_State_Complete a stateMachine:Starting_State_Complete,
+													owl:NamedIndividual;
+											stateMachine:Transition_is_connected_with_State module:_${SkillName}OpcUaSkill_StateMachine_Execute. 
+module:_${SkillName}OpcUaSkill_StateMachine_Stopping_State_Complete a stateMachine:Stopping_State_Complete,
+													owl:NamedIndividual;
+											stateMachine:Transition_is_connected_with_State module:_${SkillName}OpcUaSkill_StateMachine_Stopped. 
+module:_${SkillName}OpcUaSkill_StateMachine_Suspending_State_Complete a stateMachine:Suspending_State_Complete,
+													owl:NamedIndividual;
+											stateMachine:Transition_is_connected_with_State module:_${SkillName}OpcUaSkill_StateMachine_Suspended. 
+module:_${SkillName}OpcUaSkill_StateMachine_Unholding_State_Complete a stateMachine:Unholding_State_Complete,
+													owl:NamedIndividual;
+											stateMachine:Transition_is_connected_with_State module:_${SkillName}OpcUaSkill_StateMachine_Execute. 
+module:_${SkillName}OpcUaSkill_StateMachine_Unsuspending_State_Complete a stateMachine:Unsuspending_State_Complete,
+													owl:NamedIndividual;
+											stateMachine:Transition_is_connected_with_State module:_${SkillName}OpcUaSkill_StateMachine_Execute. 
+											
+module:_${SkillName}OpcUaSkill_StateMachine stateMachine:hasState module:_${SkillName}OpcUaSkill_StateMachine_Aborted, 
+															module:_${SkillName}OpcUaSkill_StateMachine_Aborting, 
+															module:_${SkillName}OpcUaSkill_StateMachine_Clearing,
+															module:_${SkillName}OpcUaSkill_StateMachine_Complete, 
+															module:_${SkillName}OpcUaSkill_StateMachine_Completing,
+															module:_${SkillName}OpcUaSkill_StateMachine_Execute, 
+															module:_${SkillName}OpcUaSkill_StateMachine_Held, 
+															module:_${SkillName}OpcUaSkill_StateMachine_Holding,
+															module:_${SkillName}OpcUaSkill_StateMachine_Idle, 
+															module:_${SkillName}OpcUaSkill_StateMachine_Resetting, 
+															module:_${SkillName}OpcUaSkill_StateMachine_Starting,
+															module:_${SkillName}OpcUaSkill_StateMachine_Stopped, 
+															module:_${SkillName}OpcUaSkill_StateMachine_Stopping, 
+															module:_${SkillName}OpcUaSkill_StateMachine_Suspended,
+															module:_${SkillName}OpcUaSkill_StateMachine_Suspending, 
+															module:_${SkillName}OpcUaSkill_StateMachine_Unholding,
+															module:_${SkillName}OpcUaSkill_StateMachine_Unsuspending;
+										stateMachine:hasTransition module:_${SkillName}OpcUaSkill_StateMachine_Abort_Command,
+																	module:_${SkillName}OpcUaSkill_StateMachine_Aborting_State_Complete, 
+																	module:_${SkillName}OpcUaSkill_StateMachine_Clear_Command,
+																	module:_${SkillName}OpcUaSkill_StateMachine_Clearing_State_Complete, 
+																	module:_${SkillName}OpcUaSkill_StateMachine_Completing_State_Complete,
+																	module:_${SkillName}OpcUaSkill_StateMachine_Execute_State_Complete, 
+																	module:_${SkillName}OpcUaSkill_StateMachine_Hold_Command,
+																	module:_${SkillName}OpcUaSkill_StateMachine_Holding_State_Complete, 
+																	module:_${SkillName}OpcUaSkill_StateMachine_Reset_Command,
+																	module:_${SkillName}OpcUaSkill_StateMachine_Resetting_State_Complete, 
+																	module:_${SkillName}OpcUaSkill_StateMachine_Start_Command,
+																	module:_${SkillName}OpcUaSkill_StateMachine_Starting_State_Complete, 
+																	module:_${SkillName}OpcUaSkill_StateMachine_Stop_Command,
+																	module:_${SkillName}OpcUaSkill_StateMachine_Stopping_State_Complete, 
+																	module:_${SkillName}OpcUaSkill_StateMachine_Suspend_Command,
+																	module:_${SkillName}OpcUaSkill_StateMachine_Suspending_State_Complete, 
+																	module:_${SkillName}OpcUaSkill_StateMachine_Unhold_Command,
+																	module:_${SkillName}OpcUaSkill_StateMachine_Unholding_State_Complete, 
+																	module:_${SkillName}OpcUaSkill_StateMachine_Unsuspend_Command,
+																	module:_${SkillName}OpcUaSkill_StateMachine_Unsuspending_State_Complete. 

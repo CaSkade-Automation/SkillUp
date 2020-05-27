@@ -1,126 +1,194 @@
 package skillRegistration;
 
-import java.util.ArrayList;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
+import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.osgi.service.component.ComponentFactory;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.wiring.BundleWiring;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.util.tracker.BundleTracker;
+import org.osgi.util.tracker.BundleTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import actionGenerator.ActionGenerator;
 import annotations.Skill;
-import annotations.Skills;
+import server.Server;
+import skillDescriptionGeneratorInterface.SkillDescriptionGenerator;
 import skillGeneratorInterface.SkillGeneratorInterface;
+import smartModule.SmartModule;
 import statemachine.StateMachine;
 
 @Component(immediate = true)
 public class SkillRegistration {
 
 	private final Logger logger = LoggerFactory.getLogger(SkillRegistration.class);
-	private SkillGeneratorInterface opcuaSkillGenerator;
-	private SkillGeneratorInterface webserviceSkillGenerator;
-	private Map<String, List<Object>> skillMap = new HashMap<>();
-	private List<Object> opcuaSkillList = new ArrayList<>();
-	private List<Object> webserviceSkillList = new ArrayList<>();
+
+	private BundleTracker<Bundle> bundleTracker;
+	private Map<Bundle, Object> classObjects = new HashMap<Bundle, Object>();
 
 	@Reference
 	ActionGenerator actionGenerator;
 
-	@Reference(cardinality = ReferenceCardinality.MULTIPLE)
-	void bindSkillGeneratorInterface(SkillGeneratorInterface skillGenerator) {
-		if (skillGenerator.getClass().getSimpleName().equals("OpcuaSkillGenerator")) {
-			opcuaSkillGenerator = skillGenerator;
-		} else if (skillGenerator.getClass().getSimpleName().equals("WebserviceGenerator")) {
-			webserviceSkillGenerator = skillGenerator;
-		}
-	}
+	@Reference(target = "(name=OpcUa)", cardinality = ReferenceCardinality.OPTIONAL)
+	volatile SkillGeneratorInterface opcUaSkillGenerator;
 
-	/**
-	 * This method is called to bind a new service to the component
-	 * 
-	 * @Reference used to specify dependency on other services, here:
-	 *            ComponentFactory <br>
-	 *            cardinality=MULTIPLE (0...n), reference is optional and multiple
-	 *            bound services are supported <br>
-	 *            policy=DYNAMIC, SCR(Service Component Runtime) can change the set
-	 *            of bound services without deactivating the Component Configuration
-	 *            -> method can be called while component is active and not only
-	 *            before the activate method <br>
-	 * @param factory instance of referenced Component Factory (skill) is passed
-	 */
-	@Reference(target = "(component.factory=skill.factory)", cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-	void bindFactory(ComponentFactory factory) {
+	@Reference(target = "(name=Rest)", cardinality = ReferenceCardinality.OPTIONAL)
+	volatile SkillGeneratorInterface restSkillGenerator;
 
-		Object skill = factory.newInstance(null).getInstance();
-		Skill skillAnnotation = skill.getClass().getAnnotation(Skill.class);
-		if (skillAnnotation != null) {
-			StateMachine stateMachine = actionGenerator.generateAction(skill);
+	@Reference
+	SkillDescriptionGenerator skillDescriptionGenerator;
 
-			if (skillAnnotation.value().equals(Skills.OPCUASkill)) {
-				logger.info("OPC-UA-Skill found");
+	@Reference
+	SmartModule module;
+	
+	@Reference
+	Server server; 
 
-				opcuaSkillGenerator.generateSkill(skill, stateMachine);
-				opcuaSkillList.add(skill);
-				skillMap.put("OPCUA", opcuaSkillList);
-			} else if (skillAnnotation.value().equals(Skills.RestSkill)) {
-				logger.info("Webservice-Skill found");
+	@Activate
+	public void activate(BundleContext context) {
 
-				webserviceSkillGenerator.generateSkill(skill, stateMachine);
-				webserviceSkillList.add(skill);
-				skillMap.put("Webservice", webserviceSkillList);
+		this.bundleTracker = new BundleTracker<Bundle>(context, Bundle.ACTIVE, new BundleTrackerCustomizer<Bundle>() {
+
+			@Override
+			public Bundle addingBundle(Bundle bundle, BundleEvent event) {
+				// TODO Auto-generated method stub
+
+				if (bundle.getLocation().contains("include")) {
+
+					BundleWiring wiring = bundle.adapt(BundleWiring.class);
+					if (wiring != null) {
+
+						Collection<String> resources = wiring.listResources("/", "*class",
+								BundleWiring.LISTRESOURCES_RECURSE);
+
+						for (String resource : resources) {
+
+							try {
+								resource = resource.replace("/", ".");
+								resource = resource.substring(0, resource.lastIndexOf("."));
+								Class<?> skill = bundle.loadClass(resource);
+								// Class.forName(resource);
+								Skill skillAnnotation = skill.getAnnotation(Skill.class);
+
+								if (skillAnnotation != null) {
+
+									Object skillObj = skill.getDeclaredConstructor().newInstance();
+									classObjects.put(bundle, skillObj);
+									StateMachine stateMachine = actionGenerator.generateAction(skillObj);
+
+									if (skillAnnotation.value().equals("OpcUaSkill")) {
+										logger.info("Add OPC-UA-Skill");
+
+										opcUaSkillGenerator.generateSkill(skillObj, stateMachine);
+										Enumeration<String> userSnippets = bundle.getEntryPaths("ExampleSnippet");
+										String skillDescription = skillDescriptionGenerator
+												.generateOpcUaDescription(server, skillObj, stateMachine, userSnippets);
+										module.registerSkill(skillDescription, skillObj.getClass().getSimpleName());
+
+									} else if (skillAnnotation.value().equals("RestSkill")) {
+										logger.info("Add REST-Skill");
+
+										restSkillGenerator.generateSkill(skillObj, stateMachine);
+									}
+								}
+							} catch (ClassNotFoundException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (SecurityException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (InstantiationException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (IllegalAccessException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (IllegalArgumentException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (InvocationTargetException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (NoSuchMethodException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+					}
+				}
+				return bundle;
 			}
-		} else {
-			logger.error("Skill-Annotation not set!");
-		}
-	}
 
-	/**
-	 * This method is called to unbind a (bound) service and deletes node of
-	 * referenced skill from the server
-	 * 
-	 * @param factory reference of component factory (skill) is passed
-	 */
-	void unbindFactory(ComponentFactory factory) {
+			@Override
+			public void modifiedBundle(Bundle bundle, BundleEvent event, Bundle object) {
+				// TODO Auto-generated method stub
 
-		String key = null;
-		Object skill = null;
+			}
 
-		loop: for (Map.Entry<String, List<Object>> entry : skillMap.entrySet()) {
-			key = entry.getKey();
-			for (Object value : entry.getValue()) {
-				if (factory.toString().contains(value.getClass().getSimpleName())) {
-					if (key.equals("OPCUA")) {
-						logger.info("Delete OPC-UA-Skill");
+			@Override
+			public void removedBundle(Bundle bundle, BundleEvent event, Bundle object) {
 
-						opcuaSkillGenerator.deleteSkill(value);
-						skill = value;
-						break loop;
-					} else if (key.equals("Webservice")) {
-						logger.info("Delete Webservice-Skill");
+				BundleWiring wiring = bundle.adapt(BundleWiring.class);
+				if (wiring != null) {
 
-						webserviceSkillGenerator.deleteSkill(value);
-						skill = value;
-						break loop;
+					Collection<String> resources = wiring.listResources("/", "*class",
+							BundleWiring.LISTRESOURCES_RECURSE);
+
+					for (String resource : resources) {
+						try {
+							resource = resource.replace("/", ".");
+							resource = resource.substring(0, resource.lastIndexOf("."));
+							Class<?> skill = bundle.loadClass(resource);
+							// Class.forName(resource);
+							Skill skillAnnotation = skill.getAnnotation(Skill.class);
+
+							if (skillAnnotation != null) {
+
+								Object skillObj = classObjects.get(bundle);
+								// hier fehlt noch delete action!
+
+								if (skillAnnotation.value().equals("OpcUaSkill")) {
+									logger.info("Delete OPC-UA-Skill");
+
+									opcUaSkillGenerator.deleteSkill(skillObj);
+
+								} else if (skillAnnotation.value().equals("RestSkill")) {
+									logger.info("Delete REST-Skill");
+
+									restSkillGenerator.deleteSkill(skillObj);
+								}
+								classObjects.remove(bundle);
+							}
+						} catch (ClassNotFoundException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (SecurityException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (IllegalArgumentException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
 				}
 			}
-		}
-		removeFromList(key, skill);
+		});
+		this.bundleTracker.open();
+
 	}
 
-	public void removeFromList(String key, Object value) {
-		if (key.equals("OPCUA")) {
-			opcuaSkillList.remove(value);
-			skillMap.put(key, opcuaSkillList);
-		} else if (key.equals("Webservice")) {
-			webserviceSkillList.remove(value);
-			skillMap.put(key, webserviceSkillList);
-		}
+	@Deactivate
+	public void deactivate() {
+		this.bundleTracker.close();
 	}
 }

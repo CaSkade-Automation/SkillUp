@@ -12,7 +12,7 @@ import server.Server;
 import skillGeneratorInterface.SkillGeneratorInterface;
 import statemachine.StateMachine;
 
-@Component(immediate = true)
+@Component(immediate = true, property = "name=OpcUa")
 public class OpcuaSkillGenerator implements SkillGeneratorInterface {
 	
 	@Reference
@@ -25,8 +25,12 @@ public class OpcuaSkillGenerator implements SkillGeneratorInterface {
 		String skillName = skill.getClass().getSimpleName();
 		
 		UaFolderNode folder = server.getNamespace().addFolder(skillName);
+
+		server.getNamespace().addVariableNodes(skill, folder);
 		
-		server.getNamespace().addAllSkillMethods(folder, stateMachine);
+		server.getNamespace().addAllSkillMethods(folder, stateMachine, skill);
+		
+		stateMachine.addStateChangeObserver(server.getNamespace().getGenericMethod());
 	}
 
 	@Override

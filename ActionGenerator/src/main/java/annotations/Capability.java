@@ -5,9 +5,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import enums.DIN8580;
+
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface Skill {
-
-	public String value() default "OpcUaSkill"; 
+public @interface Capability {
+	
+	public String name() default ""; 
+	public DIN8580 value() default DIN8580.None;  
 }

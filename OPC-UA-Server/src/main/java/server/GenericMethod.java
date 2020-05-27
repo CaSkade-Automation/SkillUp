@@ -1,25 +1,38 @@
 package server;
 
+import java.lang.reflect.Field;
+
 import org.eclipse.milo.opcua.sdk.server.api.methods.AbstractMethodInvocationHandler;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaMethodNode;
+import org.eclipse.milo.opcua.sdk.server.nodes.UaVariableNode;
 import org.eclipse.milo.opcua.stack.core.UaException;
+import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
 import org.eclipse.milo.opcua.stack.core.types.structured.Argument;
+
+import annotations.SkillOutput;
+import statemachine.IStateChangeObserver;
 import statemachine.StateMachine;
+import states.IState;
 import states.TransitionName;
 
 /**
  * Class is used to reflect the skill to be added to the server <br>
  */
-public class GenericMethod extends AbstractMethodInvocationHandler {
+public class GenericMethod extends AbstractMethodInvocationHandler implements IStateChangeObserver {
 
 	StateMachine stateMachine;
 	TransitionName transition;
+	UaVariableNode outputNode;
+	Object skill;
 
-	public GenericMethod(UaMethodNode node, StateMachine stateMachine, TransitionName transition) {
+	public GenericMethod(UaMethodNode node, StateMachine stateMachine, TransitionName transition,
+			UaVariableNode outputNode, Object skill) {
 		super(node);
 		this.stateMachine = stateMachine;
 		this.transition = transition;
+		this.outputNode = outputNode;
+		this.skill = skill;
 	}
 
 	@Override
@@ -44,7 +57,33 @@ public class GenericMethod extends AbstractMethodInvocationHandler {
 		// TODO Auto-generated method stub
 
 		stateMachine.invokeTransition(transition);
-
 		return null;
+	}
+
+	@Override
+	public void onStateChanged(IState newState) {
+		// TODO Auto-generated method stub
+
+		Field[] fields = skill.getClass().getDeclaredFields();
+		for (Field field : fields) {
+			if (field.isAnnotationPresent(SkillOutput.class)) {
+
+				field.setAccessible(true);
+				try {
+					outputNode.setValue(new DataValue(new Variant(field.get(skill))));
+				} catch (IllegalArgumentException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+
+		System.out.println("State of " + skill.getClass().getSimpleName() + " has changed, new State is: "
+				+ newState.getClass().getSimpleName());
+		// hier muss auch noch OPS informiert werden
+		// server.informOps(skill, newState.getClass().getSimpleName()); 
 	}
 }

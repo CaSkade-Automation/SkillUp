@@ -9,15 +9,15 @@
 	<name>OPC-UA-Skill-Generator</name>
 	<dependencies>
 		<dependency>
+			<groupId>de.hsu-hh.ifa.skill-generator-interface</groupId>
+			<artifactId>Skill-Generator-Interface</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
 			<groupId>de.hsu-hh.ifa.opcua-server</groupId>
 			<artifactId>OPC-UA-Server</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
-		<dependency>
-			<groupId>de.hsu-hh.ifa.skill-generator-interface</groupId>
-			<artifactId>Skill-Generator-Interface</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>		
 	</dependencies>
 	<build>
 		<plugins>

@@ -6,8 +6,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface Skill {
+@Target(ElementType.FIELD)
+public @interface SkillOutput {
 
-	public String value() default "OpcUaSkill"; 
+	public String name() default ""; 
+	public String description() default ""; 
 }
