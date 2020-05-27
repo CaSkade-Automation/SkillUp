@@ -22,7 +22,7 @@ import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import annotations.Capability;
+import annotations.Skill;
 import enums.DIN8580;
 import server.Server;
 import statemachine.StateMachine;
@@ -197,22 +197,18 @@ public class SkillDescriptionGenerator {
 	public String generateCapabilityDescription(Object skill) {
 		String capabilityDescription = capabilitySnippet;
 
-		Capability capabilityAnnotation = skill.getClass().getAnnotation(Capability.class);
-		if (capabilityAnnotation != null) {
+		Skill skillAnnotation = skill.getClass().getAnnotation(Skill.class);
 
-			if (!capabilityAnnotation.name().isEmpty()) {
-				this.capabilityName = capabilityAnnotation.name();
+			if (!skillAnnotation.capabilityName().isEmpty()) {
+				this.capabilityName = skillAnnotation.capabilityName();
 			} else {
 				this.capabilityName = skill.getClass().getSimpleName();
 			}
-			if (!capabilityAnnotation.value().equals(DIN8580.None)) {
+			if (!skillAnnotation.capabilityType().equals(DIN8580.None)) {
 				String capabilityDIN8580Description = capabilityDIN8580Snippet.replace("{DIN8580Type}",
-						capabilityAnnotation.value().name());
+						skillAnnotation.capabilityType().name());
 				capabilityDescription = capabilityDescription + capabilityDIN8580Description;
 			}
-		} else {
-			this.capabilityName = skill.getClass().getSimpleName();
-		}
 
 		return capabilityDescription;
 	}
