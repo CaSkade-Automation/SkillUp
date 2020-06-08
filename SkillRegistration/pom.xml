@@ -9,39 +9,8 @@
 	<name>Skill-Registration</name>
 	<dependencies>
 		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.service.component</artifactId>
-			<version>1.4.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.core</artifactId>
-			<version>6.0.0</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-			<version>1.7.28</version>
-		</dependency>
-		<dependency>
-			<groupId>de.hsu-hh.ifa.skill-generator-interface</groupId>
-			<artifactId>Skill-Generator-Interface</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>de.hsu-hh.ifa.action-generator</groupId>
-			<artifactId>Action-Generator</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>de.hsu-hh.ifa.skill-description-generator-interface</groupId>
-			<artifactId>Skill-Description-Generator-Interface</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>de.hsu-hh.ifa.smart-module</groupId>
-			<artifactId>Smart-Module</artifactId>
+			<groupId>de.hsu-hh.ifa.registration</groupId>
+			<artifactId>Registration</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
