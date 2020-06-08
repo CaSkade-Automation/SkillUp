@@ -33,11 +33,9 @@ import org.eclipse.milo.opcua.stack.server.EndpointConfiguration;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import smartModule.SmartModule;
 import states.IState;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -62,9 +60,6 @@ public class Server {
 		// Required for SecurityPolicy.Aes256_Sha256_RsaPss
 		Security.addProvider(new BouncyCastleProvider());
 	}
-
-	@Reference
-	SmartModule module;
 
 	/**
 	 * Server is started <br>
