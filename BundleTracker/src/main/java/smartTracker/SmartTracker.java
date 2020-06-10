@@ -43,6 +43,7 @@ public class SmartTracker {
 	private Map<Bundle, Object> skillClassObjects = new HashMap<Bundle, Object>();
 	private Map<Bundle, Object> moduleClassObjects = new HashMap<Bundle, Object>();
 
+	//Bundle of skill xy is waiting for module with moduleIri z
 	private Map<Bundle, String> waitingSkills = new HashMap<Bundle, String>();
 
 	@Reference
@@ -56,7 +57,7 @@ public class SmartTracker {
 
 	@Reference(target = "(name=Rest)", cardinality = ReferenceCardinality.OPTIONAL)
 	volatile SkillGeneratorInterface restSkillGenerator;
-	
+
 	@Reference
 	ModuleRegistration moduleRegistration;
 
@@ -100,21 +101,19 @@ public class SmartTracker {
 											Object moduleObj = newBundle.getDeclaredConstructor().newInstance();
 											moduleClassObjects.put(bundle, moduleObj);
 
-//											Enumeration<String> userSnippets = bundle
-//													.getEntryPaths("ExampleSnippet");
+											Enumeration<String> userSnippets = bundle.getEntryPaths("Snippets");
 
 											String moduleDescription = moduleDescriptionGenerator
-													.generateModuleDescription(moduleObj, server);
+													.generateModuleDescription(moduleObj, server, userSnippets);
 
-											String moduleIri = moduleDescriptionGenerator.getModuleIri(module);
 											try {
-												moduleRegistration.broadcast(moduleObj, moduleDescription, moduleIri);
+												moduleRegistration.broadcast(moduleObj, moduleDescription);
 											} catch (IOException e) {
 												// TODO Auto-generated catch block
 												e.printStackTrace();
 											}
-											
-											Bundle startSkill = getKey(waitingSkills, module.namespace());
+
+											Bundle startSkill = getKey(waitingSkills, module.moduleIri());
 											if (startSkill != null) {
 												try {
 													startSkill.start();
@@ -127,27 +126,26 @@ public class SmartTracker {
 										}
 
 										if (skill != null) {
-											Object moduleObj = skillRegistration.skillNeedsModule(skill.namespace()); 
+											Object moduleObj = skillRegistration.skillNeedsModule(skill.moduleIri());
 											if (moduleObj != null) {
 												Object skillObj = newBundle.getDeclaredConstructor().newInstance();
 												skillClassObjects.put(bundle, skillObj);
 
 												StateMachine stateMachine = actionGenerator.generateAction(skillObj);
 
-												if (skill.value().equals("OpcUaSkill")) {
+												if (skill.type().equals("OpcUaSkill")) {
 													logger.info("Add OPC-UA-Skill");
 
 													opcUaSkillGenerator.generateSkill(skillObj, stateMachine);
 													Enumeration<String> userSnippets = bundle
-															.getEntryPaths("ExampleSnippet");
+															.getEntryPaths("Snippets");
 													String skillDescription = opcUaSkillDescriptionGenerator
 															.generateOpcUaDescription(server, skillObj, stateMachine,
-																	userSnippets, moduleObj);
+																	userSnippets);
 
-													skillRegistration.register(skillDescription,
-															skill.getClass().getSimpleName());
+													skillRegistration.register(skillDescription, skillObj);
 
-												} else if (skill.value().equals("RestSkill")) {
+												} else if (skill.type().equals("RestSkill")) {
 													logger.info("Add REST-Skill");
 
 													restSkillGenerator.generateSkill(skillObj, stateMachine);
@@ -155,7 +153,7 @@ public class SmartTracker {
 												}
 											} else {
 												try {
-													waitingSkills.put(bundle, skill.namespace());
+													waitingSkills.put(bundle, skill.moduleIri());
 													bundle.stop();
 												} catch (BundleException e) {
 													// TODO Auto-generated catch block
@@ -216,7 +214,7 @@ public class SmartTracker {
 									Skill skill = removeBundle.getAnnotation(Skill.class);
 
 									if (module != null) {
-										logger.info("Delete Module " + module.name());
+										logger.info("Delete Module " + module.moduleIri());
 
 										moduleRegistration.delete(moduleClassObjects.get(bundle));
 										moduleClassObjects.remove(bundle);
@@ -227,13 +225,13 @@ public class SmartTracker {
 										Object skillObj = skillClassObjects.get(bundle);
 										// hier fehlt noch delete action!
 
-										if (skill.value().equals("OpcUaSkill")) {
+										if (skill.type().equals("OpcUaSkill")) {
 											logger.info("Delete OPC-UA-Skill");
 
 											opcUaSkillGenerator.deleteSkill(skillObj);
-											skillRegistration.delete(skillObj.getClass().getSimpleName());
+											skillRegistration.delete(skillObj);
 
-										} else if (skill.value().equals("RestSkill")) {
+										} else if (skill.type().equals("RestSkill")) {
 											logger.info("Delete REST-Skill");
 
 											restSkillGenerator.deleteSkill(skillObj);
