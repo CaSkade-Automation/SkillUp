@@ -11,7 +11,6 @@ import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaVariableNode;
 import org.osgi.service.component.annotations.Component;
 
-import annotations.Module;
 import annotations.Skill;
 import server.Server;
 import skillDescriptionGenerator.SkillDescriptionGenerator;
@@ -20,31 +19,30 @@ import statemachine.StateMachine;
 @Component(immediate = true, service = OpcUaSkillDescriptionGenerator.class)
 public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 
-	private String opcUaSkillSnippet = "registration:${MACAddress}_${ModuleName} Cap:providesOpcUaSkill module:_${SkillName}OpcUaSkill .\r\n"
-			+ "module:_${SkillName}OpcUaSkill a Cap:OpcUaSkill,\r\n"
-			+ "							owl:NamedIndividual.\r\n"
-			+ "${CapabilityIri} Cap:isExecutableViaOpcUaSkill module:_${SkillName}OpcUaSkill .\r\n"
-			+ "module:_${SkillName}OpcUaSkill OpcUa:browseName \"${BrowseName}\";  \r\n"
+	private String opcUaSkillSnippet = "${ModuleIri} Cap:providesOpcUaSkill ${SkillIri} .\r\n"
+			+ "${SkillIri} a Cap:OpcUaSkill,\r\n" + "							owl:NamedIndividual.\r\n"
+			+ "${CapabilityIri} Cap:isExecutableViaOpcUaSkill ${SkillIri} .\r\n"
+			+ "${SkillIri} OpcUa:browseName \"${BrowseName}\";  \r\n"
 			+ "						OpcUa:browseNamespace \"${BrowseNamespace}\";\r\n"
 			+ "						OpcUa:nodeId \"${NodeId}\";\r\n"
 			+ "						OpcUa:nodeNamespace \"${NodeNamespace}\";\r\n"
 			+ "						OpcUa:displayName \"${DisplayName}\" ;\r\n"
-			+ "						Cap:hasStateMachine module:_${SkillName}OpcUaSkill_StateMachine;\r\n"
-			+ "						Cap:hasCurrentState module:_${SkillName}OpcUaSkill_StateMachine_${StateName}.\r\n"
-			+ "module:_${ServerName}_NodeSet OpcUa:containsNode module:_${SkillName}OpcUaSkill .";
+			+ "						Cap:hasStateMachine ${SkillIri}_StateMachine;\r\n"
+			+ "						Cap:hasCurrentState ${SkillIri}_StateMachine_${StateName}.\r\n"
+			+ "${ModuleIri}_${ServerName}_NodeSet OpcUa:containsNode ${SkillIri} .";
 
-	private String opcUaMethodSnippet = "module:_${SkillName}OpcUaSkill_${MethodName} a OpcUa:UAMethod,\r\n"
+	private String opcUaMethodSnippet = "${SkillIri}_${MethodName} a OpcUa:UAMethod,\r\n"
 			+ "										owl:NamedIndiviual;\r\n"
 			+ "									OpcUa:browseName \"${BrowseName}\";  \r\n"
 			+ "									OpcUa:browseNamespace \"${BrowseNamespace}\";\r\n"
 			+ "									OpcUa:nodeId \"${NodeId}\";\r\n"
 			+ "									OpcUa:nodeNamespace \"${NodeNamespace}\";\r\n"
 			+ "									OpcUa:displayName \"${DisplayName}\".   \r\n"
-			+ "module:_${SkillName}OpcUaSkill OpcUa:hasComponent module:_${SkillName}OpcUaSkill_${MethodName}. \r\n";
+			+ "${SkillIri} OpcUa:hasComponent ${SkillIri}_${MethodName}. \r\n";
 
-	private String opcUaMethodInvokesTransitionSnippet = "module:_${SkillName}OpcUaSkill_${MethodName} Cap:invokes module:_${SkillName}OpcUaSkill_StateMachine_${CommandName}_Command .   \r\n";
+	private String opcUaMethodInvokesTransitionSnippet = "${SkillIri}_${MethodName} Cap:invokes ${SkillIri}_StateMachine_${CommandName}_Command .   \r\n";
 
-	private String opcUaVariableSnippet = "module:_${SkillName}OpcUaSkill_${VariableName} a OpcUa:UAVariable,\r\n"
+	private String opcUaVariableSnippet = "${SkillIri}_${VariableName} a OpcUa:UAVariable,\r\n"
 			+ "										owl:NamedIndividual;\r\n"
 			+ "									OpcUa:browseName \"${BrowseName}\";  \r\n"
 			+ "									OpcUa:browseNamespace \"${BrowseNamespace}\";\r\n"
@@ -56,39 +54,27 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 			+ "									OpcUa:historizing \"${Historizing}\";\r\n"
 			+ "									OpcUa:userAccessLevel \"${UserAccessLevel}\";\r\n"
 			+ "									OpcUa:valueRank \"${ValueRank}\".\r\n"
-			+ "module:_${SkillName}OpcUaSkill OpcUa:organizes module:_${SkillName}OpcUaSkill_${VariableName}. \r\n";
+			+ "${SkillIri} OpcUa:organizes ${SkillIri}_${VariableName}. \r\n";
 
 	public String generateOpcUaDescription(Server server, Object skill, StateMachine stateMachine,
-			Enumeration<String> userFiles, Object module) {
-
-		String modulePrefix = getModulePrefixSnippet();
+			Enumeration<String> userFiles) {
+		Skill skillAnnotation = skill.getClass().getAnnotation(Skill.class);
 
 		String opcUaSkillDescription = generateOpcUaSkillDescription(skill.getClass().getSimpleName(), stateMachine,
 				server);
 		String stateMachineDescription = generateStateMachineDescription(stateMachine);
 
-		String userSnippet = "";
-		if (userFiles != null) {
-			for (Iterator<String> it = userFiles.asIterator(); it.hasNext();) {
-				try {
-					userSnippet = userSnippet + getFileFromResources(skill.getClass().getClassLoader(), it.next());
-					userSnippet = userSnippet.replace("${Prefix}", "module");
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}
+		String userSnippet = getUserSnippets(userFiles, skill.getClass().getClassLoader());
+
 		String completeSkillDescription;
 		try {
-			completeSkillDescription = getFileFromResources(null, "prefix.ttl") + modulePrefix + opcUaSkillDescription
+			completeSkillDescription = getFileFromResources(null, "prefix.ttl") + opcUaSkillDescription
 					+ stateMachineDescription + userSnippet;
 
-			completeSkillDescription = completeSkillDescription.replace("${MACAddress}", getThisMacAddress())
-					.replace("${ModuleName}", module.getClass().getAnnotation(Module.class).name())
+			completeSkillDescription = completeSkillDescription.replace("${ModuleIri}", skillAnnotation.moduleIri())
 					.replace("${ServerName}", server.getServer().getConfig().getApplicationName().getText())
-					.replace("${CapabilityIri}", skill.getClass().getAnnotation(Skill.class).capabilityIri())
-					.replace("${SkillName}", skill.getClass().getSimpleName());
+					.replace("${CapabilityIri}", skillAnnotation.capabilityIri())
+					.replace("${SkillIri}", skillAnnotation.skillIri());
 
 			createFile(completeSkillDescription, "opcUaDescription.ttl");
 
