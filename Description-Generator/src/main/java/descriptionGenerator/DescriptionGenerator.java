@@ -12,8 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import annotations.Module;
-import annotations.Skill;
-import enums.DIN8580;
 
 public class DescriptionGenerator {
 
@@ -21,51 +19,7 @@ public class DescriptionGenerator {
 
 	private String modulePrefixSnippet = "@prefix module: <${Namespace}/modules#${MACAddress}_${ModuleName}> .";
 
-	private String capabilitySnippet = "registration:${MACAddress}_${ModuleName} Cap:hasCapability module:_${CapabilityName}Capability .\r\n"
-			+ "module:_${CapabilityName}Capability a Cap:Capability,\r\n"
-			+ "									owl:NamedIndividual. ";
-
-	private String capabilityDIN8580Snippet = "module:_${CapabilityName}Capability a DIN8580:${DIN8580Type}.  \r\n";
-	private String capabilityName;
 	private String macAddress;
-
-	public String generateCapabilityDescription(Object object, boolean module) {
-
-		String capabilityDescription;
-
-		if (module) {
-			Module moduleAnnotation = object.getClass().getAnnotation(Module.class);
-			if (!moduleAnnotation.capabilityName().isEmpty()) {
-				String capabilityName = moduleAnnotation.capabilityName();
-
-				if (!moduleAnnotation.capabilityType().equals(DIN8580.None)) {
-					capabilityDescription = capabilitySnippet + capabilityDIN8580Snippet;
-					capabilityDescription = capabilityDescription.replace("${CapabilityName}", capabilityName)
-							.replace("${DIN8580Type}", moduleAnnotation.capabilityType().name());
-				} else {
-					capabilityDescription = capabilitySnippet.replace("${CapabilityName}", capabilityName);
-				}
-			} else {
-				capabilityDescription = "";
-			}
-		} else {
-			Skill skillAnnotation = object.getClass().getAnnotation(Skill.class);
-
-			if (!skillAnnotation.capabilityName().isEmpty()) {
-				capabilityName = skillAnnotation.capabilityName();
-			} else {
-				capabilityName = object.getClass().getSimpleName();
-			}
-			if (!skillAnnotation.capabilityType().equals(DIN8580.None)) {
-				capabilityDescription = capabilitySnippet + capabilityDIN8580Snippet;
-				capabilityDescription = capabilityDescription.replace("{$DIN8580Type}",
-						skillAnnotation.capabilityType().name());
-			} else {
-				capabilityDescription = capabilitySnippet;
-			}
-		}
-		return capabilityDescription;
-	}
 
 	/**
 	 * Method gets the file from resources folder, reads it and converts it to a
@@ -164,9 +118,5 @@ public class DescriptionGenerator {
 
 	public String getThisMacAddress() {
 		return macAddress;
-	}
-
-	public String getCapabilityName() {
-		return capabilityName;
 	}
 }
