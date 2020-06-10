@@ -9,9 +9,8 @@ import annotations.SkillInput;
 import annotations.SkillOutput;
 import annotations.Skill;
 import annotations.Starting;
-import enums.DIN8580;
 
-@Skill(capabilityType = DIN8580.Bohren_oder_Senken_oder_Reiben, namespace = "https://siemens.de")
+@Skill(namespace = "https://siemens.de", capabilityIri = "https://siemens.de/capabilites#bestCapability")
 public class SimpleSkill {
 
 	private final Logger logger = LoggerFactory.getLogger(SimpleSkill.class);

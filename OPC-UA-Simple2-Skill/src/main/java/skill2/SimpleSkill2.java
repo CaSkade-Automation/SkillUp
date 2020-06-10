@@ -10,7 +10,7 @@ import annotations.SkillInput;
 import annotations.SkillOutput;
 import annotations.Starting;
 
-@Skill("OpcUaSkill")
+@Skill(namespace = "https://www.bosch.com", capabilityIri = "https://www.bosch.com/capabilites#CrazyCapability")
 public class SimpleSkill2 {
 	
 	private final Logger logger = LoggerFactory.getLogger(SimpleSkill2.class);
