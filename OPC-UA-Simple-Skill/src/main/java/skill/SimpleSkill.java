@@ -10,17 +10,17 @@ import annotations.SkillOutput;
 import annotations.Skill;
 import annotations.Starting;
 
-@Skill(namespace = "https://siemens.de", capabilityIri = "https://siemens.de/capabilites#bestCapability")
+@Skill(skillIri = "https://siemens.de/skills#OpcUaSkill", capabilityIri = "https://siemens.de/capabilites#bestCapability", moduleIri = "https://siemens.de/modules#ModuleA")
 public class SimpleSkill {
 
 	private final Logger logger = LoggerFactory.getLogger(SimpleSkill.class);
-	
+
 	@SkillInput
 	private int j;
-	
+
 	@SkillOutput
-	private int y; 
-	
+	private int y;
+
 	@Starting
 	public void starting() {
 		logger.info("Starting, j = " + j);
