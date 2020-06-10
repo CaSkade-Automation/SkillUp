@@ -39,7 +39,7 @@ public class ModuleDescriptionGenerator extends DescriptionGenerator {
 			String opcUaServerDescription = generateOpcUaServerDescription(server);
 
 			Module moduleAnnotation = module.getClass().getAnnotation(Module.class);
-			
+
 			String userSnippet = getUserSnippets(userFiles, module.getClass().getClassLoader());
 
 			String moduleDescription = prefix + moduleSnippet + opcUaServerDescription + userSnippet;
@@ -80,6 +80,11 @@ public class ModuleDescriptionGenerator extends DescriptionGenerator {
 					.replace("${EndpointUrl}", endpointDescription.getEndpointUrl())
 					.replace("${MessageSecurityMode}", endpointDescription.getSecurityMode().name())
 					.replace("${SecurityPolicy}", securityPolicy);
+
+			if (endpointDescription.getSecurityMode().name().equals("Sign&Encrypt")) {
+				opcUaServerSecuritySnippet.replace("${UserName}", server.getUserName()).replace("${Password}",
+						server.getUserPassword());
+			}
 
 			opcUaServerDescription = opcUaServerDescription + opcUaServerSecurity;
 			opcUaServerDescription = opcUaServerDescription.replace("${ServerName}",

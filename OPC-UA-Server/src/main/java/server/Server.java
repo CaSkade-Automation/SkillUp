@@ -54,6 +54,8 @@ public class Server {
 
 	private static final int TCP_BIND_PORT = 4841;
 	private Namespace namespace;
+	private String userName = "user"; 
+	private String userPassword = "password1"; 
 	private final Logger logger = LoggerFactory.getLogger(Server.class);
 
 	static {
@@ -115,7 +117,7 @@ public class Server {
 			String username = authChallenge.getUsername();
 			String password = authChallenge.getPassword();
 
-			boolean userOk = "user".equals(username) && "password1".equals(password);
+			boolean userOk = this.userName.equals(username) && this.userPassword.equals(password);
 			boolean adminOk = "admin".equals(username) && "password2".equals(password);
 
 			return userOk || adminOk;
@@ -211,6 +213,14 @@ public class Server {
 //	public void informOps(Object skill, IState state) {
 //		module.stateChanged(skill, state); 
 //	}
+	
+	public String getUserName() {
+		return this.userName; 
+	}
+	
+	public String getUserPassword() {
+		return this.userPassword; 
+	}
 
 	private static EndpointConfiguration buildTcpEndpoint(EndpointConfiguration.Builder base) {
 		return base.copy().setTransportProfile(TransportProfile.TCP_UASC_UABINARY).setBindPort(TCP_BIND_PORT).build();
