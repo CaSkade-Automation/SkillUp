@@ -38,7 +38,7 @@ public class ModuleRegistration extends Registration {
 		// TODO Auto-generated method stub
 
 		for (OpsDescription myOpsDescription : getOpsDescriptionList()) {
-			logger.info("Registering Module " + object.getClass().getAnnotation(Module.class).name()
+			logger.info("Registering Module " + object.getClass().getAnnotation(Module.class).moduleIri()
 					+ " with description in rdf syntax to " + myOpsDescription.getId());
 
 			String moduleEndpoint = myOpsDescription.getModuleEndpoint();
@@ -47,8 +47,7 @@ public class ModuleRegistration extends Registration {
 
 			if (responseStatusCode == 201) {
 				logger.info("Module successfully registered...");
-				getModules().put(object,
-						moduleDescriptionGenerator.getModuleIri(object.getClass().getAnnotation(Module.class)));
+				getModules().add(object);
 			} else {
 				logger.error("Module couldn't be registered...");
 			}
@@ -58,7 +57,7 @@ public class ModuleRegistration extends Registration {
 	@Override
 	public void delete(Object object) {
 		// TODO Auto-generated method stub
-		logger.info("Unregistering Module " + object.getClass().getAnnotation(Module.class).name());
+		logger.info("Unregistering Module " + object.getClass().getAnnotation(Module.class).moduleIri());
 
 		List<OpsDescription> delete = new ArrayList<OpsDescription>();
 
@@ -66,8 +65,7 @@ public class ModuleRegistration extends Registration {
 
 			logger.info("Delete Module from " + myOps.getId());
 			String moduleEndpoint = myOps.getModuleEndpoint();
-			String moduleIriEncoded = encodeValue(
-					moduleDescriptionGenerator.getModuleIri(object.getClass().getAnnotation(Module.class)));
+			String moduleIriEncoded = encodeValue(object.getClass().getAnnotation(Module.class).moduleIri());
 			String location = moduleEndpoint + "/" + moduleIriEncoded;
 
 			int responseStatusCode = opsRequest(myOps, "DELETE", location, "");
@@ -81,7 +79,7 @@ public class ModuleRegistration extends Registration {
 		logger.info("Remove every OPS which received DELETE from Module from OPS-List...");
 		getOpsDescriptionList().removeAll(delete);
 		opsListMessage();
-		getModules().remove(object); 
+		getModules().remove(object);
 	}
 
 	/**
@@ -91,11 +89,12 @@ public class ModuleRegistration extends Registration {
 	 * @param broadcastMessage contains module description
 	 * @throws IOException
 	 */
-	public void broadcast(Object module, String moduleInsert, String moduleIri) throws IOException {
+	public void broadcast(Object module, String moduleInsert) throws IOException {
 
-		ModuleDescription moduleDescription = new ModuleDescription(
-				module.getClass().getAnnotation(Module.class).name(),
-				module.getClass().getAnnotation(Module.class).description());
+		Module moduleAnnotation = module.getClass().getAnnotation(Module.class);
+
+		ModuleDescription moduleDescription = new ModuleDescription(moduleAnnotation.name(),
+				moduleAnnotation.description());
 		String broadcastMessage = gson.toJson(moduleDescription);
 		logger.info("Broadcasting to get all OPS...");
 

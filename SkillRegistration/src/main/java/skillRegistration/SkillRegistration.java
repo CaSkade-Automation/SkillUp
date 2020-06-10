@@ -18,9 +18,10 @@ public class SkillRegistration extends Registration {
 	@Override
 	public void register(String requestBody, Object object) {
 		// TODO Auto-generated method stub
-		String moduleIri = getModules().get(skillNeedsModule(object.getClass().getAnnotation(Skill.class).namespace()));
+		String moduleIri = object.getClass().getAnnotation(Skill.class).moduleIri();
 
-		logger.info("Registering Skill " + object.getClass().getSimpleName() + " with module " + moduleIri);
+		logger.info("Registering Skill " + object.getClass().getAnnotation(Skill.class).skillIri() + " with module "
+				+ moduleIri);
 
 		for (OpsDescription myOpsDescription : getOpsDescriptionList()) {
 
@@ -32,16 +33,16 @@ public class SkillRegistration extends Registration {
 			int responseStatusCode = opsRequest(myOpsDescription, "POST", location, requestBody);
 
 			if (responseStatusCode == 201) {
-				logger.info("Skill " + object.getClass().getSimpleName() + " registered to " + "OPS "
-						+ myOpsDescription.getId());
+				logger.info("Skill " + object.getClass().getAnnotation(Skill.class).skillIri() + " registered to "
+						+ "OPS " + myOpsDescription.getId());
 				ArrayList<String> skills = getOpsAndSkillList().get(myOpsDescription.getId());
-				skills.add(object.getClass().getSimpleName());
+				skills.add(object.getClass().getAnnotation(Skill.class).skillIri());
 				getOpsAndSkillList().put(myOpsDescription.getId(), skills);
 				opsSkillListMessage();
 
 			} else {
-				logger.info("Skill: " + object.getClass().getSimpleName() + " couldn't be registered to " + "OPS "
-						+ myOpsDescription.getId());
+				logger.info("Skill: " + object.getClass().getAnnotation(Skill.class).skillIri()
+						+ " couldn't be registered to " + "OPS " + myOpsDescription.getId());
 			}
 		}
 	}
@@ -58,16 +59,13 @@ public class SkillRegistration extends Registration {
 	@Override
 	public void delete(Object object) {
 		// TODO Auto-generated method stub
-		String name = object.getClass().getSimpleName();
-		logger.info("Unregistering Skill " + name + "...");
+		String skill = object.getClass().getAnnotation(Skill.class).skillIri(); 
+		logger.info("Unregistering Skill " + skill + "...");
 
 		for (OpsDescription myOpsDescription : getOpsDescriptionList()) {
 
 			// String moduleEndpoint = myOpsDescription.getModuleEndpoint();
-			String capabilityIri = getModules()
-					.get(skillNeedsModule(object.getClass().getAnnotation(Skill.class).namespace())) + "_" + name + "_"
-					+ "Process";
-			capabilityIri = encodeValue(capabilityIri);
+			String capabilityIri = encodeValue(skill);
 			String capabilityEndpoint = myOpsDescription.getCapabilityEndpoint();
 			String location = capabilityEndpoint + "/" + capabilityIri;
 			// String location = moduleEndpoint + "/" + capabilityIri + capabilityEndpoint +
@@ -77,9 +75,9 @@ public class SkillRegistration extends Registration {
 			// get????
 			opsRequest(myOpsDescription, "DELETE", location, "");
 
-			logger.info("Skill " + name + " removed from " + myOpsDescription.getId());
+			logger.info("Skill " + skill + " removed from " + myOpsDescription.getId());
 			ArrayList<String> skills = getOpsAndSkillList().get(myOpsDescription.getId());
-			skills.remove(name);
+			skills.remove(skill);
 			getOpsAndSkillList().put(myOpsDescription.getId(), skills);
 			opsSkillListMessage();
 		}
