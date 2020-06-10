@@ -11,6 +11,6 @@ public @interface Module {
 
 	public String name(); 
 	public String description() default ""; 
-	public String namespace(); 
+	public String moduleIri(); 
 	public String capabilityIri() default ""; 
 }

@@ -9,7 +9,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface Skill {
 
-	public String value() default "OpcUaSkill"; 
-	public String namespace(); 
+	public String type() default "OpcUaSkill"; 
+	public String skillIri(); 
+	public String moduleIri(); 
 	public String capabilityIri(); 
 }
