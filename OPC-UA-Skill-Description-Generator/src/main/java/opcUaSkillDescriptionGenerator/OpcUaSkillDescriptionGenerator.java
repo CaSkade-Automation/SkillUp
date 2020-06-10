@@ -12,6 +12,7 @@ import org.eclipse.milo.opcua.sdk.server.nodes.UaVariableNode;
 import org.osgi.service.component.annotations.Component;
 
 import annotations.Module;
+import annotations.Skill;
 import server.Server;
 import skillDescriptionGenerator.SkillDescriptionGenerator;
 import statemachine.StateMachine;
@@ -19,13 +20,10 @@ import statemachine.StateMachine;
 @Component(immediate = true, service = OpcUaSkillDescriptionGenerator.class)
 public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 
-	// private String registrationPrefixSnippet = "@prefix registration:
-	// <${Namespace}/modules#> .";
-
 	private String opcUaSkillSnippet = "registration:${MACAddress}_${ModuleName} Cap:providesOpcUaSkill module:_${SkillName}OpcUaSkill .\r\n"
 			+ "module:_${SkillName}OpcUaSkill a Cap:OpcUaSkill,\r\n"
 			+ "							owl:NamedIndividual.\r\n"
-			+ "module:_${CapabilityName}Capability Cap:isExecutableViaOpcUaSkill module:_${SkillName}OpcUaSkill .\r\n"
+			+ "${CapabilityIri} Cap:isExecutableViaOpcUaSkill module:_${SkillName}OpcUaSkill .\r\n"
 			+ "module:_${SkillName}OpcUaSkill OpcUa:browseName \"${BrowseName}\";  \r\n"
 			+ "						OpcUa:browseNamespace \"${BrowseNamespace}\";\r\n"
 			+ "						OpcUa:nodeId \"${NodeId}\";\r\n"
@@ -65,7 +63,6 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 
 		String modulePrefix = getModulePrefixSnippet();
 
-		String capabilityDescription = generateCapabilityDescription(skill, false);
 		String opcUaSkillDescription = generateOpcUaSkillDescription(skill.getClass().getSimpleName(), stateMachine,
 				server);
 		String stateMachineDescription = generateStateMachineDescription(stateMachine);
@@ -84,13 +81,13 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 		}
 		String completeSkillDescription;
 		try {
-			completeSkillDescription = getFileFromResources(null, "prefix.ttl") + modulePrefix + capabilityDescription
-					+ opcUaSkillDescription + stateMachineDescription + userSnippet;
+			completeSkillDescription = getFileFromResources(null, "prefix.ttl") + modulePrefix + opcUaSkillDescription
+					+ stateMachineDescription + userSnippet;
 
 			completeSkillDescription = completeSkillDescription.replace("${MACAddress}", getThisMacAddress())
 					.replace("${ModuleName}", module.getClass().getAnnotation(Module.class).name())
 					.replace("${ServerName}", server.getServer().getConfig().getApplicationName().getText())
-					.replace("${CapabilityName}", getCapabilityName())
+					.replace("${CapabilityIri}", skill.getClass().getAnnotation(Skill.class).capabilityIri())
 					.replace("${SkillName}", skill.getClass().getSimpleName());
 
 			createFile(completeSkillDescription, "opcUaDescription.ttl");
@@ -100,7 +97,7 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		return null; 
+		return null;
 	}
 
 	public String generateOpcUaSkillDescription(String skillName, StateMachine stateMachine, Server server) {
