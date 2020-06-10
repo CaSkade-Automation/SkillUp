@@ -15,10 +15,8 @@ import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +30,7 @@ public abstract class Registration {
 
 	private List<OpsDescription> opsDescriptionList = new ArrayList<OpsDescription>();
 	private Map<String, ArrayList<String>> opsAndSkillList = new HashMap<String, ArrayList<String>>();
-	private Map<Object, String> modules = new HashMap<Object, String>();
+	private List<Object> modules = new ArrayList<Object>();
 
 	public abstract void register(String requestBody, Object object);
 
@@ -45,9 +43,9 @@ public abstract class Registration {
 	public Map<String, ArrayList<String>> getOpsAndSkillList() {
 		return opsAndSkillList;
 	}
-	
-	public Map<Object, String> getModules() {
-		return modules; 
+
+	public List<Object> getModules() {
+		return modules;
 	}
 
 	/**
@@ -194,13 +192,10 @@ public abstract class Registration {
 		return responseStatusCode;
 	}
 
-	public Object skillNeedsModule(String namespace) {
-		Set set = modules.entrySet();
-		Iterator iterator = set.iterator();
-		while (iterator.hasNext()) {
-			Map.Entry mentry = (Map.Entry) iterator.next();
-			if (mentry.getKey().getClass().getAnnotation(Module.class).namespace().equals(namespace)) {
-				return mentry.getKey();
+	public Object skillNeedsModule(String moduleIri) {
+		for (Object module : modules) {
+			if (module.getClass().getAnnotation(Module.class).moduleIri().equals(moduleIri)) {
+				return module;
 			}
 		}
 		return null;
