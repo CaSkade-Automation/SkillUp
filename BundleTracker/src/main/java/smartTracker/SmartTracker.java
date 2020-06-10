@@ -2,9 +2,11 @@ package smartTracker;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -43,7 +45,7 @@ public class SmartTracker {
 	private Map<Bundle, Object> skillClassObjects = new HashMap<Bundle, Object>();
 	private Map<Bundle, Object> moduleClassObjects = new HashMap<Bundle, Object>();
 
-	//Bundle of skill xy is waiting for module with moduleIri z
+	// Bundle of skill xy is waiting for module with moduleIri z
 	private Map<Bundle, String> waitingSkills = new HashMap<Bundle, String>();
 
 	@Reference
@@ -113,11 +115,13 @@ public class SmartTracker {
 												e.printStackTrace();
 											}
 
-											Bundle startSkill = getKey(waitingSkills, module.moduleIri());
-											if (startSkill != null) {
+											List<Bundle> startSkills = getKey(waitingSkills, module.moduleIri());
+											if (!startSkills.isEmpty()) {
 												try {
-													startSkill.start();
-													waitingSkills.remove(startSkill);
+													for (Bundle startSkill : startSkills) {
+														startSkill.start();
+														waitingSkills.remove(startSkill);
+													}
 												} catch (BundleException e) {
 													// TODO Auto-generated catch block
 													e.printStackTrace();
@@ -137,8 +141,7 @@ public class SmartTracker {
 													logger.info("Add OPC-UA-Skill");
 
 													opcUaSkillGenerator.generateSkill(skillObj, stateMachine);
-													Enumeration<String> userSnippets = bundle
-															.getEntryPaths("Snippets");
+													Enumeration<String> userSnippets = bundle.getEntryPaths("Snippets");
 													String skillDescription = opcUaSkillDescriptionGenerator
 															.generateOpcUaDescription(server, skillObj, stateMachine,
 																	userSnippets);
@@ -257,13 +260,14 @@ public class SmartTracker {
 
 	}
 
-	public Bundle getKey(Map<Bundle, String> map, String value) {
+	public List<Bundle> getKey(Map<Bundle, String> map, String value) {
+		List<Bundle> skillList = new ArrayList<Bundle>();
 		for (Entry<Bundle, String> entry : map.entrySet()) {
 			if (entry.getValue().equals(value)) {
-				return entry.getKey();
+				skillList.add(entry.getKey());
 			}
 		}
-		return null;
+		return skillList;
 	}
 
 	@Deactivate
