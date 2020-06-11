@@ -2,16 +2,21 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>de.hsu-hh.ifa.skill-registration</groupId>
-	<artifactId>Skill-Registration</artifactId>
+	<groupId>de.hsu-hh.ifa.opc-ua-skill-description-generator</groupId>
+	<artifactId>OPC-UA-Skill-Description-Generator</artifactId>
 	<packaging>bundle</packaging>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>Skill-Registration</name>
+	<name>OPC UA Skill Description Generator</name>
 	<dependencies>
 		<dependency>
-			<groupId>de.hsu-hh.ifa.registration</groupId>
-			<artifactId>Registration</artifactId>
+			<groupId>de.hsu-hh.ifa.skill-description-generator</groupId>
+			<artifactId>Skill-Description-Generator</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.service.component.annotations</artifactId>
+			<version>1.4.0</version>
 		</dependency>
 	</dependencies>
 	<build>

@@ -7,10 +7,10 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface Skill {
+public @interface Module {
 
-	public String type() default "OpcUaSkill"; 
-	public String skillIri(); 
+	public String name(); 
+	public String description() default ""; 
 	public String moduleIri(); 
-	public String capabilityIri(); 
+	public String capabilityIri() default ""; 
 }
