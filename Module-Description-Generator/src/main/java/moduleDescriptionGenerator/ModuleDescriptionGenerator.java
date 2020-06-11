@@ -48,8 +48,8 @@ public class ModuleDescriptionGenerator extends DescriptionGenerator {
 				moduleDescription = moduleDescription + capabilitySnippet;
 			}
 
-			moduleDescription = moduleDescription.replace("${ModuleIri}", moduleAnnotation.moduleIri())
-					.replace("${CapabilityIri}", moduleAnnotation.capabilityIri());
+			moduleDescription = moduleDescription.replace("${ModuleIri}", "<" + moduleAnnotation.moduleIri() + ">")
+					.replace("${CapabilityIri}", "<" + moduleAnnotation.capabilityIri() + ">");
 			try {
 				createFile(moduleDescription, "module.ttl");
 			} catch (IOException e) {

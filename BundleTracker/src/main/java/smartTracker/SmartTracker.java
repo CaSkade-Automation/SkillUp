@@ -130,7 +130,7 @@ public class SmartTracker {
 										}
 
 										if (skill != null) {
-											Object moduleObj = skillRegistration.skillNeedsModule(skill.moduleIri());
+											Object moduleObj = moduleRegistration.skillNeedsModule(skill.moduleIri());
 											if (moduleObj != null) {
 												Object skillObj = newBundle.getDeclaredConstructor().newInstance();
 												skillClassObjects.put(bundle, skillObj);

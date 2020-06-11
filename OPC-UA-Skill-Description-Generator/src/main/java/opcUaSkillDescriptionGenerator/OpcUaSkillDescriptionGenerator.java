@@ -2,7 +2,6 @@ package opcUaSkillDescriptionGenerator;
 
 import java.io.IOException;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.milo.opcua.sdk.server.api.nodes.Node;
@@ -71,10 +70,10 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 			completeSkillDescription = getFileFromResources(null, "prefix.ttl") + opcUaSkillDescription
 					+ stateMachineDescription + userSnippet;
 
-			completeSkillDescription = completeSkillDescription.replace("${ModuleIri}", skillAnnotation.moduleIri())
+			completeSkillDescription = completeSkillDescription.replace("${ModuleIri}", "<" + skillAnnotation.moduleIri() + ">")
 					.replace("${ServerName}", server.getServer().getConfig().getApplicationName().getText())
-					.replace("${CapabilityIri}", skillAnnotation.capabilityIri())
-					.replace("${SkillIri}", skillAnnotation.skillIri());
+					.replace("${CapabilityIri}", "<" + skillAnnotation.capabilityIri() + ">")
+					.replace("${SkillIri}", "<" + skillAnnotation.skillIri() + ">");
 
 			createFile(completeSkillDescription, "opcUaDescription.ttl");
 
