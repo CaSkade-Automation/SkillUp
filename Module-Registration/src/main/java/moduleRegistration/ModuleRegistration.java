@@ -12,14 +12,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 
 import annotations.Module;
-import moduleDescriptionGenerator.ModuleDescriptionGenerator;
 import opsDescription.OpsDescription;
 import registration.Registration;
 
@@ -29,9 +27,6 @@ public class ModuleRegistration extends Registration {
 	private static DatagramSocket socket = null;
 	private Logger logger = LoggerFactory.getLogger(ModuleRegistration.class);
 	private Gson gson = new Gson();
-
-	@Reference
-	ModuleDescriptionGenerator moduleDescriptionGenerator;
 
 	@Override
 	public void register(String requestBody, Object object) {
