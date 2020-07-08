@@ -1,81 +1,24 @@
-package moduleRegistration;
+package registration;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Stack;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 
-import annotations.Module;
-import opsDescription.OpsDescription;
-import registration.Registration;
+public class Broadcast {
 
-@Component(immediate = true, service = ModuleRegistration.class)
-public class ModuleRegistration extends Registration {
-
-	private static DatagramSocket socket = null;
-	private Logger logger = LoggerFactory.getLogger(ModuleRegistration.class);
+	private Logger logger = LoggerFactory.getLogger(Broadcast.class);
 	private Gson gson = new Gson();
-
-	@Override
-	public void register(String requestBody, Object object) {
-		// TODO Auto-generated method stub
-
-		for (OpsDescription myOpsDescription : getOpsDescriptionList()) {
-			logger.info("Registering Module " + object.getClass().getAnnotation(Module.class).moduleIri()
-					+ " with description in rdf syntax to " + myOpsDescription.getId());
-
-			String moduleEndpoint = myOpsDescription.getModuleEndpoint();
-
-			int responseStatusCode = opsRequest(myOpsDescription, "POST", moduleEndpoint, requestBody);
-
-			if (responseStatusCode == 201) {
-				logger.info("Module successfully registered...");
-				getModules().add(object);
-			} else {
-				logger.error("Module couldn't be registered...");
-			}
-		}
-	}
-
-	@Override
-	public void delete(Object object) {
-		// TODO Auto-generated method stub
-		logger.info("Unregistering Module " + object.getClass().getAnnotation(Module.class).moduleIri());
-
-		List<OpsDescription> delete = new ArrayList<OpsDescription>();
-
-		for (OpsDescription myOps : getOpsDescriptionList()) {
-
-			logger.info("Delete Module from " + myOps.getId());
-			String moduleEndpoint = myOps.getModuleEndpoint();
-			String moduleIriEncoded = encodeValue(object.getClass().getAnnotation(Module.class).moduleIri());
-			String location = moduleEndpoint + "/" + moduleIriEncoded;
-
-			int responseStatusCode = opsRequest(myOps, "DELETE", location, "");
-
-			if (responseStatusCode == 204) {
-				delete.add(myOps);
-				logger.info("Remove OPS " + myOps.getId() + " from OPS-Skill-List...");
-				getOpsAndSkillList().remove(myOps.getId());
-			}
-		}
-		logger.info("Remove every OPS which received DELETE from Module from OPS-List...");
-		getOpsDescriptionList().removeAll(delete);
-		opsListMessage();
-		getModules().remove(object);
-	}
+	private static DatagramSocket socket = null;
 
 	/**
 	 * Method to send broadcast message and to wait for answers of possible
@@ -84,13 +27,10 @@ public class ModuleRegistration extends Registration {
 	 * @param broadcastMessage contains module description
 	 * @throws IOException
 	 */
-	public void broadcast(Object module, String moduleInsert) throws IOException {
+	public void broadcast(ModuleRegistry moduleRegistry) throws IOException {
 
-		Module moduleAnnotation = module.getClass().getAnnotation(Module.class);
-
-		ModuleDescription moduleDescription = new ModuleDescription(moduleAnnotation.name(),
-				moduleAnnotation.description());
-		String broadcastMessage = gson.toJson(moduleDescription);
+		String broadcastMessage = "Hello World!";
+		broadcastMessage = gson.toJson(broadcastMessage);
 		logger.info("Broadcasting to get all OPS...");
 
 		socket = new DatagramSocket(55555);
@@ -138,7 +78,7 @@ public class ModuleRegistration extends Registration {
 			public void run() {
 				try {
 					socket.receive(receivePacket);
-					broadcastResponse(receivePacket, moduleInsert, module);
+					broadcastResponse(receivePacket, moduleRegistry);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -151,15 +91,6 @@ public class ModuleRegistration extends Registration {
 					logger.error("An error occured", throwable);
 					return null;
 				});
-
-//		receivingBroadcastResponseThread.start();
-//		try {
-//			receivingBroadcastResponseThread.join(120000);
-//		} catch (InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		logger.info("Thread is closed...");
 	}
 
 	/**
@@ -169,7 +100,7 @@ public class ModuleRegistration extends Registration {
 	 * @param receivePacket response to broadcast
 	 * @param moduleInsert  rdf description of module for registering it to OPS
 	 */
-	public void broadcastResponse(DatagramPacket receivePacket, String moduleInsert, Object module) {
+	public void broadcastResponse(DatagramPacket receivePacket, ModuleRegistry moduleRegistry) {
 
 		String ip = receivePacket.getAddress().getHostAddress();
 		String opsDescriptionAsString = new String(receivePacket.getData()).trim();
@@ -184,10 +115,10 @@ public class ModuleRegistration extends Registration {
 		String moduleEndpoint = opsDescription.getModuleEndpoint();
 		String id = opsDescription.getId();
 		String capabilityEndpoint = opsDescription.getCapabilityEndpoint();
+		String skillEndpoint = opsDescription.getSkillEndpoint();
 
-		opsDescription = new OpsDescription(ip, id, port, moduleEndpoint, capabilityEndpoint);
-		addOps(opsDescription);
-		register(moduleInsert, module);
+		opsDescription = new OpsDescription(ip, id, port, moduleEndpoint, capabilityEndpoint, skillEndpoint);
+		moduleRegistry.addOps(opsDescription);
 	}
 
 	/**
