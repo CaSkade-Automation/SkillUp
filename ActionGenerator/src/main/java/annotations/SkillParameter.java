@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface SkillInput {
+public @interface SkillParameter {
 
 	public String name() default "";   
 	public String description() default "";  
