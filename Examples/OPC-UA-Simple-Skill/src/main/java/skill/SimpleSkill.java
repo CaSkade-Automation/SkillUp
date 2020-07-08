@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import annotations.Completing;
 import annotations.Execute;
-import annotations.SkillInput;
+import annotations.SkillParameter;
 import annotations.SkillOutput;
 import annotations.Skill;
 import annotations.Starting;
@@ -15,7 +15,7 @@ public class SimpleSkill {
 
 	private final Logger logger = LoggerFactory.getLogger(SimpleSkill.class);
 
-	@SkillInput
+	@SkillParameter
 	private int j;
 
 	@SkillOutput
