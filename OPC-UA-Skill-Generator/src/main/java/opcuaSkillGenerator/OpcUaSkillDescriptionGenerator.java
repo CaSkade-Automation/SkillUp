@@ -1,47 +1,47 @@
-package opcUaSkillDescriptionGenerator;
+package opcuaSkillGenerator;
 
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.List;
 
+import org.eclipse.milo.opcua.sdk.server.OpcUaServer;
 import org.eclipse.milo.opcua.sdk.server.api.nodes.Node;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaVariableNode;
-import org.osgi.service.component.annotations.Component;
+import org.eclipse.milo.opcua.stack.core.types.structured.EndpointDescription;
 
 import annotations.Skill;
-import server.Server;
-import skillDescriptionGenerator.SkillDescriptionGenerator;
+import descriptionGenerator.SkillDescriptionGenerator;
+import opcUaServer.Server;
 import statemachine.StateMachine;
 
-@Component(immediate = true, service = OpcUaSkillDescriptionGenerator.class)
 public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 
-	private String opcUaSkillSnippet = "${ModuleIri} Cap:providesOpcUaSkill ${SkillIri} .\r\n"
-			+ "${SkillIri} a Cap:OpcUaSkill,\r\n" + "							owl:NamedIndividual.\r\n"
-			+ "${CapabilityIri} Cap:isExecutableViaOpcUaSkill ${SkillIri} .\r\n"
-			+ "${SkillIri} OpcUa:browseName \"${BrowseName}\";  \r\n"
+	private String opcUaSkillSnippet = "<${ModuleIri}> Cap:providesOpcUaSkill <${SkillIri}> .\r\n"
+			+ "<${SkillIri}> a Cap:OpcUaSkill,\r\n" + "							owl:NamedIndividual.\r\n"
+			+ "<${CapabilityIri}> Cap:isExecutableViaOpcUaSkill <${SkillIri}> .\r\n"
+			+ "<${SkillIri}> OpcUa:browseName \"${BrowseName}\";  \r\n"
 			+ "						OpcUa:browseNamespace \"${BrowseNamespace}\";\r\n"
 			+ "						OpcUa:nodeId \"${NodeId}\";\r\n"
 			+ "						OpcUa:nodeNamespace \"${NodeNamespace}\";\r\n"
 			+ "						OpcUa:displayName \"${DisplayName}\" ;\r\n"
-			+ "						Cap:hasStateMachine ${SkillIri}_StateMachine;\r\n"
-			+ "						Cap:hasCurrentState ${SkillIri}_StateMachine_${StateName}.\r\n"
-			+ "${ModuleIri}_${ServerName}_NodeSet OpcUa:containsNode ${SkillIri} .";
+			+ "						Cap:hasStateMachine <${SkillIri}_StateMachine>;\r\n"
+			+ "						Cap:hasCurrentState <${SkillIri}_StateMachine_${StateName}>.\r\n"
+			+ "<${ModuleIri}_${ServerName}_NodeSet> OpcUa:containsNode <${SkillIri}> .";
 
-	private String opcUaMethodSnippet = "${SkillIri}_${MethodName} a OpcUa:UAMethod,\r\n"
+	private String opcUaMethodSnippet = "<${SkillIri}_${MethodName}> a OpcUa:UAMethod,\r\n"
 			+ "										owl:NamedIndiviual;\r\n"
 			+ "									OpcUa:browseName \"${BrowseName}\";  \r\n"
 			+ "									OpcUa:browseNamespace \"${BrowseNamespace}\";\r\n"
 			+ "									OpcUa:nodeId \"${NodeId}\";\r\n"
 			+ "									OpcUa:nodeNamespace \"${NodeNamespace}\";\r\n"
 			+ "									OpcUa:displayName \"${DisplayName}\".   \r\n"
-			+ "${SkillIri} OpcUa:hasComponent ${SkillIri}_${MethodName}. \r\n";
+			+ "<${SkillIri}> OpcUa:hasComponent <${SkillIri}_${MethodName}>. \r\n";
 
-	private String opcUaMethodInvokesTransitionSnippet = "${SkillIri}_${MethodName} Cap:invokes ${SkillIri}_StateMachine_${CommandName}_Command .   \r\n";
+	private String opcUaMethodInvokesTransitionSnippet = "<${SkillIri}_${MethodName}> Cap:invokes <${SkillIri}_StateMachine_${CommandName}_Command> .   \r\n";
 
-	private String opcUaVariableSnippet = "${SkillIri}_${VariableName} a OpcUa:UAVariable,\r\n"
+	private String opcUaVariableSnippet = "<${SkillIri}_${VariableName}> a OpcUa:UAVariable,\r\n"
 			+ "										owl:NamedIndividual;\r\n"
 			+ "									OpcUa:browseName \"${BrowseName}\";  \r\n"
 			+ "									OpcUa:browseNamespace \"${BrowseNamespace}\";\r\n"
@@ -53,12 +53,33 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 			+ "									OpcUa:historizing \"${Historizing}\";\r\n"
 			+ "									OpcUa:userAccessLevel \"${UserAccessLevel}\";\r\n"
 			+ "									OpcUa:valueRank \"${ValueRank}\".\r\n"
-			+ "${SkillIri} OpcUa:organizes ${SkillIri}_${VariableName}. \r\n";
+			+ "<${SkillIri}> OpcUa:organizes <${SkillIri}_${VariableName}>. \r\n";
+
+	private String opcUaServerSnippet = "<${ModuleIri}_${ServerName}> a OpcUa:UAServer,\r\n"
+			+ "						owl:NamedIndividual;\r\n"
+			+ "					OpcUa:hasNodeSet <${ModuleIri}_${ServerName}_NodeSet>.\r\n"
+			+ "<${ModuleIri}_${ServerName}_NodeSet> a OpcUa:UANodeSet, \r\n"
+			+ "									owl:NamedIndividual. \r\n" + "";
+
+	private String opcUaServerSecuritySnippet = "<${ModuleIri}_${ServerName}> OpcUa:hasEndpointUrl \"${EndpointUrl}\";\r\n"
+			+ "					OpcUa:hasMessageSecurityMode OpcUa:MessageSecurityMode_${MessageSecurityMode}; \r\n"
+			+ "					OpcUa:hasSecurityPolicy OpcUa:${SecurityPolicy} .";
+
+	private String opcUaServerUserSnippet = "<${ModuleIri}_${ServerName}> OpcUa:requiresUserName \"${UserName}\";\r\n"
+			+ "					OpcUa:requiresPassword \"${Password}\" .";
+	
+	private boolean serverDescription = false;
 
 	public String generateOpcUaDescription(Server server, Object skill, StateMachine stateMachine,
 			Enumeration<String> userFiles) {
 		Skill skillAnnotation = skill.getClass().getAnnotation(Skill.class);
 
+		String opcUaServerDescription = null; 
+		if(!serverDescription) {
+		opcUaServerDescription = generateOpcUaServerDescription(server);
+		serverDescription = true; 
+		}
+		
 		String opcUaSkillDescription = generateOpcUaSkillDescription(skill.getClass().getSimpleName(), stateMachine,
 				server);
 		String stateMachineDescription = generateStateMachineDescription(stateMachine);
@@ -67,13 +88,13 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 
 		String completeSkillDescription;
 		try {
-			completeSkillDescription = getFileFromResources(null, "prefix.ttl") + opcUaSkillDescription
-					+ stateMachineDescription + userSnippet;
+			completeSkillDescription = getFileFromResources(null, "prefix.ttl") + opcUaServerDescription
+					+ opcUaSkillDescription + stateMachineDescription + userSnippet;
 
-			completeSkillDescription = completeSkillDescription.replace("${ModuleIri}", "<" + skillAnnotation.moduleIri() + ">")
+			completeSkillDescription = completeSkillDescription.replace("${ModuleIri}", skillAnnotation.moduleIri())
 					.replace("${ServerName}", server.getServer().getConfig().getApplicationName().getText())
-					.replace("${CapabilityIri}", "<" + skillAnnotation.capabilityIri() + ">")
-					.replace("${SkillIri}", "<" + skillAnnotation.skillIri() + ">");
+					.replace("${CapabilityIri}", skillAnnotation.capabilityIri())
+					.replace("${SkillIri}", skillAnnotation.skillIri());
 
 			createFile(completeSkillDescription, "opcUaDescription.ttl");
 
@@ -147,5 +168,35 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 				.replace("${DisplayName}", node.getDisplayName().getText());
 
 		return newDescription;
+	}
+
+	public String generateOpcUaServerDescription(Server server) {
+
+		OpcUaServer opcUaServer = server.getServer();
+		String opcUaServerDescription = opcUaServerSnippet;
+
+		List<EndpointDescription> endpointDescriptions = opcUaServer.getEndpointDescriptions();
+
+		for (EndpointDescription endpointDescription : endpointDescriptions) {
+			String securityPolicy = endpointDescription.getSecurityPolicyUri();
+			securityPolicy = securityPolicy.substring(securityPolicy.lastIndexOf("/") + 1);
+			securityPolicy = securityPolicy.replace("#", "_");
+
+			String opcUaServerSecurity = opcUaServerSecuritySnippet
+					.replace("${EndpointUrl}", endpointDescription.getEndpointUrl())
+					.replace("${MessageSecurityMode}", endpointDescription.getSecurityMode().name())
+					.replace("${SecurityPolicy}", securityPolicy);
+
+			if (endpointDescription.getSecurityMode().name().equals("SignAndEncrypt")) {
+				String opcUaServerUser = opcUaServerUserSnippet.replace("${UserName}", server.getUserName())
+						.replace("${Password}", server.getUserPassword());
+				opcUaServerDescription = opcUaServerDescription + opcUaServerUser;
+			}
+
+			opcUaServerDescription = opcUaServerDescription + opcUaServerSecurity;
+			opcUaServerDescription = opcUaServerDescription.replace("${ServerName}",
+					server.getServer().getConfig().getApplicationName().getText());
+		}
+		return opcUaServerDescription;
 	}
 }
