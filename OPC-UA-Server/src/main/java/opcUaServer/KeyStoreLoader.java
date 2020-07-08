@@ -1,4 +1,4 @@
-package server;
+package opcUaServer;
 
 import java.io.File;
 import java.io.FileInputStream;

@@ -1,4 +1,4 @@
-package server;
+package opcUaServer;
 
 import java.io.File;
 import java.net.InetAddress;
@@ -16,7 +16,6 @@ import org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig;
 import org.eclipse.milo.opcua.sdk.server.identity.CompositeValidator;
 import org.eclipse.milo.opcua.sdk.server.identity.UsernameIdentityValidator;
 import org.eclipse.milo.opcua.sdk.server.identity.X509IdentityValidator;
-import org.eclipse.milo.opcua.sdk.server.util.HostnameUtil;
 import org.eclipse.milo.opcua.stack.core.StatusCodes;
 import org.eclipse.milo.opcua.stack.core.UaRuntimeException;
 import org.eclipse.milo.opcua.stack.core.security.DefaultCertificateManager;
@@ -36,8 +35,6 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import states.IState;
-
 import static com.google.common.collect.Lists.newArrayList;
 import static org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig.USER_TOKEN_POLICY_ANONYMOUS;
 import static org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig.USER_TOKEN_POLICY_USERNAME;
@@ -56,35 +53,35 @@ public class Server {
 	private Namespace namespace;
 	private String userName = "user"; 
 	private String userPassword = "password1"; 
-	private final Logger logger = LoggerFactory.getLogger(Server.class);
+    private final Logger logger = LoggerFactory.getLogger(Server.class);
 
 	static {
 		// Required for SecurityPolicy.Aes256_Sha256_RsaPss
 		Security.addProvider(new BouncyCastleProvider());
 	}
 
-	/**
-	 * Server is started <br>
-	 * 
-	 * Constructor hasn't to be added to activate method, because an OSGi bundle
-	 * starts constructor automatically. Without future.get so that the activate
-	 * method doesn't block until the future is reached.
-	 * 
-	 * @Activate method that should be called on component activation
-	 * @throws Exception
-	 */
-	@Activate
-	public void activate() throws Exception {
+    /**
+     * Server is started <br>
+     * 
+     * Constructor hasn't to be added to activate method, because an OSGi bundle
+     * starts constructor automatically. Without future.get so that the activate
+     * method doesn't block until the future is reached.
+     * 
+     * @Activate method that should be called on component activation
+     * @throws Exception
+     */
+    @Activate
+    public void activate() throws Exception {
 
-		logger.info("OPC-UA-Server wird aktiviert");
+        logger.info("OPC-UA-Server wird aktiviert");
 
-		server.startup().get();
+        server.startup().get();
 
-		final CompletableFuture<Void> future = new CompletableFuture<>();
+        final CompletableFuture<Void> future = new CompletableFuture<>();
 
-		Runtime.getRuntime().addShutdownHook(new Thread(() -> future.complete(null)));
-	}
-
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> future.complete(null)));
+    }
+	
 	private final OpcUaServer server;
 
 	/**
@@ -242,9 +239,9 @@ public class Server {
 		return server.shutdown();
 	}
 
-	@Deactivate
-	public void deactivate() {
-		logger.info("OPC-UA-Server wird deaktiviert");
-		//hier server.shutdown(); 
-	}
+    @Deactivate
+    public void deactivate() {
+        logger.info("OPC-UA-Server wird deaktiviert");
+        //hier: server.shutdown(); 
+    }
 }

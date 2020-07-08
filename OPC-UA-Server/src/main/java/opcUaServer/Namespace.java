@@ -1,4 +1,4 @@
-package server;
+package opcUaServer;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -23,7 +23,7 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
 
-import annotations.SkillInput;
+import annotations.SkillParameter;
 import annotations.SkillOutput;
 
 import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.ubyte;
@@ -88,7 +88,7 @@ public class Namespace extends ManagedNamespace {
 		Field[] fields = skill.getClass().getDeclaredFields();
 		for (Field field : fields) {
 
-			if (field.isAnnotationPresent(SkillInput.class)) {
+			if (field.isAnnotationPresent(SkillParameter.class)) {
 
 				MethodDescription methodDescription = setMethodDescription(field, skill, true);
 
@@ -188,14 +188,14 @@ public class Namespace extends ManagedNamespace {
 		String fieldName;
 		String fieldDescription;
 		if (skillInput) {
-			if (!field.getAnnotation(SkillInput.class).name().isEmpty()) {
-				fieldName = field.getAnnotation(SkillInput.class).name();
+			if (!field.getAnnotation(SkillParameter.class).name().isEmpty()) {
+				fieldName = field.getAnnotation(SkillParameter.class).name();
 			} else {
 				fieldName = field.getName();
 			}
 
-			if (!field.getAnnotation(SkillInput.class).description().isEmpty()) {
-				fieldDescription = field.getAnnotation(SkillInput.class).description();
+			if (!field.getAnnotation(SkillParameter.class).description().isEmpty()) {
+				fieldDescription = field.getAnnotation(SkillParameter.class).description();
 			} else {
 				fieldDescription = field.getName();
 			}
