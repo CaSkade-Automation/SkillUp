@@ -10,19 +10,9 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.service.component.annotations</artifactId>
-			<version>1.4.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.core</artifactId>
 			<version>6.0.0</version>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-			<version>1.7.28</version>
 		</dependency>
 		<dependency>
 			<groupId>de.hsu-hh.ifa.action-generator</groupId>
@@ -30,28 +20,18 @@
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>de.hsu-hh.ifa.skill-generator-interface</groupId>
-			<artifactId>Skill-Generator-Interface</artifactId>
+			<groupId>de.hsu-hh.ifa.opcua-skill-generator</groupId>
+			<artifactId>OPC-UA-Skill-Generator</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>de.hsu-hh.ifa.module-registration</groupId>
-			<artifactId>Module-Registration</artifactId>
+			<groupId>de.hsu-hh.ifa.registration</groupId>
+			<artifactId>Registration</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>de.hsu-hh.ifa.skill-registration</groupId>
-			<artifactId>Skill-Registration</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>de.hsu-hh.ifa.opc-ua-skill-description-generator</groupId>
-			<artifactId>OPC-UA-Skill-Description-Generator</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>de.hsu-hh.ifa.module-description-generator</groupId>
-			<artifactId>Module-Description-Generator</artifactId>
+			<groupId>de.hsu-hh.ifa.module-generator</groupId>
+			<artifactId>Module-Generator</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
