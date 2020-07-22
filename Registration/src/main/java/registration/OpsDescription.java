@@ -8,6 +8,7 @@ public class OpsDescription {
 	private String ip;
 	private String id;
 	private int port;
+	private String basePath; 
 	private String moduleEndpoint;
 	private String capabilityEndpoint;
 	private String skillEndpoint; 
@@ -17,18 +18,20 @@ public class OpsDescription {
 
 	}
 
-	public OpsDescription(String ip, String id, int port, String moduleEndpoint, String capabilityEndpoint, String skillEndpoint) {
+	public OpsDescription(String ip, String id, int port, String basePath, String moduleEndpoint, String capabilityEndpoint, String skillEndpoint) {
 		this.ip = ip;
 		this.id = id;
 		this.port = port;
+		this.basePath = basePath; 
 		this.moduleEndpoint = moduleEndpoint;
 		this.capabilityEndpoint = capabilityEndpoint;
 		this.skillEndpoint = skillEndpoint; 
 	}
 
-	public OpsDescription(String id, int port, String moduleEndpoint, String capabilityEndpoint, String skillEndpoint) {
+	public OpsDescription(String id, int port, String basePath, String moduleEndpoint, String capabilityEndpoint, String skillEndpoint) {
 		this.id = id;
 		this.port = port;
+		this.basePath = basePath; 
 		this.moduleEndpoint = moduleEndpoint;
 		this.capabilityEndpoint = capabilityEndpoint;
 		this.skillEndpoint = skillEndpoint; 
@@ -40,6 +43,10 @@ public class OpsDescription {
 
 	public String getModuleEndpoint() {
 		return moduleEndpoint;
+	}
+	
+	public String getBasePath() {
+		return basePath; 
 	}
 
 	public String getIp() {
