@@ -22,10 +22,11 @@ public class SkillRegistration extends RegistrationMethods {
 		List<OpsDescription> opsList = moduleRegistry.skillRegisterOpsList(moduleIri);
 
 		for (OpsDescription opsDescription : opsList) {
+			String basePath = opsDescription.getBasePath(); 
 			String moduleEndpoint = opsDescription.getModuleEndpoint();
 			String moduleIriEncoded = encodeValue(moduleIri);
 			String skillEndpoint = opsDescription.getSkillEndpoint();
-			String location = moduleEndpoint + "/" + moduleIriEncoded + skillEndpoint;
+			String location = basePath + moduleEndpoint + "/" + moduleIriEncoded + skillEndpoint;
 
 			int responseStatusCode = opsRequest(opsDescription, "POST", location, requestBody);
 
@@ -60,11 +61,12 @@ public class SkillRegistration extends RegistrationMethods {
 
 		for (OpsDescription myOpsDescription : opsList) {
 
+			String basePath = myOpsDescription.getBasePath(); 
 			String moduleEndpoint = myOpsDescription.getModuleEndpoint();
 			String moduleIriEncoded = encodeValue(object.getClass().getAnnotation(Skill.class).moduleIri());
 			String skillEndpoint = myOpsDescription.getSkillEndpoint();
 			String skillIri = encodeValue(skill);
-			String location = moduleEndpoint + "/" + moduleIriEncoded + skillEndpoint + "/" + skillIri;
+			String location = basePath + moduleEndpoint + "/" + moduleIriEncoded + skillEndpoint + "/" + skillIri;
 
 			int responseStatusCode = opsRequest(myOpsDescription, "DELETE", location, "");
 

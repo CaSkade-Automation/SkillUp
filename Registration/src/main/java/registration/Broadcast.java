@@ -112,12 +112,13 @@ public class Broadcast {
 		OpsDescription opsDescription = gson.fromJson(opsDescriptionAsString, OpsDescription.class);
 
 		int port = opsDescription.getPort();
+		String basePath = opsDescription.getBasePath(); 
 		String moduleEndpoint = opsDescription.getModuleEndpoint();
 		String id = opsDescription.getId();
 		String capabilityEndpoint = opsDescription.getCapabilityEndpoint();
 		String skillEndpoint = opsDescription.getSkillEndpoint();
 
-		opsDescription = new OpsDescription(ip, id, port, moduleEndpoint, capabilityEndpoint, skillEndpoint);
+		opsDescription = new OpsDescription(ip, id, port, basePath, moduleEndpoint, capabilityEndpoint, skillEndpoint);
 		moduleRegistry.addOps(opsDescription);
 	}
 

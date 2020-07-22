@@ -19,9 +19,12 @@ public class ModuleRegistration extends RegistrationMethods {
 			logger.info("Registering Module " + object.getClass().getAnnotation(Module.class).moduleIri()
 					+ " with description in rdf syntax to " + opsDescription.getId());
 
+			String basePath = opsDescription.getBasePath(); 
 			String moduleEndpoint = opsDescription.getModuleEndpoint();
 
-			int responseStatusCode = opsRequest(opsDescription, "POST", moduleEndpoint, requestBody);
+			String location = basePath + moduleEndpoint; 
+			
+			int responseStatusCode = opsRequest(opsDescription, "POST", location, requestBody);
 
 			if (responseStatusCode == 201) {
 				logger.info("Module successfully registered...");
@@ -42,9 +45,10 @@ public class ModuleRegistration extends RegistrationMethods {
 		for (OpsDescription myOps : moduleRegistry.getOpsDescriptionList()) {
 
 			logger.info("Delete Module from " + myOps.getId());
+			String basePath = myOps.getBasePath(); 
 			String moduleEndpoint = myOps.getModuleEndpoint();
 			String moduleIriEncoded = encodeValue(object.getClass().getAnnotation(Module.class).moduleIri());
-			String location = moduleEndpoint + "/" + moduleIriEncoded;
+			String location = basePath + moduleEndpoint + "/" + moduleIriEncoded;
 
 			int responseStatusCode = opsRequest(myOps, "DELETE", location, "");
 
