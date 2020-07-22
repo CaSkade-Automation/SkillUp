@@ -55,6 +55,13 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 			+ "									OpcUa:valueRank \"${ValueRank}\".\r\n"
 			+ "<${SkillIri}> OpcUa:organizes <${SkillIri}_${VariableName}>. \r\n";
 
+	private String opcUaSkillParameterSnippet = "<${SkillIri}_${VariableName}> a Cap:SkillParameter;\r\n"
+			+ "								Cap:hasParameterName \"${BrowseName}\";\r\n"
+			+ "								Cap:hasParameterType \"${DataType}\";\r\n"
+			+ "								Cap:isRequired \"${Required}\";\r\n"
+			+ "								Cap:hasDefaultValue \"${DefaultValue}\".\r\n"
+			+ "<${SkillIri}> Cap:hasSkillParameter <${SkillIri}_${VariableName}>.";
+
 	private String opcUaServerSnippet = "<${ModuleIri}_${ServerName}> a OpcUa:UAServer,\r\n"
 			+ "						owl:NamedIndividual;\r\n"
 			+ "					OpcUa:hasNodeSet <${ModuleIri}_${ServerName}_NodeSet>.\r\n"
@@ -67,19 +74,19 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 
 	private String opcUaServerUserSnippet = "<${ModuleIri}_${ServerName}> OpcUa:requiresUserName \"${UserName}\";\r\n"
 			+ "					OpcUa:requiresPassword \"${Password}\" .";
-	
+
 	private boolean serverDescription = false;
 
 	public String generateOpcUaDescription(Server server, Object skill, StateMachine stateMachine,
 			Enumeration<String> userFiles) {
 		Skill skillAnnotation = skill.getClass().getAnnotation(Skill.class);
 
-		String opcUaServerDescription = null; 
-		if(!serverDescription) {
-		opcUaServerDescription = generateOpcUaServerDescription(server);
-		serverDescription = true; 
+		String opcUaServerDescription = null;
+		if (!serverDescription) {
+			opcUaServerDescription = generateOpcUaServerDescription(server);
+			serverDescription = true;
 		}
-		
+
 		String opcUaSkillDescription = generateOpcUaSkillDescription(skill.getClass().getSimpleName(), stateMachine,
 				server);
 		String stateMachineDescription = generateStateMachineDescription(stateMachine);
@@ -144,13 +151,23 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 				for (Node organizedNode : organizedNodes) {
 					UaVariableNode variableNode = (UaVariableNode) organizedNode;
 
-					String variableDescription = opcUaVariableSnippet
+					String skillParameterDescription = "";
+					if (variableNode.getAccessLevel().toString().contains("READ_WRITE")) {
+						skillParameterDescription = opcUaSkillParameterSnippet;
+					}
+
+					String variableDescription = skillParameterDescription + opcUaVariableSnippet;
+					variableDescription = variableDescription
 							.replace("${VariableName}", variableNode.getBrowseName().getName())
 							.replace("${AccessLevel}", variableNode.getAccessLevel().toString())
 							.replace("${DataType}", variableNode.getDataType().toParseableString())
 							.replace("${Historizing}", variableNode.getHistorizing().toString())
 							.replace("${UserAccessLevel}", variableNode.getUserAccessLevel().toString())
 							.replace("${ValueRank}", variableNode.getValueRank().toString());
+
+					if (variableNode.getValue() != null) {
+						variableDescription.replace("${DefaultValue}", variableNode.getValue().toString());
+					}
 
 					variableDescription = generateOpcUaSkillDataPropertyDescription(variableDescription, organizedNode);
 					opcUaSkillDescription = opcUaSkillDescription + variableDescription;
