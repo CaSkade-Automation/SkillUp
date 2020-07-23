@@ -43,18 +43,22 @@ public class RestResource {
 	}
 
 	// Does not work yet. how to identify skill?
-	// integers would be nice. compared to opcua skills. to go only by names...difficult
+	// integers would be nice. compared to opcua skills. to go only by
+	// names...difficult
 	// how to make sure there are no duplicates?
 	public void deleteSkill(Object skill) {
-		String skillname = skill.getClass().getSimpleName();
-		
+		logger.info(getClass().getSimpleName() + ": Deleting RestSkill \"" + skill.getClass().toString() + "\"");
+		logger.info("Deletion of RestSkills not yet implemented!");
+		// String skillname = skill.getClass().getSimpleName();
+		// object hat skill-annotation und dann über die uri in der annotation gehen.
+		// is annotation present von skill object machen...
 
 	}
 
 	@GET
 	@Produces(MediaType.TEXT_HTML)
 	public String landing() {
-		logger.info("SkillResource: Landing page called!");
+		logger.info(getClass().getSimpleName() + ": Landing page called!");
 
 		StringBuilder sb = new StringBuilder("<html><body>");
 		sb.append("<h1>Simple RESTful OSGi StateMachine</h1>");
@@ -76,7 +80,7 @@ public class RestResource {
 	@Path("{instanceNo}")
 	@Produces(MediaType.TEXT_HTML)
 	public String info(@PathParam("instanceNo") String instance) {
-		logger.info("SkillResource: RestSkill # " + instance + " info page called!");
+		logger.info(getClass().getSimpleName() + ": RestSkill # " + instance + " info page called!");
 
 		StringBuilder sb = new StringBuilder("<html><body>");
 		sb.append("<h1>Simple RESTful OSGi StateMachine</h1>");
@@ -117,7 +121,7 @@ public class RestResource {
 	@Path("{instanceNo}/start")
 	@Produces(MediaType.TEXT_HTML)
 	public String start(@PathParam("instanceNo") String instance) {
-		logger.info("SkillResource: RestSkill # " + instance + " START page called!");
+		logger.info(getClass().getSimpleName() + ": RestSkill # " + instance + " START page called!");
 
 		StringBuilder sb = new StringBuilder("<html><body>");
 		sb.append("<h1>Simple RESTful OSGi StateMachine</h1>");
@@ -168,7 +172,7 @@ public class RestResource {
 	@Path("{instanceNo}/reset")
 	@Produces(MediaType.TEXT_HTML)
 	public String reset(@PathParam("instanceNo") String instance) {
-		logger.info("SkillResource: RestSkill # " + instance + " RESET page called!");
+		logger.info(getClass().getSimpleName() + ": RestSkill # " + instance + " RESET page called!");
 
 		StringBuilder sb = new StringBuilder("<html><body>");
 		sb.append("<h1>Simple RESTful OSGi StateMachine</h1>");
