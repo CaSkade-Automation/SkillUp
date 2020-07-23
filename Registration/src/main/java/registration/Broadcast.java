@@ -3,8 +3,15 @@ package registration;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Stack;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -38,59 +45,51 @@ public class Broadcast {
 
 		byte[] buffer = broadcastMessage.getBytes();
 
-		// get IP Address and convert it to binary form
-		String[] str = new String[4];
-		InetAddress localHost = InetAddress.getLocalHost();
-		String ipAddress = localHost.getHostAddress();
-		str = ipAddress.split("\\.");
-		int[] ipAddressBinary = new int[32];
-		ipAddressBinary = ipAddressToBinary(str);
+		// get all possible IP broadcast addresses
+		ArrayList<InetAddress> broadcasts = new ArrayList<InetAddress>();
 
-		// get subnetmask and build broadcast address
-		NetworkInterface networkInterface = NetworkInterface.getByInetAddress(localHost);
-		int subnetMask = (int) networkInterface.getInterfaceAddresses().get(0).getNetworkPrefixLength();
-		int[] broadcastAddress = new int[32];
-		int t = 32 - subnetMask;
-
-		for (int i = 0; i <= (31 - t); i++) {
-			broadcastAddress[i] = ipAddressBinary[i];
+		Enumeration<NetworkInterface> n = null;
+		try {
+			n = NetworkInterface.getNetworkInterfaces();
+		} catch (SocketException e) {
+			e.printStackTrace();
 		}
+		for (; n.hasMoreElements();) {
+			NetworkInterface e = n.nextElement();
+			if (e.isVirtual()) {
+				continue;
+			}
+			List<InterfaceAddress> i = e.getInterfaceAddresses();
+			for (InterfaceAddress intAddr : i) {
+				if (intAddr.getAddress() instanceof Inet4Address) {
+					if (intAddr.getBroadcast() != null) {
+						broadcasts.add(intAddr.getBroadcast());
+						logger.info("Found broadcast address " + intAddr.getBroadcast());
 
-		for (int i = 31; i > (31 - t); i--) {
-			broadcastAddress[i] = 1;
-		}
-
-		// converting broadcast address to decimal
-		int[] broadcastAddressDecimal = convertAddressToDecimal(broadcastAddress);
-		InetAddress address = InetAddress.getByName(broadcastAddressDecimal[0] + "." + broadcastAddressDecimal[1] + "."
-				+ broadcastAddressDecimal[2] + "." + broadcastAddressDecimal[3]);
-
-		logger.info("Broadcast-Address: " + address);
-		DatagramPacket packet = new DatagramPacket(buffer, buffer.length, address, 15000);
-
-		socket.send(packet);
-
-		// Wait for a response
-		byte[] recvBuf = new byte[15000];
-		DatagramPacket receivePacket = new DatagramPacket(recvBuf, recvBuf.length);
-
-		Thread receivingBroadcastResponseThread = new Thread() {
-			public void run() {
-				try {
-					socket.receive(receivePacket);
-					broadcastResponse(receivePacket, moduleRegistry);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					}
 				}
 			}
-		};
+		}
 
-		CompletableFuture.runAsync(receivingBroadcastResponseThread::run).orTimeout(20, TimeUnit.SECONDS)
-				.exceptionally(throwable -> {
-					logger.error("An error occured", throwable);
-					return null;
-				});
+		// send broadcast on all found addresses
+		for (InetAddress b : broadcasts) {
+			DatagramPacket sendPacket = new DatagramPacket(buffer, buffer.length, b, 15000);
+			logger.info("Sending broadcast on " + b.toString());
+			socket.send(sendPacket);
+		}
+
+		// wait for a response
+		byte[] receiveData = new byte[2048];
+		DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+
+		// TODO: wait for possibly multiple responses
+		socket.receive(receivePacket);
+		logger.info(receivePacket.toString());
+		logger.info(receivePacket.getData().toString());
+
+		broadcastResponse(receivePacket, moduleRegistry);
+
+		socket.close();
 	}
 
 	/**
