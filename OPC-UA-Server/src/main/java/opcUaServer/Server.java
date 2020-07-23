@@ -173,7 +173,7 @@ public class Server {
 		for (String bindAddress : bindAddresses) {
 			for (String hostname : hostnames) {
 				EndpointConfiguration.Builder builder = EndpointConfiguration.newBuilder().setBindAddress(bindAddress)
-						.setHostname(hostname).setPath("/milo").setCertificate(certificate).addTokenPolicies(
+						.setHostname(hostname).setPath("milo").setCertificate(certificate).addTokenPolicies(
 								USER_TOKEN_POLICY_ANONYMOUS, USER_TOKEN_POLICY_USERNAME, USER_TOKEN_POLICY_X509);
 
 				EndpointConfiguration.Builder noSecurityBuilder = builder.copy().setSecurityPolicy(SecurityPolicy.None)
@@ -197,10 +197,10 @@ public class Server {
 				 * the address by appending the path "/discovery" to its base address.
 				 */
 
-				EndpointConfiguration.Builder discoveryBuilder = builder.copy().setPath("/discovery")
-						.setSecurityPolicy(SecurityPolicy.None).setSecurityMode(MessageSecurityMode.None);
-
-				endpointConfigurations.add(buildTcpEndpoint(discoveryBuilder));
+//				EndpointConfiguration.Builder discoveryBuilder = builder.copy().setPath("/discovery")
+//						.setSecurityPolicy(SecurityPolicy.None).setSecurityMode(MessageSecurityMode.None);
+//
+//				endpointConfigurations.add(buildTcpEndpoint(discoveryBuilder));
 			}
 		}
 
