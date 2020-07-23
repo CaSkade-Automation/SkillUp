@@ -34,7 +34,7 @@ public class RestSkillGenerator implements SkillGeneratorInterface {
 	@Override
 	public void generateSkill(Object skill, StateMachine stateMachine) {
 		if (resource != null) {
-			generateSkill(skill, stateMachine);
+			resource.generateSkill(skill, stateMachine);
 		}
 
 	}
