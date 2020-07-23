@@ -90,18 +90,18 @@ public class Namespace extends ManagedNamespace {
 
 			if (field.isAnnotationPresent(SkillParameter.class)) {
 
-				MethodDescription methodDescription = setMethodDescription(field, skill, true);
+				OpcUaVariableDescription variableDescription = setVariableDescription(field, skill, true);
 
 				UaVariableNode node = new UaVariableNode.UaVariableNodeBuilder(getNodeContext())
-						.setNodeId(newNodeId(folder.getBrowseName() + "/" + methodDescription.getMethodName()))
+						.setNodeId(newNodeId(folder.getBrowseName() + "/" + variableDescription.getVariableName()))
 						.setAccessLevel(ubyte(AccessLevel.getMask(AccessLevel.READ_WRITE)))
 						.setUserAccessLevel(ubyte(AccessLevel.getMask(AccessLevel.READ_WRITE)))
-						.setBrowseName(newQualifiedName(methodDescription.getMethodName()))
-						.setDisplayName(LocalizedText.english(methodDescription.getMethodDescription()))
-						.setDataType(methodDescription.getNodeId()).setTypeDefinition(Identifiers.BaseDataVariableType)
+						.setBrowseName(newQualifiedName(variableDescription.getVariableName()))
+						.setDisplayName(LocalizedText.english(variableDescription.getVariableDescription()))
+						.setDataType(variableDescription.getNodeId()).setTypeDefinition(Identifiers.BaseDataVariableType)
 						.build();
 
-				node.setValue(new DataValue(methodDescription.getVariant()));
+				node.setValue(new DataValue(variableDescription.getVariant()));
 				node.addAttributeObserver(new AttributeObserver() {
 
 					@Override
@@ -129,18 +129,18 @@ public class Namespace extends ManagedNamespace {
 
 			if (field.isAnnotationPresent(SkillOutput.class)) {
 
-				MethodDescription methodDescription = setMethodDescription(field, skill, false);
+				OpcUaVariableDescription variableDescription = setVariableDescription(field, skill, false);
 
 				UaVariableNode node = new UaVariableNode.UaVariableNodeBuilder(getNodeContext())
-						.setNodeId(newNodeId(folder.getBrowseName() + "/" + methodDescription.getMethodName()))
+						.setNodeId(newNodeId(folder.getBrowseName() + "/" + variableDescription.getVariableName()))
 						.setAccessLevel(ubyte(AccessLevel.getMask(AccessLevel.READ_ONLY)))
 						.setUserAccessLevel(ubyte(AccessLevel.getMask(AccessLevel.READ_ONLY)))
-						.setBrowseName(newQualifiedName(methodDescription.getMethodName()))
-						.setDisplayName(LocalizedText.english(methodDescription.getMethodDescription()))
-						.setDataType(methodDescription.getNodeId()).setTypeDefinition(Identifiers.BaseDataVariableType)
+						.setBrowseName(newQualifiedName(variableDescription.getVariableName()))
+						.setDisplayName(LocalizedText.english(variableDescription.getVariableDescription()))
+						.setDataType(variableDescription.getNodeId()).setTypeDefinition(Identifiers.BaseDataVariableType)
 						.build();
 
-				node.setValue(new DataValue(methodDescription.getVariant()));
+				node.setValue(new DataValue(variableDescription.getVariant()));
 
 				getNodeManager().addNode(node);
 				folder.addOrganizes(node);
@@ -168,7 +168,7 @@ public class Namespace extends ManagedNamespace {
 		}
 	}
 
-	public MethodDescription setMethodDescription(Field field, Object skill, boolean skillInput) {
+	public OpcUaVariableDescription setVariableDescription(Field field, Object skill, boolean skillInput) {
 		Variant variant = null;
 		field.setAccessible(true);
 		Class<?> type = field.getType();
@@ -212,8 +212,8 @@ public class Namespace extends ManagedNamespace {
 				fieldDescription = field.getName();
 			}
 		}
-		MethodDescription methodDescription = new MethodDescription(typeId, fieldName, fieldDescription, variant);
-		return methodDescription;
+		OpcUaVariableDescription variableDescription = new OpcUaVariableDescription(typeId, fieldName, fieldDescription, variant);
+		return variableDescription;
 	}
 
 	/**
