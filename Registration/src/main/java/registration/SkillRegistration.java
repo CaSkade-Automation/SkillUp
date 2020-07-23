@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import annotations.Skill;
+import states.IState;
 
 public class SkillRegistration extends RegistrationMethods {
 
@@ -22,7 +23,7 @@ public class SkillRegistration extends RegistrationMethods {
 		List<OpsDescription> opsList = moduleRegistry.skillRegisterOpsList(moduleIri);
 
 		for (OpsDescription opsDescription : opsList) {
-			String basePath = opsDescription.getBasePath(); 
+			String basePath = opsDescription.getBasePath();
 			String moduleEndpoint = opsDescription.getModuleEndpoint();
 			String moduleIriEncoded = encodeValue(moduleIri);
 			String skillEndpoint = opsDescription.getSkillEndpoint();
@@ -41,14 +42,18 @@ public class SkillRegistration extends RegistrationMethods {
 		}
 	}
 
-//	public void stateChanged(Object skill, IState state) {
-//	String location = moduleEndpoint + "/" + moduleIri + skillEndpoint + "/"
-//			+ skillIri;
-//
-//	for (OpsDescription myOpsDescription : opsDescriptionList) {
-//		int responseStatusCode = sendSPARQLQuery(myOpsDescription, "POST", location, state);
-//	}
-//}
+	public void stateChanged(Object skill, IState state, ModuleRegistry moduleRegistry) {
+
+		String moduleIri = skill.getClass().getAnnotation(Skill.class).moduleIri();
+		List<OpsDescription> opsList = moduleRegistry.skillRegisterOpsList(moduleIri);
+
+		for (OpsDescription opsDescription : opsList) {
+			String location = opsDescription.getBasePath() + opsDescription.getModuleEndpoint() + "/" + moduleIri
+					+ opsDescription.getSkillEndpoint() + "/" + skill.getClass().getAnnotation(Skill.class).skillIri();
+
+			opsRequest(opsDescription, "PATCH", location, state.toString());
+		}
+	}
 
 	@Override
 	public void delete(Object object, ModuleRegistry moduleRegistry) {
@@ -61,7 +66,7 @@ public class SkillRegistration extends RegistrationMethods {
 
 		for (OpsDescription myOpsDescription : opsList) {
 
-			String basePath = myOpsDescription.getBasePath(); 
+			String basePath = myOpsDescription.getBasePath();
 			String moduleEndpoint = myOpsDescription.getModuleEndpoint();
 			String moduleIriEncoded = encodeValue(object.getClass().getAnnotation(Skill.class).moduleIri());
 			String skillEndpoint = myOpsDescription.getSkillEndpoint();
