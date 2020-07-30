@@ -24,7 +24,7 @@ public class ModuleRegistration extends RegistrationMethods {
 
 			String location = basePath + moduleEndpoint; 
 			
-			int responseStatusCode = opsRequest(opsDescription, "POST", location, requestBody);
+			int responseStatusCode = opsRequest(opsDescription, "POST", location, requestBody, "text/plain");
 
 			if (responseStatusCode == 201) {
 				logger.info("Module successfully registered...");
@@ -50,7 +50,7 @@ public class ModuleRegistration extends RegistrationMethods {
 			String moduleIriEncoded = encodeValue(object.getClass().getAnnotation(Module.class).moduleIri());
 			String location = basePath + moduleEndpoint + "/" + moduleIriEncoded;
 
-			int responseStatusCode = opsRequest(myOps, "DELETE", location, "");
+			int responseStatusCode = opsRequest(myOps, "DELETE", location, "", "text/plain");
 
 			if (responseStatusCode == 200) {
 				delete.add(myOps);

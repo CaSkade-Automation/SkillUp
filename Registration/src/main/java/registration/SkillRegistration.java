@@ -29,7 +29,7 @@ public class SkillRegistration extends RegistrationMethods {
 			String skillEndpoint = opsDescription.getSkillEndpoint();
 			String location = basePath + moduleEndpoint + "/" + moduleIriEncoded + skillEndpoint;
 
-			int responseStatusCode = opsRequest(opsDescription, "POST", location, requestBody);
+			int responseStatusCode = opsRequest(opsDescription, "POST", location, requestBody, "text/plain");
 
 			if (responseStatusCode == 201) {
 				logger.info("Skill " + object.getClass().getAnnotation(Skill.class).skillIri() + " registered to "
@@ -51,7 +51,8 @@ public class SkillRegistration extends RegistrationMethods {
 			String location = opsDescription.getBasePath() + opsDescription.getModuleEndpoint() + "/" + moduleIri
 					+ opsDescription.getSkillEndpoint() + "/" + skill.getClass().getAnnotation(Skill.class).skillIri();
 
-			opsRequest(opsDescription, "PATCH", location, state.toString());
+			String json = "{\"newState\":" + state.toString() + "}";
+			opsRequest(opsDescription, "PATCH", location, json, "application/json");
 		}
 	}
 
@@ -73,7 +74,7 @@ public class SkillRegistration extends RegistrationMethods {
 			String skillIri = encodeValue(skill);
 			String location = basePath + moduleEndpoint + "/" + moduleIriEncoded + skillEndpoint + "/" + skillIri;
 
-			int responseStatusCode = opsRequest(myOpsDescription, "DELETE", location, "");
+			int responseStatusCode = opsRequest(myOpsDescription, "DELETE", location, "", "text/plain");
 
 			if (responseStatusCode == 200) {
 				logger.info("Skill " + skill + " removed from " + myOpsDescription.getId());
