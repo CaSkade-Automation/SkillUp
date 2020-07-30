@@ -80,10 +80,5 @@ public class GenericMethod extends AbstractMethodInvocationHandler implements IS
 				}
 			}
 		}
-
-		System.out.println("State of " + skill.getClass().getSimpleName() + " has changed, new State is: "
-				+ newState.getClass().getSimpleName());
-		// hier muss auch noch OPS informiert werden
-		// server.informOps(skill, newState.getClass().getSimpleName()); 
 	}
 }

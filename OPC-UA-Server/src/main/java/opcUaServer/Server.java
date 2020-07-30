@@ -207,10 +207,6 @@ public class Server {
 		return endpointConfigurations;
 	}
 	
-//	public void informOps(Object skill, IState state) {
-//		module.stateChanged(skill, state); 
-//	}
-	
 	public String getUserName() {
 		return this.userName; 
 	}

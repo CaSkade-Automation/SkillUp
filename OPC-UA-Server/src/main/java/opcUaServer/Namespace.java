@@ -42,9 +42,9 @@ public class Namespace extends ManagedNamespace {
 	private UaVariableNode skillOutput;
 	private GenericMethod newSkill;
 
-	public Namespace(final OpcUaServer server) {
-		super(server, URI);
-		subscriptionModel = new SubscriptionModel(server, this);
+	public Namespace(final OpcUaServer opcUaServer) {
+		super(opcUaServer, URI);
+		subscriptionModel = new SubscriptionModel(opcUaServer, this);
 	}
 
 	/**
