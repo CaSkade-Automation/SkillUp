@@ -12,4 +12,5 @@ public @interface SkillParameter {
 	public String name() default "";   
 	public String description() default "";  
 	public boolean isRequired(); 
+	public String[] option() default ""; 
 }

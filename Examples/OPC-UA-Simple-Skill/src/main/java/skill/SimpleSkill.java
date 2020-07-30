@@ -15,7 +15,7 @@ public class SimpleSkill {
 
 	private final Logger logger = LoggerFactory.getLogger(SimpleSkill.class);
 
-	@SkillParameter(isRequired = true)
+	@SkillParameter(isRequired = true, option = {"4", "3", "2"})
 	private int j;
 
 	@SkillOutput(isRequired = false)
