@@ -15,10 +15,10 @@ public class SimpleSkill2 {
 
 	private final Logger logger = LoggerFactory.getLogger(SimpleSkill2.class);
 
-	@SkillParameter
+	@SkillParameter(isRequired = true)
 	private int i;
 
-	@SkillOutput
+	@SkillOutput(isRequired = true)
 	private int z;
 
 	@Starting

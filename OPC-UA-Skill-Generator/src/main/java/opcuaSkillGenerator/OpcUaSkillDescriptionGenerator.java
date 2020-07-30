@@ -1,6 +1,7 @@
 package opcuaSkillGenerator;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -9,9 +10,12 @@ import org.eclipse.milo.opcua.sdk.server.api.nodes.Node;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaVariableNode;
+import org.eclipse.milo.opcua.stack.core.BuiltinDataType;
 import org.eclipse.milo.opcua.stack.core.types.structured.EndpointDescription;
 
 import annotations.Skill;
+import annotations.SkillOutput;
+import annotations.SkillParameter;
 import descriptionGenerator.SkillDescriptionGenerator;
 import opcUaServer.Server;
 import statemachine.StateMachine;
@@ -56,11 +60,17 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 			+ "<${SkillIri}> OpcUa:organizes <${SkillIri}_${VariableName}>. \r\n";
 
 	private String opcUaSkillParameterSnippet = "<${SkillIri}_${VariableName}> a Cap:SkillParameter;\r\n"
-			+ "								Cap:hasParameterName \"${BrowseName}\";\r\n"
-			+ "								Cap:hasParameterType \"${DataType}\";\r\n"
+			+ "								Cap:hasVariableName \"${BrowseName}\";\r\n"
+			+ "								Cap:hasVariableType \"${VariableType}\";\r\n"
 			+ "								Cap:isRequired \"${Required}\";\r\n"
 			+ "								Cap:hasDefaultValue \"${DefaultValue}\".\r\n"
 			+ "<${SkillIri}> Cap:hasSkillParameter <${SkillIri}_${VariableName}>.";
+
+	private String opcUaSkillOutputSnippet = "<${SkillIri}_${VariableName}> a Cap:SkillOutput;\r\n"
+			+ "								Cap:hasVariableName \"${BrowseName}\";\r\n"
+			+ "								Cap:hasVariableType \"${VariableType}\";\r\n"
+			+ "								Cap:isRequired \"${Required}\".\r\n"
+			+ "<${SkillIri}> Cap:hasSkillOutput <${SkillIri}_${VariableName}>.";
 
 	private String opcUaServerSnippet = "<${ModuleIri}_${ServerName}> a OpcUa:UAServer,\r\n"
 			+ "						owl:NamedIndividual;\r\n"
@@ -87,8 +97,7 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 			serverDescription = true;
 		}
 
-		String opcUaSkillDescription = generateOpcUaSkillDescription(skill.getClass().getSimpleName(), stateMachine,
-				server);
+		String opcUaSkillDescription = generateOpcUaSkillDescription(skill, stateMachine, server);
 		String stateMachineDescription = generateStateMachineDescription(stateMachine);
 
 		String userSnippet = getUserSnippets(userFiles, skill.getClass().getClassLoader());
@@ -113,7 +122,9 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 		return null;
 	}
 
-	public String generateOpcUaSkillDescription(String skillName, StateMachine stateMachine, Server server) {
+	public String generateOpcUaSkillDescription(Object skill, StateMachine stateMachine, Server server) {
+
+		String skillName = skill.getClass().getSimpleName();
 
 		String opcUaSkillDescription = null;
 		List<Node> opcUaNodes = server.getNamespace().getFolder().getOrganizesNodes();
@@ -152,22 +163,57 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 					UaVariableNode variableNode = (UaVariableNode) organizedNode;
 
 					String skillParameterDescription = "";
-					if (variableNode.getAccessLevel().toString().contains("READ_WRITE")) {
-						skillParameterDescription = opcUaSkillParameterSnippet;
-					}
+					String skillOutputDescription = "";
 
-					String variableDescription = skillParameterDescription + opcUaVariableSnippet;
+					Field[] fields = skill.getClass().getDeclaredFields();
+					for (Field field : fields) {
+						if (field.isAnnotationPresent(SkillParameter.class)) {
+							field.setAccessible(true);
+							if ((field.getAnnotation(SkillParameter.class).name()
+									.equals(variableNode.getBrowseName().getName()))
+									|| field.getName().equals(variableNode.getBrowseName().getName())) {
+
+								boolean isRequired = field.getAnnotation(SkillParameter.class).isRequired();
+								try {
+									skillParameterDescription = opcUaSkillParameterSnippet
+											.replace("${Required}", Boolean.toString(isRequired))
+											.replace("${DefaultValue}", field.get(skill).toString());
+								} catch (IllegalArgumentException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								} catch (IllegalAccessException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+								break;
+							}
+						} else if (field.isAnnotationPresent(SkillOutput.class)) {
+							field.setAccessible(true);
+							if ((field.getAnnotation(SkillOutput.class).name()
+									.equals(variableNode.getBrowseName().getName()))
+									|| field.getName().equals(variableNode.getBrowseName().getName())) {
+
+								boolean isRequired = field.getAnnotation(SkillOutput.class).isRequired();
+
+								skillOutputDescription = opcUaSkillOutputSnippet.replace("${Required}",
+										Boolean.toString(isRequired));
+								break;
+							}
+						}
+					}
+					
+					String variableType = variableNode.getDataType().getIdentifier().toString(); 
+					
+					String variableDescription = skillParameterDescription + skillOutputDescription
+							+ opcUaVariableSnippet;
 					variableDescription = variableDescription
 							.replace("${VariableName}", variableNode.getBrowseName().getName())
 							.replace("${AccessLevel}", variableNode.getAccessLevel().toString())
 							.replace("${DataType}", variableNode.getDataType().toParseableString())
+							.replace("${VariableType}", BuiltinDataType.getBackingClass(Integer.parseInt(variableType)).getSimpleName())
 							.replace("${Historizing}", variableNode.getHistorizing().toString())
 							.replace("${UserAccessLevel}", variableNode.getUserAccessLevel().toString())
 							.replace("${ValueRank}", variableNode.getValueRank().toString());
-
-					if (variableNode.getValue() != null) {
-						variableDescription.replace("${DefaultValue}", variableNode.getValue().toString());
-					}
 
 					variableDescription = generateOpcUaSkillDataPropertyDescription(variableDescription, organizedNode);
 					opcUaSkillDescription = opcUaSkillDescription + variableDescription;
