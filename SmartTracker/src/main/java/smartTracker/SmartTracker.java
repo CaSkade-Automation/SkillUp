@@ -125,6 +125,8 @@ public class SmartTracker {
 											skillClassObjects.put(bundle, skillObj);
 
 											StateMachine stateMachine = actionGenerator.generateAction(skillObj);
+											StateChangeObserver stateChangeObserver = new StateChangeObserver(registration, skillObj); 
+											stateMachine.addStateChangeObserver(stateChangeObserver);
 
 											for (Map.Entry<SkillGeneratorInterface, String> me : skillGeneratorPropertyList
 													.entrySet()) {
