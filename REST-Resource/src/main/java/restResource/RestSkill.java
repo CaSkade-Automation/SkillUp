@@ -1,9 +1,7 @@
 package restResource;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.UUID;
 
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,54 +9,79 @@ import statemachine.StateMachine;
 
 public class RestSkill {
 
-	private static AtomicInteger instanceCounter = new AtomicInteger(-1); // -1: Adjustment so that first generated instance = 0
-
-	private final int instanceNo;
-
 	private static Logger logger = LoggerFactory.getLogger(RestSkill.class);
 
+	private UUID uuid;
 	private StateMachine stateMachine;
+	private String skillIri; // we need this to identify our skill later (to delete it...).
 
-	public RestSkill() {
-		instanceNo = instanceCounter.incrementAndGet();
-	}
-	
-	public RestSkill(StateMachine sm) {
-		instanceNo = instanceCounter.incrementAndGet();
+	public RestSkill(StateMachine sm, String skillIri) {
+		uuid = UUID.randomUUID();
 		this.stateMachine = sm;
-	}
-
-	@Activate
-	void activate() {
-		logger.info("RestSkill # " + instanceNo + " activated");
-	}
-
-	@Deactivate
-	void deactivate() {
-		logger.info("RestSkill # " + instanceNo + " deactivated");
+		this.skillIri = skillIri;
+		logger.info("RestSkill \"" + uuid + "\" (skillIri=" + this.skillIri + ") created.");
 	}
 
 	public void setStateMachine(StateMachine stateMachine) {
 		this.stateMachine = stateMachine;
-		logger.info("RestSkill # " + instanceNo + " StateMachine set (" + stateMachine.toString() + ")");
+		logger.info("RestSkill \"" + uuid + "\": StateMachine set (" + stateMachine.toString() + ").");
 	}
 
 	public void start() {
 		stateMachine.start();
-		logger.info("RestSkill # " + instanceNo + " StateMachine started");
+		logger.info("RestSkill \"" + uuid + "\": StateMachine start.");
 	}
 
 	public void reset() {
 		stateMachine.reset();
-		logger.info("RestSkill # " + instanceNo + " StateMachine reset");
+		logger.info("RestSkill \"" + uuid + "\": StateMachine reset.");
+	}
+
+	public void hold() {
+		stateMachine.hold();
+		logger.info("RestSkill \"" + uuid + "\": StateMachine hold.");
+	}
+
+	public void unhold() {
+		stateMachine.unhold();
+		logger.info("RestSkill \"" + uuid + "\": StateMachine unhold.");
+	}
+
+	public void suspend() {
+		stateMachine.suspend();
+		logger.info("RestSkill \"" + uuid + "\": StateMachine suspend.");
+	}
+
+	public void unsuspend() {
+		stateMachine.unsuspend();
+		logger.info("RestSkill \"" + uuid + "\": StateMachine unsuspend.");
+	}
+	
+	public void stop() {
+		stateMachine.stop();
+		logger.info("RestSkill \"" + uuid + "\": StateMachine stop.");
+	}
+	
+	public void abort() {
+		stateMachine.abort();
+		logger.info("RestSkill \"" + uuid + "\": StateMachine abort.");
+	}
+	
+	public void clear() {
+		stateMachine.clear();
+		logger.info("RestSkill \"" + uuid + "\": StateMachine clear.");
 	}
 
 	public String getState() {
 		return stateMachine.getState().getClass().getSimpleName();
 	}
 
-	public int getInstanceNo() {
-		return instanceNo;
+	public UUID getUUID() {
+		return uuid;
+	}
+
+	public String getSkillIri() {
+		return skillIri;
 	}
 
 }

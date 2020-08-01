@@ -34,9 +34,11 @@ public class RestSkillGenerator implements SkillGeneratorInterface {
 	@Override
 	public void generateSkill(Object skill, StateMachine stateMachine) {
 		if (resource != null) {
+			logger.info(getClass().getSimpleName() + ": Trying to generate skill...");
 			resource.generateSkill(skill, stateMachine);
+		} else {
+			logger.info(getClass().getSimpleName() + ": ERR while generating skill: RestResource is NULL.");
 		}
-
 	}
 
 	// TODO
@@ -49,7 +51,10 @@ public class RestSkillGenerator implements SkillGeneratorInterface {
 	@Override
 	public void deleteSkill(Object skill) {
 		if (resource != null) {
-			deleteSkill(skill);
+			logger.info(getClass().getSimpleName() + ": Trying to delete skill...");
+			resource.deleteSkill(skill);
+		} else {
+			logger.info(getClass().getSimpleName() + ": ERR while deleting skill: RestResource is NULL.");
 		}
 	}
 
