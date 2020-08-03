@@ -2,6 +2,7 @@ package restResource;
 
 import java.util.HashMap;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -16,6 +17,7 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import annotations.Skill;
 import statemachine.StateMachine;
 
 @Component(immediate = true, service = RestResource.class)
@@ -24,7 +26,8 @@ import statemachine.StateMachine;
 public class RestResource {
 
 	private static Logger logger = LoggerFactory.getLogger(RestResource.class);
-	private HashMap<Integer, RestSkill> skillTable = new HashMap<Integer, RestSkill>();
+
+	private HashMap<UUID, RestSkill> skillTable = new HashMap<UUID, RestSkill>();
 
 	@Activate
 	public void activate() {
@@ -37,22 +40,51 @@ public class RestResource {
 	}
 
 	public void generateSkill(Object skill, StateMachine stateMachine) {
-		logger.info(getClass().getSimpleName() + ": Generating new RestSkill");
-		RestSkill newSkill = new RestSkill(stateMachine);
-		skillTable.put(newSkill.getInstanceNo(), newSkill);
+		String skillIri = null;
+		if (skill.getClass().isAnnotationPresent(Skill.class)) {
+			skillIri = skill.getClass().getAnnotation(Skill.class).skillIri();
+		} else {
+			logger.info(getClass().getSimpleName()
+					+ ": ERR while generating new skill: Object does not have \"Skill\"-Annotation.");
+			return;
+		}
+		RestSkill newSkill = new RestSkill(stateMachine, skillIri);
+		skillTable.put(newSkill.getUUID(), newSkill);
 	}
 
-	// Does not work yet. how to identify skill?
-	// integers would be nice. compared to opcua skills. to go only by
-	// names...difficult
-	// how to make sure there are no duplicates?
+	// we identify the skill by its "Skill"-Annotation (see Action-Generator:
+	// annotations) -> skillIri
 	public void deleteSkill(Object skill) {
-		logger.info(getClass().getSimpleName() + ": Deleting RestSkill \"" + skill.getClass().toString() + "\"");
-		logger.info("Deletion of RestSkills not yet implemented!");
-		// String skillname = skill.getClass().getSimpleName();
-		// object hat skill-annotation und dann über die uri in der annotation gehen.
-		// is annotation present von skill object machen...
+		logger.info(getClass().getSimpleName() + ": Deleting skill \"" + skill.getClass().toString() + "\"...");
 
+		// get iri of the skill we need to delete
+		if (skill.getClass().isAnnotationPresent(Skill.class)) {
+			String skillIri = skill.getClass().getAnnotation(Skill.class).skillIri();
+			logger.info(getClass().getSimpleName() + ": skillIri=" + skillIri);
+
+			// check if iri is present in skillTable
+			Set<UUID> setOfKeys = skillTable.keySet();
+			for (UUID key : setOfKeys) {
+
+				// match
+				if (skillIri.equals(skillTable.get(key).getSkillIri())) {
+					logger.info(
+							getClass().getSimpleName() + ": Found match (uuid=" + skillTable.get(key).getUUID() + ").");
+					skillTable.remove(key);
+					logger.info(getClass().getSimpleName() + ": Skill (uuid=" + skillTable.get(key).getUUID()
+							+ ") removed.");
+
+					// TODO: can we omit the rest? (break) is there a check we do not have multiple
+					// skills with the same iri?
+					break;
+				}
+			}
+
+		} else {
+			logger.info(getClass().getSimpleName() + ": ERR while deleting skill: Object ("
+					+ skill.getClass().toString() + ") does not have \"Skill\"-Annotation.");
+			return;
+		}
 	}
 
 	@GET
@@ -64,11 +96,11 @@ public class RestResource {
 		sb.append("<h1>Simple RESTful OSGi StateMachine</h1>");
 		sb.append("<h2>These are all available RestSkills</h2>");
 
-		Set<Integer> setOfKeys = skillTable.keySet();
-		for (Integer key : setOfKeys) {
+		Set<UUID> setOfKeys = skillTable.keySet();
+		for (UUID key : setOfKeys) {
 			sb.append("<p>");
-			sb.append("Key: \"" + key + "\", InstanceNo: \"" + skillTable.get(key).getInstanceNo() + "\", State: \""
-					+ skillTable.get(key).getState() + "\"");
+			sb.append("Key: \"" + key + "\", UUID: \"" + skillTable.get(key).getUUID() + "\", skillIri: \""
+					+ skillTable.get(key).getSkillIri() + "\", State: \"" + skillTable.get(key).getState() + "\"");
 			sb.append("</p>");
 		}
 
@@ -77,40 +109,27 @@ public class RestResource {
 	}
 
 	@GET
-	@Path("{instanceNo}")
+	@Path("{uid}")
 	@Produces(MediaType.TEXT_HTML)
-	public String info(@PathParam("instanceNo") String instance) {
-		logger.info(getClass().getSimpleName() + ": RestSkill # " + instance + " info page called!");
+	public String info(@PathParam("uid") String uid) {
+		UUID key = UUID.fromString(uid);
+		logger.info(getClass().getSimpleName() + ": RestSkill # " + key + ": Info page called!");
 
 		StringBuilder sb = new StringBuilder("<html><body>");
 		sb.append("<h1>Simple RESTful OSGi StateMachine</h1>");
-		sb.append("<h2>You called the info page for RestSkill # " + instance + "</h2>");
+		sb.append("<h2>Info page for RestSkill # " + key + "</h2>");
 
-		if (!isInteger(instance)) {
+		if (skillTable.containsKey(key)) {
+			// key exists
 			sb.append("<p>");
-			sb.append("InstanceNo: \"" + instance + "\" is not a valid instance number. (NaN)");
+			sb.append("Key: \"" + key + "\", UUID: \"" + skillTable.get(key).getUUID() + "\", skillIri: \""
+					+ skillTable.get(key).getSkillIri() + "\", State: \"" + skillTable.get(key).getState() + "\"");
 			sb.append("</p>");
 		} else {
-			if (Integer.parseInt(instance) < 0) {
-				sb.append("<p>");
-				sb.append("InstanceNo: \"" + instance
-						+ "\" is not a valid instance number. (Instance numbers must be >= 0)");
-				sb.append("</p>");
-			} else {
-				int key = Integer.parseInt(instance);
-
-				if (skillTable.containsKey(key)) {
-					// key exists
-					sb.append("<p>");
-					sb.append("Key: \"" + key + "\", InstanceNo: \"" + skillTable.get(key).getInstanceNo()
-							+ "\", State: \"" + skillTable.get(key).getState() + "\"");
-					sb.append("</p>");
-				} else {
-					sb.append("<p>");
-					sb.append("InstanceNo: \"" + instance + "\" is not a valid instance number. (Instance not found!)");
-					sb.append("</p>");
-				}
-			}
+			// key does not exist
+			sb.append("<p>");
+			sb.append("Key: \"" + key + "\" is not a valid key. (Instance not found!)");
+			sb.append("</p>");
 		}
 
 		sb.append("</body></html>");
@@ -118,50 +137,37 @@ public class RestResource {
 	}
 
 	@GET
-	@Path("{instanceNo}/start")
+	@Path("{uid}/start")
 	@Produces(MediaType.TEXT_HTML)
-	public String start(@PathParam("instanceNo") String instance) {
-		logger.info(getClass().getSimpleName() + ": RestSkill # " + instance + " START page called!");
+	public String start(@PathParam("uid") String uid) {
+		UUID key = UUID.fromString(uid);
+		logger.info(getClass().getSimpleName() + ": RestSkill # " + key + " START page called!");
 
 		StringBuilder sb = new StringBuilder("<html><body>");
 		sb.append("<h1>Simple RESTful OSGi StateMachine</h1>");
-		sb.append("<h2>You called the START page for RestSkill # " + instance + "</h2>");
+		sb.append("<h2>You called the START page for RestSkill # " + key + "</h2>");
 
-		if (!isInteger(instance)) {
+		if (skillTable.containsKey(key)) {
 			sb.append("<p>");
-			sb.append("InstanceNo: \"" + instance + "\" is not a valid instance number. (NaN)");
+			sb.append("Key: \"" + key + "\", UUID: \"" + skillTable.get(key).getUUID() + "\", skillIri: \""
+					+ skillTable.get(key).getSkillIri() + "\", State: \"" + skillTable.get(key).getState() + "\"");
+			sb.append("</p>");
+
+			sb.append("<p>");
+			sb.append("You can check the skill again to see if you were successful.");
+			sb.append("</p>");
+
+			// actually start the skill
+			skillTable.get(key).start();
+
+			sb.append("<p>");
+			sb.append("http://localhost:8181/skills/" + key);
 			sb.append("</p>");
 		} else {
-			if (Integer.parseInt(instance) < 0) {
-				sb.append("<p>");
-				sb.append("InstanceNo: \"" + instance
-						+ "\" is not a valid instance number. (Instance numbers must be >= 0)");
-				sb.append("</p>");
-			} else {
-				int key = Integer.parseInt(instance);
-
-				if (skillTable.containsKey(key)) {
-					sb.append("<p>");
-					sb.append("Key: \"" + key + "\", InstanceNo: \"" + skillTable.get(key).getInstanceNo()
-							+ "\", State: \"" + skillTable.get(key).getState() + "\"");
-					sb.append("</p>");
-
-					sb.append("<p>");
-					sb.append(
-							"We are trying to START the skill now! You can check the landing page of the skill to see if you were successful.");
-					sb.append("</p>");
-
-					skillTable.get(key).start();
-
-					sb.append("<p>");
-					sb.append("http://localhost:8181/skills/" + instance);
-					sb.append("</p>");
-				} else {
-					sb.append("<p>");
-					sb.append("InstanceNo: \"" + instance + "\" is not a valid instance number. (Instance not found!)");
-					sb.append("</p>");
-				}
-			}
+			// key does not exist
+			sb.append("<p>");
+			sb.append("Key: \"" + key + "\" is not a valid key. (Instance not found!)");
+			sb.append("</p>");
 		}
 
 		sb.append("</body></html>");
@@ -169,65 +175,306 @@ public class RestResource {
 	}
 
 	@GET
-	@Path("{instanceNo}/reset")
+	@Path("{uid}/reset")
 	@Produces(MediaType.TEXT_HTML)
-	public String reset(@PathParam("instanceNo") String instance) {
-		logger.info(getClass().getSimpleName() + ": RestSkill # " + instance + " RESET page called!");
+	public String reset(@PathParam("uid") String uid) {
+		UUID key = UUID.fromString(uid);
+		logger.info(getClass().getSimpleName() + ": RestSkill # " + key + " RESET page called!");
 
 		StringBuilder sb = new StringBuilder("<html><body>");
 		sb.append("<h1>Simple RESTful OSGi StateMachine</h1>");
-		sb.append("<h2>You called the RESET page for RestSkill # " + instance + "</h2>");
+		sb.append("<h2>You called the RESET page for RestSkill # " + key + "</h2>");
 
-		if (!isInteger(instance)) {
+		if (skillTable.containsKey(key)) {
 			sb.append("<p>");
-			sb.append("InstanceNo: \"" + instance + "\" is not a valid instance number. (NaN)");
+			sb.append("Key: \"" + key + "\", UUID: \"" + skillTable.get(key).getUUID() + "\", skillIri: \""
+					+ skillTable.get(key).getSkillIri() + "\", State: \"" + skillTable.get(key).getState() + "\"");
+			sb.append("</p>");
+
+			sb.append("<p>");
+			sb.append("You can check the skill again to see if you were successful.");
+			sb.append("</p>");
+
+			// actually reset the skill
+			skillTable.get(key).reset();
+
+			sb.append("<p>");
+			sb.append("http://localhost:8181/skills/" + key);
 			sb.append("</p>");
 		} else {
-			if (Integer.parseInt(instance) < 0) {
-				sb.append("<p>");
-				sb.append("InstanceNo: \"" + instance
-						+ "\" is not a valid instance number. (Instance numbers must be >= 0)");
-				sb.append("</p>");
-			} else {
-				int key = Integer.parseInt(instance);
-
-				if (skillTable.containsKey(key)) {
-					sb.append("<p>");
-					sb.append("Key: \"" + key + "\", InstanceNo: \"" + skillTable.get(key).getInstanceNo()
-							+ "\", State: \"" + skillTable.get(key).getState() + "\"");
-					sb.append("</p>");
-
-					sb.append("<p>");
-					sb.append(
-							"We are trying to RESET the skill now! You can check the landing page of the skill to see if you were successful.");
-					sb.append("</p>");
-
-					skillTable.get(key).reset();
-
-					sb.append("<p>");
-					sb.append("http://localhost:8181/skills/" + instance);
-					sb.append("</p>");
-				} else {
-					sb.append("<p>");
-					sb.append("InstanceNo: \"" + instance + "\" is not a valid instance number. (Instance not found!)");
-					sb.append("</p>");
-				}
-			}
+			// key does not exist
+			sb.append("<p>");
+			sb.append("Key: \"" + key + "\" is not a valid key. (Instance not found!)");
+			sb.append("</p>");
 		}
 
 		sb.append("</body></html>");
 		return sb.toString();
 	}
 
-	public boolean isInteger(String string) {
-		// TODO: make one large Check method that checks if instance is an int/is a
-		// valid int/is a valid instance -> only one check!
-		try {
-			Integer.valueOf(string);
-			return true;
-		} catch (NumberFormatException e) {
-			return false;
+	@GET
+	@Path("{uid}/hold")
+	@Produces(MediaType.TEXT_HTML)
+	public String hold(@PathParam("uid") String uid) {
+		UUID key = UUID.fromString(uid);
+		logger.info(getClass().getSimpleName() + ": RestSkill # " + key + " HOLD page called!");
+
+		StringBuilder sb = new StringBuilder("<html><body>");
+		sb.append("<h1>Simple RESTful OSGi StateMachine</h1>");
+		sb.append("<h2>You called the HOLD page for RestSkill # " + key + "</h2>");
+
+		if (skillTable.containsKey(key)) {
+			sb.append("<p>");
+			sb.append("Key: \"" + key + "\", UUID: \"" + skillTable.get(key).getUUID() + "\", skillIri: \""
+					+ skillTable.get(key).getSkillIri() + "\", State: \"" + skillTable.get(key).getState() + "\"");
+			sb.append("</p>");
+
+			sb.append("<p>");
+			sb.append("You can check the skill again to see if you were successful.");
+			sb.append("</p>");
+
+			// actually hold the skill
+			skillTable.get(key).hold();
+
+			sb.append("<p>");
+			sb.append("http://localhost:8181/skills/" + key);
+			sb.append("</p>");
+		} else {
+			// key does not exist
+			sb.append("<p>");
+			sb.append("Key: \"" + key + "\" is not a valid key. (Instance not found!)");
+			sb.append("</p>");
 		}
+
+		sb.append("</body></html>");
+		return sb.toString();
 	}
 
+	@GET
+	@Path("{uid}/unhold")
+	@Produces(MediaType.TEXT_HTML)
+	public String unhold(@PathParam("uid") String uid) {
+		UUID key = UUID.fromString(uid);
+		logger.info(getClass().getSimpleName() + ": RestSkill # " + key + " UNHOLD page called!");
+
+		StringBuilder sb = new StringBuilder("<html><body>");
+		sb.append("<h1>Simple RESTful OSGi StateMachine</h1>");
+		sb.append("<h2>You called the UNHOLD page for RestSkill # " + key + "</h2>");
+
+		if (skillTable.containsKey(key)) {
+			sb.append("<p>");
+			sb.append("Key: \"" + key + "\", UUID: \"" + skillTable.get(key).getUUID() + "\", skillIri: \""
+					+ skillTable.get(key).getSkillIri() + "\", State: \"" + skillTable.get(key).getState() + "\"");
+			sb.append("</p>");
+
+			sb.append("<p>");
+			sb.append("You can check the skill again to see if you were successful.");
+			sb.append("</p>");
+
+			// actually unhold the skill
+			skillTable.get(key).unhold();
+
+			sb.append("<p>");
+			sb.append("http://localhost:8181/skills/" + key);
+			sb.append("</p>");
+		} else {
+			// key does not exist
+			sb.append("<p>");
+			sb.append("Key: \"" + key + "\" is not a valid key. (Instance not found!)");
+			sb.append("</p>");
+		}
+
+		sb.append("</body></html>");
+		return sb.toString();
+	}
+
+	@GET
+	@Path("{uid}/suspend")
+	@Produces(MediaType.TEXT_HTML)
+	public String suspend(@PathParam("uid") String uid) {
+		UUID key = UUID.fromString(uid);
+		logger.info(getClass().getSimpleName() + ": RestSkill # " + key + " SUSPEND page called!");
+
+		StringBuilder sb = new StringBuilder("<html><body>");
+		sb.append("<h1>Simple RESTful OSGi StateMachine</h1>");
+		sb.append("<h2>You called the SUSPEND page for RestSkill # " + key + "</h2>");
+
+		if (skillTable.containsKey(key)) {
+			sb.append("<p>");
+			sb.append("Key: \"" + key + "\", UUID: \"" + skillTable.get(key).getUUID() + "\", skillIri: \""
+					+ skillTable.get(key).getSkillIri() + "\", State: \"" + skillTable.get(key).getState() + "\"");
+			sb.append("</p>");
+
+			sb.append("<p>");
+			sb.append("You can check the skill again to see if you were successful.");
+			sb.append("</p>");
+
+			// actually suspend the skill
+			skillTable.get(key).suspend();
+
+			sb.append("<p>");
+			sb.append("http://localhost:8181/skills/" + key);
+			sb.append("</p>");
+		} else {
+			// key does not exist
+			sb.append("<p>");
+			sb.append("Key: \"" + key + "\" is not a valid key. (Instance not found!)");
+			sb.append("</p>");
+		}
+
+		sb.append("</body></html>");
+		return sb.toString();
+	}
+
+	@GET
+	@Path("{uid}/unsuspend")
+	@Produces(MediaType.TEXT_HTML)
+	public String unsuspend(@PathParam("uid") String uid) {
+		UUID key = UUID.fromString(uid);
+		logger.info(getClass().getSimpleName() + ": RestSkill # " + key + " UNSUSPEND page called!");
+
+		StringBuilder sb = new StringBuilder("<html><body>");
+		sb.append("<h1>Simple RESTful OSGi StateMachine</h1>");
+		sb.append("<h2>You called the UNSUSPEND page for RestSkill # " + key + "</h2>");
+
+		if (skillTable.containsKey(key)) {
+			sb.append("<p>");
+			sb.append("Key: \"" + key + "\", UUID: \"" + skillTable.get(key).getUUID() + "\", skillIri: \""
+					+ skillTable.get(key).getSkillIri() + "\", State: \"" + skillTable.get(key).getState() + "\"");
+			sb.append("</p>");
+
+			sb.append("<p>");
+			sb.append("You can check the skill again to see if you were successful.");
+			sb.append("</p>");
+
+			// actually unsuspend the skill
+			skillTable.get(key).unsuspend();
+
+			sb.append("<p>");
+			sb.append("http://localhost:8181/skills/" + key);
+			sb.append("</p>");
+		} else {
+			// key does not exist
+			sb.append("<p>");
+			sb.append("Key: \"" + key + "\" is not a valid key. (Instance not found!)");
+			sb.append("</p>");
+		}
+
+		sb.append("</body></html>");
+		return sb.toString();
+	}
+
+	@GET
+	@Path("{uid}/stop")
+	@Produces(MediaType.TEXT_HTML)
+	public String stop(@PathParam("uid") String uid) {
+		UUID key = UUID.fromString(uid);
+		logger.info(getClass().getSimpleName() + ": RestSkill # " + key + " STOP page called!");
+
+		StringBuilder sb = new StringBuilder("<html><body>");
+		sb.append("<h1>Simple RESTful OSGi StateMachine</h1>");
+		sb.append("<h2>You called the STOP page for RestSkill # " + key + "</h2>");
+
+		if (skillTable.containsKey(key)) {
+			sb.append("<p>");
+			sb.append("Key: \"" + key + "\", UUID: \"" + skillTable.get(key).getUUID() + "\", skillIri: \""
+					+ skillTable.get(key).getSkillIri() + "\", State: \"" + skillTable.get(key).getState() + "\"");
+			sb.append("</p>");
+
+			sb.append("<p>");
+			sb.append("You can check the skill again to see if you were successful.");
+			sb.append("</p>");
+
+			// actually stop the skill
+			skillTable.get(key).stop();
+
+			sb.append("<p>");
+			sb.append("http://localhost:8181/skills/" + key);
+			sb.append("</p>");
+		} else {
+			// key does not exist
+			sb.append("<p>");
+			sb.append("Key: \"" + key + "\" is not a valid key. (Instance not found!)");
+			sb.append("</p>");
+		}
+
+		sb.append("</body></html>");
+		return sb.toString();
+	}
+
+	@GET
+	@Path("{uid}/abort")
+	@Produces(MediaType.TEXT_HTML)
+	public String abort(@PathParam("uid") String uid) {
+		UUID key = UUID.fromString(uid);
+		logger.info(getClass().getSimpleName() + ": RestSkill # " + key + " ABORT page called!");
+
+		StringBuilder sb = new StringBuilder("<html><body>");
+		sb.append("<h1>Simple RESTful OSGi StateMachine</h1>");
+		sb.append("<h2>You called the ABORT page for RestSkill # " + key + "</h2>");
+
+		if (skillTable.containsKey(key)) {
+			sb.append("<p>");
+			sb.append("Key: \"" + key + "\", UUID: \"" + skillTable.get(key).getUUID() + "\", skillIri: \""
+					+ skillTable.get(key).getSkillIri() + "\", State: \"" + skillTable.get(key).getState() + "\"");
+			sb.append("</p>");
+
+			sb.append("<p>");
+			sb.append("You can check the skill again to see if you were successful.");
+			sb.append("</p>");
+
+			// actually abort the skill
+			skillTable.get(key).abort();
+
+			sb.append("<p>");
+			sb.append("http://localhost:8181/skills/" + key);
+			sb.append("</p>");
+		} else {
+			// key does not exist
+			sb.append("<p>");
+			sb.append("Key: \"" + key + "\" is not a valid key. (Instance not found!)");
+			sb.append("</p>");
+		}
+
+		sb.append("</body></html>");
+		return sb.toString();
+	}
+
+	@GET
+	@Path("{uid}/clear")
+	@Produces(MediaType.TEXT_HTML)
+	public String clear(@PathParam("uid") String uid) {
+		UUID key = UUID.fromString(uid);
+		logger.info(getClass().getSimpleName() + ": RestSkill # " + key + " CLEAR page called!");
+
+		StringBuilder sb = new StringBuilder("<html><body>");
+		sb.append("<h1>Simple RESTful OSGi StateMachine</h1>");
+		sb.append("<h2>You called the CLEAR page for RestSkill # " + key + "</h2>");
+
+		if (skillTable.containsKey(key)) {
+			sb.append("<p>");
+			sb.append("Key: \"" + key + "\", UUID: \"" + skillTable.get(key).getUUID() + "\", skillIri: \""
+					+ skillTable.get(key).getSkillIri() + "\", State: \"" + skillTable.get(key).getState() + "\"");
+			sb.append("</p>");
+
+			sb.append("<p>");
+			sb.append("You can check the skill again to see if you were successful.");
+			sb.append("</p>");
+
+			// actually clear the skill
+			skillTable.get(key).clear();
+
+			sb.append("<p>");
+			sb.append("http://localhost:8181/skills/" + key);
+			sb.append("</p>");
+		} else {
+			// key does not exist
+			sb.append("<p>");
+			sb.append("Key: \"" + key + "\" is not a valid key. (Instance not found!)");
+			sb.append("</p>");
+		}
+
+		sb.append("</body></html>");
+		return sb.toString();
+	}
 }
