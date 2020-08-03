@@ -28,7 +28,7 @@ public class SimpleSkill {
 
 	@Execute
 	public void execute() {
-		y = j + 9;
+		y = j * 2;
 	}
 
 	@Completing
