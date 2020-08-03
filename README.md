@@ -44,14 +44,14 @@ Together with `@Skill` these annotations are important to create a functioning s
 * @Unsuspending: Ensures that the method following this annotation is executed in Unsuspending state
 
 
-If you have your *Skill-Runtime* up and running, you can simply deploy skills by dropping them into the *include*-directory of your skill runtime. Skill-Up will pick up the new skill and publish it as a skill.
+If you have your *Skill-Runtime* up and running, you can deploy skills by simply dropping them into the *include*-directory of your skill runtime. Skill-Up will pick up the new skill and publish it as a new skill.
 
 ## Examples
 You can already find examples in the examples folder. They will be explained here soon...
 
 ```Java
 @Skill(type = "OpcUaSkill")
-public classAdditionSkill {
+public class AdditionSkill {
 	@SkillParameter
 	int a,b;
 	
@@ -59,11 +59,11 @@ public classAdditionSkill {
 	int result;
 	
 	@Execute
-	public voidaPlusB() {
+	public void aPlusB() {
 		this.result = this.a + this.b;
 	}
 }
 ```
 
 ## How it works
-Coming soon...
+One bundle in our Skill-Runtime is responsible for tracking new bundles that contain a @Skill-Annoation
