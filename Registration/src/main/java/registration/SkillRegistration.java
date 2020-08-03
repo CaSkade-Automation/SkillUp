@@ -1,5 +1,7 @@
 package registration;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -48,8 +50,8 @@ public class SkillRegistration extends RegistrationMethods {
 		List<OpsDescription> opsList = moduleRegistry.skillRegisterOpsList(moduleIri);
 
 		for (OpsDescription opsDescription : opsList) {
-			String location = opsDescription.getBasePath() + opsDescription.getModuleEndpoint() + "/" + moduleIri
-					+ opsDescription.getSkillEndpoint() + "/" + skill.getClass().getAnnotation(Skill.class).skillIri();
+			String location = opsDescription.getBasePath() + opsDescription.getModuleEndpoint() + "/" + URLEncoder.encode(moduleIri, StandardCharsets.UTF_8)
+					+ opsDescription.getSkillEndpoint() + "/" + URLEncoder.encode(skill.getClass().getAnnotation(Skill.class).skillIri(), StandardCharsets.UTF_8);
 
 			String json = "{\"newState\":" + state.toString() + "}";
 			opsRequest(opsDescription, "PATCH", location, json, "application/json");
