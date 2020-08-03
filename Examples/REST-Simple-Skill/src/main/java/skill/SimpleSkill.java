@@ -10,7 +10,7 @@ import annotations.SkillOutput;
 import annotations.Skill;
 import annotations.Starting;
 
-@Skill(skillIri = "https://siemens.de/skills#RestSkill", capabilityIri = "https://siemens.de/capabilites#bestCapability", moduleIri = "https://siemens.de/modules#ModuleA")
+@Skill(type = "RestSkill", skillIri = "https://siemens.de/skills#RestSkill", capabilityIri = "https://siemens.de/capabilites#bestCapability", moduleIri = "https://siemens.de/modules#ModuleA")
 public class SimpleSkill {
 
 	private final Logger logger = LoggerFactory.getLogger(SimpleSkill.class);
