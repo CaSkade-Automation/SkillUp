@@ -9,10 +9,8 @@ import org.eclipse.milo.opcua.sdk.server.OpcUaServer;
 import org.eclipse.milo.opcua.sdk.server.api.DataItem;
 import org.eclipse.milo.opcua.sdk.server.api.ManagedNamespace;
 import org.eclipse.milo.opcua.sdk.server.api.MonitoredItem;
-import org.eclipse.milo.opcua.sdk.server.nodes.AttributeObserver;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaMethodNode;
-import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaVariableNode;
 import org.eclipse.milo.opcua.sdk.server.util.SubscriptionModel;
 import org.eclipse.milo.opcua.stack.core.AttributeId;
@@ -54,6 +52,8 @@ public class Namespace extends ManagedNamespace {
 	protected void onStartup() {
 		super.onStartup();
 
+		subscriptionModel.startup(); 
+		
 		// create a folder and add it to the node manager
 		NodeId folderNodeId = newNodeId("Skills");
 
@@ -102,26 +102,8 @@ public class Namespace extends ManagedNamespace {
 						.build();
 
 				node.setValue(new DataValue(variableDescription.getVariant()));
-				node.addAttributeObserver(new AttributeObserver() {
 
-					@Override
-					public void attributeChanged(UaNode node, AttributeId attributeId, Object value) {
-						// TODO Auto-generated method stub
-						DataValue dataValue = (DataValue) value;
-						try {
-							setField(field, field.getType(), dataValue, skill);
-							System.out.println(
-									"Input Paramter " + field.getName() + " of " + skill.getClass().getSimpleName()
-											+ " has changed, new Value is: " + dataValue.getValue().getValue());
-						} catch (IllegalArgumentException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (IllegalAccessException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-				});
+				node.getFilterChain().addLast(new AttributeLoggingFilter(AttributeId.Value::equals, field, skill)); 
 
 				getNodeManager().addNode(node);
 				folder.addOrganizes(node);
@@ -146,25 +128,6 @@ public class Namespace extends ManagedNamespace {
 				folder.addOrganizes(node);
 				skillOutput = node;
 			}
-		}
-	}
-
-	public void setField(Field field, Class<?> type, DataValue dataValue, Object skill)
-			throws IllegalArgumentException, IllegalAccessException {
-		if (type == boolean.class) {
-			field.set(skill, (boolean) dataValue.getValue().getValue());
-		} else if (type == byte.class) {
-			field.set(skill, (byte) dataValue.getValue().getValue());
-		} else if (type == short.class) {
-			field.set(skill, (short) dataValue.getValue().getValue());
-		} else if (type == int.class) {
-			field.set(skill, (int) dataValue.getValue().getValue());
-		} else if (type == long.class) {
-			field.set(skill, (long) dataValue.getValue().getValue());
-		} else if (type == float.class) {
-			field.set(skill, (float) dataValue.getValue().getValue());
-		} else if (type == double.class) {
-			field.set(skill, (double) dataValue.getValue().getValue());
 		}
 	}
 
@@ -244,7 +207,7 @@ public class Namespace extends ManagedNamespace {
 
 		UaMethodNode skillNode = createMethodNode(folder, "getResult");
 		GetResultMethod newSkill = new GetResultMethod(skillNode, skill);
-		skillNode.setProperty(UaMethodNode.OutputArguments, newSkill.getOutputArguments());
+		skillNode.setOutputArguments(newSkill.getOutputArguments());
 		skillNode.setInvocationHandler(newSkill);
 		getNodeManager().addNode(skillNode);
 
