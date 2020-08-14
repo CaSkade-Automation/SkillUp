@@ -131,7 +131,7 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 
 	public String generateOpcUaSkillDescription(Object skill, StateMachine stateMachine, Server server) {
 
-		String skillName = skill.getClass().getSimpleName();
+		String skillName = skill.getClass().getAnnotation(Skill.class).skillIri();
 
 		String opcUaSkillDescription = null;
 		List<Node> opcUaNodes = server.getNamespace().getFolder().getOrganizesNodes();
