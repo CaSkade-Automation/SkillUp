@@ -4,8 +4,6 @@ import java.io.IOException;
 
 import org.osgi.service.component.annotations.Component;
 
-import states.IState;
-
 @Component(immediate = true, service = Registration.class)
 public class Registration {
 
@@ -44,7 +42,7 @@ public class Registration {
 		return moduleAvailable;
 	}
 
-	public void skillStateChanged(Object skill, IState state) {
-		skillRegistration.stateChanged(skill, state, moduleRegistry); 
+	public void skillStateChanged(Object skill, String stateIri) {
+		skillRegistration.stateChanged(skill, stateIri, moduleRegistry); 
 }
 }
