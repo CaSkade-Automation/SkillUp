@@ -1,10 +1,13 @@
 package opcUaServer;
 
 import java.io.File;
+import java.net.Inet4Address;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.security.Security;
 import java.security.cert.X509Certificate;
+import java.util.Enumeration;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -19,7 +22,6 @@ import org.eclipse.milo.opcua.sdk.server.identity.X509IdentityValidator;
 import org.eclipse.milo.opcua.stack.core.StatusCodes;
 import org.eclipse.milo.opcua.stack.core.UaRuntimeException;
 import org.eclipse.milo.opcua.stack.core.security.DefaultCertificateManager;
-import org.eclipse.milo.opcua.stack.core.security.DefaultCertificateValidator;
 import org.eclipse.milo.opcua.stack.core.security.DefaultTrustListManager;
 import org.eclipse.milo.opcua.stack.core.security.SecurityPolicy;
 import org.eclipse.milo.opcua.stack.core.transport.TransportProfile;
@@ -29,6 +31,7 @@ import org.eclipse.milo.opcua.stack.core.types.enumerated.MessageSecurityMode;
 import org.eclipse.milo.opcua.stack.core.types.structured.BuildInfo;
 import org.eclipse.milo.opcua.stack.core.util.CertificateUtil;
 import org.eclipse.milo.opcua.stack.server.EndpointConfiguration;
+import org.eclipse.milo.opcua.stack.server.security.DefaultServerCertificateValidator;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -51,37 +54,37 @@ public class Server {
 
 	private static final int TCP_BIND_PORT = 4841;
 	private Namespace namespace;
-	private String userName = "user"; 
-	private String userPassword = "password1"; 
-    private final Logger logger = LoggerFactory.getLogger(Server.class);
+	private String userName = "user";
+	private String userPassword = "password1";
+	private final Logger logger = LoggerFactory.getLogger(Server.class);
 
 	static {
 		// Required for SecurityPolicy.Aes256_Sha256_RsaPss
 		Security.addProvider(new BouncyCastleProvider());
 	}
 
-    /**
-     * Server is started <br>
-     * 
-     * Constructor hasn't to be added to activate method, because an OSGi bundle
-     * starts constructor automatically. Without future.get so that the activate
-     * method doesn't block until the future is reached.
-     * 
-     * @Activate method that should be called on component activation
-     * @throws Exception
-     */
-    @Activate
-    public void activate() throws Exception {
+	/**
+	 * Server is started <br>
+	 * 
+	 * Constructor hasn't to be added to activate method, because an OSGi bundle
+	 * starts constructor automatically. Without future.get so that the activate
+	 * method doesn't block until the future is reached.
+	 * 
+	 * @Activate method that should be called on component activation
+	 * @throws Exception
+	 */
+	@Activate
+	public void activate() throws Exception {
 
-        logger.info("OPC-UA-Server wird aktiviert");
+		logger.info("OPC-UA-Server wird aktiviert");
 
-        server.startup().get();
+		server.startup().get();
 
-        final CompletableFuture<Void> future = new CompletableFuture<>();
+		final CompletableFuture<Void> future = new CompletableFuture<>();
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> future.complete(null)));
-    }
-	
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> future.complete(null)));
+	}
+
 	private final OpcUaServer server;
 
 	/**
@@ -108,7 +111,8 @@ public class Server {
 		DefaultTrustListManager trustListManager = new DefaultTrustListManager(pkiDir);
 		LoggerFactory.getLogger(getClass()).info("pki dir: {}", pkiDir.getAbsolutePath());
 
-		DefaultCertificateValidator certificateValidator = new DefaultCertificateValidator(trustListManager);
+		DefaultServerCertificateValidator certificateValidator = new DefaultServerCertificateValidator(
+				trustListManager);
 
 		UsernameIdentityValidator identityValidator = new UsernameIdentityValidator(true, authChallenge -> {
 			String username = authChallenge.getUsername();
@@ -161,19 +165,33 @@ public class Server {
 		bindAddresses.add("0.0.0.0");
 
 		Set<String> hostnames = new LinkedHashSet<>();
-//		hostnames.add(HostnameUtil.getHostname());
+		// hostnames.add(HostnameUtil.getHostname());
 //		hostnames.addAll(HostnameUtil.getHostnames("0.0.0.0"));
+
 		try {
-			hostnames.add(InetAddress.getLocalHost().getHostAddress());
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
+			Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+			while (interfaces.hasMoreElements()) {
+				NetworkInterface iface = interfaces.nextElement();
+				// filters out 127.0.0.1 and inactive interfaces
+				if (iface.isLoopback() || !iface.isUp())
+					continue;
+
+				Enumeration<InetAddress> addresses = iface.getInetAddresses();
+				while (addresses.hasMoreElements()) {
+					InetAddress addr = addresses.nextElement();
+					if (addr instanceof Inet4Address) {
+						hostnames.add(addr.getHostAddress());
+					}
+				}
+			}
+		} catch (SocketException e) {
+			throw new RuntimeException(e);
+		}
 
 		for (String bindAddress : bindAddresses) {
 			for (String hostname : hostnames) {
 				EndpointConfiguration.Builder builder = EndpointConfiguration.newBuilder().setBindAddress(bindAddress)
-						.setHostname(hostname).setPath("milo").setCertificate(certificate).addTokenPolicies(
+						.setHostname(hostname).setPath("/hsu").setCertificate(certificate).addTokenPolicies(
 								USER_TOKEN_POLICY_ANONYMOUS, USER_TOKEN_POLICY_USERNAME, USER_TOKEN_POLICY_X509);
 
 				EndpointConfiguration.Builder noSecurityBuilder = builder.copy().setSecurityPolicy(SecurityPolicy.None)
@@ -206,13 +224,13 @@ public class Server {
 
 		return endpointConfigurations;
 	}
-	
+
 	public String getUserName() {
-		return this.userName; 
+		return this.userName;
 	}
-	
+
 	public String getUserPassword() {
-		return this.userPassword; 
+		return this.userPassword;
 	}
 
 	private static EndpointConfiguration buildTcpEndpoint(EndpointConfiguration.Builder base) {
@@ -222,9 +240,9 @@ public class Server {
 	public OpcUaServer getServer() {
 		return server;
 	}
-	
+
 	public Namespace getNamespace() {
-		return namespace; 
+		return namespace;
 	}
 
 	public CompletableFuture<OpcUaServer> startup() {
@@ -232,12 +250,13 @@ public class Server {
 	}
 
 	public CompletableFuture<OpcUaServer> shutdown() {
+		namespace.shutdown();
 		return server.shutdown();
 	}
 
-    @Deactivate
-    public void deactivate() {
-        logger.info("OPC-UA-Server wird deaktiviert");
-        //hier: server.shutdown(); 
-    }
+	@Deactivate
+	public void deactivate() {
+		logger.info("OPC-UA-Server wird deaktiviert");
+		// hier: server.shutdown();
+	}
 }
