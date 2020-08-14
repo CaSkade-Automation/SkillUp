@@ -10,9 +10,7 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Stack;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -82,14 +80,25 @@ public class Broadcast {
 		byte[] receiveData = new byte[2048];
 		DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
 
-		// TODO: wait for possibly multiple responses
-		socket.receive(receivePacket);
-		logger.info(receivePacket.toString());
-		logger.info(receivePacket.getData().toString());
+		Thread receivingBroadcastResponseThread = new Thread() {
+			public void run() {
+				try {
+					while (true) {
+						socket.receive(receivePacket);
+						broadcastResponse(receivePacket, moduleRegistry);
+					}
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		};
 
-		broadcastResponse(receivePacket, moduleRegistry);
-
-		socket.close();
+		CompletableFuture.runAsync(receivingBroadcastResponseThread::run).orTimeout(20, TimeUnit.SECONDS)
+				.exceptionally(throwable -> {
+					logger.info("No more OPS found", throwable);
+					return null;
+				});
 	}
 
 	/**
@@ -111,7 +120,7 @@ public class Broadcast {
 		OpsDescription opsDescription = gson.fromJson(opsDescriptionAsString, OpsDescription.class);
 
 		int port = opsDescription.getPort();
-		String basePath = opsDescription.getBasePath(); 
+		String basePath = opsDescription.getBasePath();
 		String moduleEndpoint = opsDescription.getModuleEndpoint();
 		String id = opsDescription.getId();
 		String capabilityEndpoint = opsDescription.getCapabilityEndpoint();
@@ -119,119 +128,5 @@ public class Broadcast {
 
 		opsDescription = new OpsDescription(ip, id, port, basePath, moduleEndpoint, capabilityEndpoint, skillEndpoint);
 		moduleRegistry.addOps(opsDescription);
-	}
-
-	/**
-	 * Converts IP address to the binary form
-	 * 
-	 * @param str IP address in String form
-	 * @return IP address in binary form
-	 */
-	public static int[] ipAddressToBinary(String[] str) {
-		int re[] = new int[32];
-		int a, b, c, d, i, rem;
-		a = b = c = d = 1;
-		Stack<Integer> st = new Stack<Integer>();
-
-		// Separate each number of the IP address
-		if (str != null) {
-			a = Integer.parseInt(str[0]);
-			b = Integer.parseInt(str[1]);
-			c = Integer.parseInt(str[2]);
-			d = Integer.parseInt(str[3]);
-		}
-
-		// convert first number to binary
-		for (i = 0; i <= 7; i++) {
-			rem = a % 2;
-			st.push(rem);
-			a = a / 2;
-		}
-
-		// Obtain First octet
-		for (i = 0; i <= 7; i++) {
-			re[i] = st.pop();
-		}
-
-		// convert second number to binary
-		for (i = 8; i <= 15; i++) {
-			rem = b % 2;
-			st.push(rem);
-			b = b / 2;
-		}
-
-		// Obtain Second octet
-		for (i = 8; i <= 15; i++) {
-			re[i] = st.pop();
-		}
-
-		// convert Third number to binary
-		for (i = 16; i <= 23; i++) {
-			rem = c % 2;
-			st.push(rem);
-			c = c / 2;
-		}
-
-		// Obtain Third octet
-		for (i = 16; i <= 23; i++) {
-			re[i] = st.pop();
-		}
-
-		// convert fourth number to binary
-		for (i = 24; i <= 31; i++) {
-			rem = d % 2;
-			st.push(rem);
-			d = d / 2;
-		}
-
-		// Obtain Fourth octet
-		for (i = 24; i <= 31; i++) {
-			re[i] = st.pop();
-		}
-		return (re);
-	}
-
-	/**
-	 * Converts address from binary to decimal form
-	 * 
-	 * @param bi address in binary form
-	 * @return address in decimal form
-	 */
-
-	public static int[] convertAddressToDecimal(int[] bi) {
-
-		int[] arr = new int[4];
-		int a, b, c, d, i, j;
-		a = b = c = d = 0;
-		j = 7;
-
-		for (i = 0; i < 8; i++) {
-			a = a + (int) (Math.pow(2, j)) * bi[i];
-			j--;
-		}
-
-		j = 7;
-		for (i = 8; i < 16; i++) {
-			b = b + bi[i] * (int) (Math.pow(2, j));
-			j--;
-		}
-
-		j = 7;
-		for (i = 16; i < 24; i++) {
-			c = c + bi[i] * (int) (Math.pow(2, j));
-			j--;
-		}
-
-		j = 7;
-		for (i = 24; i < 32; i++) {
-			d = d + bi[i] * (int) (Math.pow(2, j));
-			j--;
-		}
-
-		arr[0] = a;
-		arr[1] = b;
-		arr[2] = c;
-		arr[3] = d;
-		return arr;
 	}
 }
