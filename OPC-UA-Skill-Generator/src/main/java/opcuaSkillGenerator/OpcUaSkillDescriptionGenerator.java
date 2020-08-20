@@ -276,10 +276,7 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 						.replace("${Password}", server.getUserPassword());
 				opcUaServerDescription = opcUaServerDescription + opcUaServerUser;
 			}
-
 			opcUaServerDescription = opcUaServerDescription + opcUaServerSecurity;
-			opcUaServerDescription = opcUaServerDescription.replace("${ServerName}",
-					server.getServer().getConfig().getApplicationName().getText());
 		}
 		return opcUaServerDescription;
 	}
