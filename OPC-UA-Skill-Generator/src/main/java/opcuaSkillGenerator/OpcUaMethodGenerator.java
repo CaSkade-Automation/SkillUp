@@ -6,6 +6,7 @@ import org.eclipse.milo.opcua.sdk.server.api.nodes.Node;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 
+import annotations.Skill;
 import opcUaServer.Server;
 import statemachine.StateMachine;
 
@@ -14,7 +15,8 @@ public class OpcUaMethodGenerator {
 	public void generateSkill(Object skill, StateMachine stateMachine, Server opcUaServer) {
 		// TODO Auto-generated method stub
 		
-		String skillName = skill.getClass().getSimpleName();
+		String skillName = skill.getClass().getAnnotation(Skill.class).skillIri();
+//				getSimpleName();
 		
 		UaFolderNode folder = opcUaServer.getNamespace().addFolder(skillName);
 
@@ -28,7 +30,7 @@ public class OpcUaMethodGenerator {
 	public void deleteSkill(Object skill, Server opcUaServer) {
 		// TODO Auto-generated method stub
 		
-		String skillName = skill.getClass().getSimpleName();
+		String skillName = skill.getClass().getAnnotation(Skill.class).skillIri();
 		List<Node> organizedNodes = opcUaServer.getNamespace().getFolder().getOrganizesNodes();
 		UaNode skillNode = null;
 		for (Node organizedNode : organizedNodes) {
