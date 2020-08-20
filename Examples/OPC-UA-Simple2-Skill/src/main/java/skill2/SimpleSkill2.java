@@ -18,17 +18,20 @@ public class SimpleSkill2 {
 	@SkillParameter(isRequired = true)
 	private int i;
 
+	@SkillParameter(isRequired = true)
+	private int j; 
+	
 	@SkillOutput(isRequired = true)
 	private int z;
 
 	@Starting
 	public void starting() {
-		logger.info("Starting, i = " + i);
+		logger.info("Starting with i = " + i + " and j = " + j);
 	}
 
 	@Execute
 	public void execute() {
-		z = i + 5;
+		z = i - j;
 	}
 
 	@Completing
