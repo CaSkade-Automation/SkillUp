@@ -98,7 +98,7 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 			Enumeration<String> userFiles) {
 		Skill skillAnnotation = skill.getClass().getAnnotation(Skill.class);
 
-		String opcUaServerDescription = null;
+		String opcUaServerDescription = "";
 		if (!serverDescription) {
 			opcUaServerDescription = generateOpcUaServerDescription(server);
 			serverDescription = true;
