@@ -6,8 +6,8 @@ import states.IState;
 
 public class StateChangeObserver implements IStateChangeObserver {
 
-	Registration registration;
-	Object skill;
+	private Registration registration;
+	private Object skill;
 
 	public StateChangeObserver(Registration registration, Object skill) {
 		// TODO Auto-generated constructor stub
@@ -20,6 +20,12 @@ public class StateChangeObserver implements IStateChangeObserver {
 		// TODO Auto-generated method stub
 		System.out.println("State of " + skill.getClass().getSimpleName() + " has changed, new State is: "
 				+ newState.getClass().getSimpleName());
-		registration.skillStateChanged(skill, newState);
+		String stateIri = null;
+		for (StateIris state : StateIris.values()) {
+			if (state.name().equals(newState.getClass().getSimpleName())) {
+				stateIri = state.getStateIri();
+			}
+		}
+		registration.skillStateChanged(skill, stateIri);
 	}
 }

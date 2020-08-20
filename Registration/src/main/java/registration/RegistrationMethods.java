@@ -17,12 +17,9 @@ import java.nio.charset.StandardCharsets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.Gson;
-
 public abstract class RegistrationMethods {
 
 	private Logger logger = LoggerFactory.getLogger(RegistrationMethods.class);
-	private Gson gson = new Gson(); 
 
 	public abstract void register(String requestBody, Object object, ModuleRegistry moduleRegistry);
 
@@ -74,15 +71,12 @@ public abstract class RegistrationMethods {
 	 * @param requestBody    String which is send in the body of the request
 	 * @return status code of the received response
 	 */
-	public int opsRequest(OpsDescription opsDescription, String requestType, String location, String requestBody, String contentType) {
+	public int opsRequest(OpsDescription opsDescription, String requestType, String location, String requestBody,
+			String contentType) {
 
-		if(contentType.equals("application/json")) {
-			requestBody = gson.toJson(requestBody); 
-		}
-		
-		String ip = opsDescription.getIp(); 
-		int port = opsDescription.getPort(); 
-		
+		String ip = opsDescription.getIp();
+		int port = opsDescription.getPort();
+
 		// Using new JDK 11 HttpClient -> could be moved to constructor
 		HttpClient httpClient = HttpClient.newBuilder().build();
 

@@ -7,12 +7,14 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.Gson;
+
 import annotations.Skill;
-import states.IState;
 
 public class SkillRegistration extends RegistrationMethods {
 
 	private Logger logger = LoggerFactory.getLogger(SkillRegistration.class);
+	private Gson gson = new Gson();
 
 	@Override
 	public void register(String requestBody, Object object, ModuleRegistry moduleRegistry) {
@@ -44,16 +46,23 @@ public class SkillRegistration extends RegistrationMethods {
 		}
 	}
 
-	public void stateChanged(Object skill, IState state, ModuleRegistry moduleRegistry) {
+	public void stateChanged(Object skill, String stateIri, ModuleRegistry moduleRegistry) {
 
 		String moduleIri = skill.getClass().getAnnotation(Skill.class).moduleIri();
 		List<OpsDescription> opsList = moduleRegistry.skillRegisterOpsList(moduleIri);
 
 		for (OpsDescription opsDescription : opsList) {
-			String location = opsDescription.getBasePath() + opsDescription.getModuleEndpoint() + "/" + URLEncoder.encode(moduleIri, StandardCharsets.UTF_8)
-					+ opsDescription.getSkillEndpoint() + "/" + URLEncoder.encode(skill.getClass().getAnnotation(Skill.class).skillIri(), StandardCharsets.UTF_8);
+			String location = opsDescription.getBasePath() + opsDescription.getModuleEndpoint() + "/"
+					+ URLEncoder.encode(moduleIri, StandardCharsets.UTF_8) + opsDescription.getSkillEndpoint() + "/"
+					+ URLEncoder.encode(skill.getClass().getAnnotation(Skill.class).skillIri(), StandardCharsets.UTF_8);
 
-			String json = "{\"newState\":" + state.toString() + "}";
+//			String json = "{ \"newState\":" + " \"" + stateIri + "\" " + "}";
+			ChangedState newState = new ChangedState(); 
+			newState.newState = stateIri; 
+			
+			String json = gson.toJson(newState); 
+			logger.info(json); 
+			
 			opsRequest(opsDescription, "PATCH", location, json, "application/json");
 		}
 	}
