@@ -17,7 +17,7 @@ import statemachine.StateMachine;
 public class RestSkillGenerator implements SkillGeneratorInterface {
 
 	private static Logger logger = LoggerFactory.getLogger(RestSkillGenerator.class);
-	
+
 	private RestSkillDescriptionGenerator restSkillDescriptionGenerator = new RestSkillDescriptionGenerator();
 
 	@Reference
@@ -46,7 +46,8 @@ public class RestSkillGenerator implements SkillGeneratorInterface {
 	@Override
 	public String generateDescription(Object skill, StateMachine stateMachine, Enumeration<String> userFiles) {
 		logger.info(getClass().getSimpleName() + ": Trying to generate REST skill description...");
-		String description = restSkillDescriptionGenerator.generateRestDescription(resource, skill, stateMachine, userFiles);
+		String description = restSkillDescriptionGenerator.generateRestDescription(resource, skill, stateMachine,
+				userFiles);
 		return description;
 	}
 
