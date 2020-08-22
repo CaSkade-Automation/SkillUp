@@ -87,6 +87,18 @@ public class RestResource {
 		}
 	}
 
+	public String getUuidByIri(String skillIri) throws Exception {
+		// check if iri is present in skillTable
+		Set<UUID> setOfKeys = skillTable.keySet();
+		for (UUID key : setOfKeys) {
+			// match
+			if (skillIri.equals(skillTable.get(key).getSkillIri())) {
+				return skillTable.get(key).getUUID().toString();
+			}
+		}
+		throw new Exception("No skill with that Iri found!");
+	}
+
 	@GET
 	@Produces(MediaType.TEXT_HTML)
 	public String landing() {
