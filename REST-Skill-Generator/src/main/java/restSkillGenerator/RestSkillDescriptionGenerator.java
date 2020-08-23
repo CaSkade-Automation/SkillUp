@@ -56,11 +56,14 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 		String userSnippet = getUserSnippets(userFiles, skill.getClass().getClassLoader());
 
 		StringBuilder restSkillDescription = new StringBuilder();
-		// TODO: providesSkill and connection to module?
+		// TODO: do we need to create module as well?
 		restSkillDescription.append("<${SkillIri}_RestSkill> a Cap:RestSkill ;\n");
 		restSkillDescription.append("	WADL:hasBase \"http://${IpAddress}:8181/skills/${UUID}/\" ;\n");
 		restSkillDescription.append("	Cap:hasStateMachine <${SkillIri}_StateMachine> ;\n");
 		restSkillDescription.append("	Cap:hasCurrentState <${SkillIri}_StateMachine_${InitialState}> .\n");
+
+		restSkillDescription.append("<${CapabilityIri}> Cap:isExecutableViaRestSkill <${SkillIri}> .\n");
+		restSkillDescription.append("<${ModuleIri}> Cap:providesRestSkill <${SkillIri}> .\n");
 
 		restSkillDescription.append("<${SkillIri}_Representation> a WADL:Representation ;\n");
 		restSkillDescription.append("	WADL:hasMediaType \"${MediaType}\" ;\n");
@@ -82,13 +85,12 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 			restSkillDescription.append(
 					"<${SkillIri}_" + transitionCapitalized + "Method> WADL:hasRequest <${SkillIri}_Request> .\n");
 			// TODO does this work correctly?
-			// wires up the invokes-connection from the method to the stateMachine
+			// invoke-DataProperty from the method to the stateMachine
 			restSkillDescription.append("<${SkillIri}_" + transitionCapitalized
 					+ "Method> Cap:invokes <${SkillIri}_StateMachine_" + transitionCapitalized + "_Command> .\n");
 		}
 
-		// wire up skill parameters and skill outputs!
-
+		// connect SkillParameters and SkillOutputs!
 		int skillParamCounter = 0;
 		int skillOutputCounter = 0;
 
@@ -103,7 +105,7 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 				restSkillDescription.append("	Cap:hasVariableType \"" + field.getType().getSimpleName() + "\" ;\n");
 				restSkillDescription.append("	Cap:isRequired \""
 						+ Boolean.toString(field.getAnnotation(SkillParameter.class).isRequired()) + "\" ;\n");
-				// TODO wie soll hasDefaultValue ausgewertet werden??
+				// TODO how to evaluate hasDefaultValue ?
 				// field.get(skill).toString()
 				restSkillDescription.append("	Cap:hasDefaultValue \"" + "ERR: NOT IMPLEMENTED" + "\" .\n");
 
@@ -149,7 +151,7 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 				restSkillDescription.append("<${SkillIri}_Representation> WADL:hasParameter <${SkillIri}_Output"
 						+ skillOutputCounter + "> .\n");
 
-				// TODO Parameter Options!
+				// TODO ParamOptions for SkillOutputs !
 
 			}
 		}
@@ -172,7 +174,7 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 					.replace("${MediaType}", "application/html")
 					.replace("${IpAddress}", getIpAddress());
 
-			// TODO: need to create a file?
+			// TODO: why need to create a file?
 			createFile(completeDescription, "restDescription.ttl");
 
 			return completeDescription;
