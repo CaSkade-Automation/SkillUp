@@ -41,7 +41,7 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 			List<InterfaceAddress> i = e.getInterfaceAddresses();
 			for (InterfaceAddress intAddr : i) {
 				if (intAddr.getAddress() instanceof Inet4Address) {
-					addresses.add(intAddr.toString());
+					addresses.add(intAddr.getAddress().toString().replace("/", ""));
 				}
 			}
 		}
