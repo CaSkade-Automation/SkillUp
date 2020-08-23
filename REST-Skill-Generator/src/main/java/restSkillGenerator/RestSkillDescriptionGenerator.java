@@ -123,10 +123,10 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 					if (!option.isEmpty()) {
 						skillOptionCounter++;
 						restSkillDescription.append("<${SkillIri}_Param" + skillParamCounter + "_Option"
-								+ skillOptionCounter + "> a Cap:SkillVariableOption ;\n");
-						restSkillDescription.append("	Cap:hasOptionValue \"" + option + "\" .\n");
+								+ skillOptionCounter + "> a WADL:Option ;\n");
+						restSkillDescription.append("	WADL:hasOptionValue \"" + option + "\" .\n");
 						restSkillDescription.append("<${SkillIri}_Param" + skillParamCounter
-								+ "> Cap:hasSkillVariableOption <${SkillIri}_Param" + skillParamCounter + "_Option"
+								+ "> WADL:hasParameterOption <${SkillIri}_Param" + skillParamCounter + "_Option"
 								+ skillOptionCounter + "> .\n");
 					}
 				}
