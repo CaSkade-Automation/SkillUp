@@ -19,9 +19,6 @@ import states.TransitionName;
 
 public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 
-	String restMainSkillSnippet = "";
-	String restActionSkillSnippet = "";
-
 	// find our local ip address for generating url in the descriptions
 	public String getIpAddress() {
 		Enumeration<NetworkInterface> n = null;
@@ -140,7 +137,7 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 				restSkillDescription.append("	Cap:hasVariableType \"" + field.getType().getSimpleName() + "\" ;\n");
 				restSkillDescription.append("	Cap:isRequired \""
 						+ Boolean.toString(field.getAnnotation(SkillParameter.class).isRequired()) + "\" ;\n");
-				// TODO wie soll hasDefaultValue ausgewertet werden??
+				// TODO how to get the default value?
 				// field.get(skill).toString()
 				restSkillDescription.append("	Cap:hasDefaultValue \"" + "ERR: NOT IMPLEMENTED" + "\" .\n");
 
@@ -152,7 +149,7 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 				restSkillDescription.append("<${SkillIri}_Representation> WADL:hasParameter <${SkillIri}_Output"
 						+ skillOutputCounter + "> .\n");
 
-				// TODO parameter options??
+				// TODO Parameter Options!
 
 			}
 		}
@@ -169,12 +166,12 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 					.replace("${SkillIri}", skillAnnotation.skillIri())
 					// TODO: does this return the correct uuid?
 					.replace("${UUID}", restResource.getUuidByIri(skillAnnotation.skillIri()))
-					// TODO: setting initial state to idle - is this ok?
+					// TODO: setting initial state to idle by default - is this ok?
 					.replace("${InitialState}", "Idle")
 					// TODO: ALWAYS setting mediaType to html - change?
 					.replace("${MediaType}", "application/html")
 					.replace("${IpAddress}", getIpAddress());
-			
+
 			// TODO: need to create a file?
 			createFile(completeDescription, "restDescription.ttl");
 
