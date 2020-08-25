@@ -169,8 +169,8 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 					// TODO: does this return the correct uuid?
 					.replace("${UUID}", restResource.getUuidByIri(skillAnnotation.skillIri()))
 					.replace("${InitialState}", stateMachine.getState().getClass().getSimpleName())
-					// TODO: ALWAYS setting mediaType to html - change?
-					.replace("${MediaType}", "application/html")
+					// for now we always assume JSON format
+					.replace("${MediaType}", "application/json")
 					.replace("${IpAddress}", getIpAddress());
 
 			// TODO: why need to create a file?
