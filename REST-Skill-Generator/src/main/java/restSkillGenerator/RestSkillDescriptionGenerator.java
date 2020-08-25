@@ -168,8 +168,7 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 					.replace("${SkillIri}", skillAnnotation.skillIri())
 					// TODO: does this return the correct uuid?
 					.replace("${UUID}", restResource.getUuidByIri(skillAnnotation.skillIri()))
-					// TODO: setting initial state to idle by default - is this ok?
-					.replace("${InitialState}", "Idle")
+					.replace("${InitialState}", stateMachine.getState().getClass().getSimpleName())
 					// TODO: ALWAYS setting mediaType to html - change?
 					.replace("${MediaType}", "application/html")
 					.replace("${IpAddress}", getIpAddress());
