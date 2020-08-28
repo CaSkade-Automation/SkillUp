@@ -1,9 +1,7 @@
 package registration;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +11,6 @@ import annotations.Module;
 public class ModuleRegistry {
 
 	private List<OpsDescription> opsDescriptionList = new ArrayList<OpsDescription>();
-	private Map<String, ArrayList<String>> opsAndSkillList = new HashMap<String, ArrayList<String>>();
 	private Logger logger = LoggerFactory.getLogger(ModuleRegistry.class);
 
 	public List<OpsDescription> skillRegisterOpsList(String moduleIri) {
@@ -43,10 +40,6 @@ public class ModuleRegistry {
 		return opsDescriptionList;
 	}
 
-	public Map<String, ArrayList<String>> getOpsAndSkillList() {
-		return opsAndSkillList;
-	}
-
 	/**
 	 * Method to get the whole OPS description by its IP address
 	 * 
@@ -73,8 +66,6 @@ public class ModuleRegistry {
 	public void addOps(OpsDescription opsDescription) {
 		opsDescriptionList.add(opsDescription);
 		opsListMessage();
-		ArrayList<String> skills = new ArrayList<String>();
-		opsAndSkillList.put(opsDescription.getId(), skills);
 	}
 
 	/**
@@ -102,35 +93,11 @@ public class ModuleRegistry {
 		}
 	}
 
-	/**
-	 * Method to log OPS-Skill-List as message
-	 */
-	public void opsSkillListMessage() {
-		logger.info("New OPS-Skill-List: ");
-		for (Map.Entry<String, ArrayList<String>> me : opsAndSkillList.entrySet()) {
-			logger.info("OPS: " + me.getKey() + " & Skills: " + me.getValue());
-		}
-	}
-
 	public void addModule(OpsDescription opsDescription, Object module) {
 		opsDescription.addModule(module);
 	}
 
 	public void deleteModule(OpsDescription opsDescription, Object module) {
 		opsDescription.deleteModule(module);
-	}
-
-	public void addSkill(OpsDescription opsDescription, String skillIri) {
-		ArrayList<String> skills = opsAndSkillList.get(opsDescription.getId());
-		skills.add(skillIri);
-		getOpsAndSkillList().put(opsDescription.getId(), skills);
-		opsSkillListMessage();
-	}
-	
-	public void deleteSkill(OpsDescription opsDescription, String skillIri) {
-		ArrayList<String> skills = opsAndSkillList.get(opsDescription.getId());
-		skills.remove(skillIri);
-		getOpsAndSkillList().put(opsDescription.getId(), skills);
-		opsSkillListMessage();
 	}
 }

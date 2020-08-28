@@ -37,8 +37,8 @@ public class SmartTracker {
 	private final Logger logger = LoggerFactory.getLogger(SmartTracker.class);
 	private org.osgi.util.tracker.BundleTracker<Bundle> bundleTracker;
 
-	// class objects from a skill bundle to use method to delete skill before
-	// removing bundle
+	// class objects from a skill/module bundle to use method to delete skill/module
+	// before removing bundle
 	private Map<Bundle, Object> skillClassObjects = new HashMap<Bundle, Object>();
 	private Map<Bundle, Object> moduleClassObjects = new HashMap<Bundle, Object>();
 
@@ -125,7 +125,8 @@ public class SmartTracker {
 											skillClassObjects.put(bundle, skillObj);
 
 											StateMachine stateMachine = actionGenerator.generateAction(skillObj);
-											StateChangeObserver stateChangeObserver = new StateChangeObserver(registration, skillObj); 
+											StateChangeObserver stateChangeObserver = new StateChangeObserver(
+													registration, skillObj);
 											stateMachine.addStateChangeObserver(stateChangeObserver);
 
 											for (Map.Entry<SkillGeneratorInterface, String> me : skillGeneratorPropertyList

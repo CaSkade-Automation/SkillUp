@@ -38,7 +38,6 @@ public class SkillRegistration extends RegistrationMethods {
 			if (responseStatusCode == 201) {
 				logger.info("Skill " + object.getClass().getAnnotation(Skill.class).skillIri() + " registered to "
 						+ "OPS " + opsDescription.getId());
-				moduleRegistry.addSkill(opsDescription, object.getClass().getAnnotation(Skill.class).skillIri());
 			} else {
 				logger.info("Skill: " + object.getClass().getAnnotation(Skill.class).skillIri()
 						+ " couldn't be registered to " + "OPS " + opsDescription.getId());
@@ -57,12 +56,12 @@ public class SkillRegistration extends RegistrationMethods {
 					+ URLEncoder.encode(skill.getClass().getAnnotation(Skill.class).skillIri(), StandardCharsets.UTF_8);
 
 //			String json = "{ \"newState\":" + " \"" + stateIri + "\" " + "}";
-			ChangedState newState = new ChangedState(); 
-			newState.newState = stateIri; 
-			
-			String json = gson.toJson(newState); 
-			logger.info(json); 
-			
+			ChangedState newState = new ChangedState();
+			newState.newState = stateIri;
+
+			String json = gson.toJson(newState);
+			logger.info(json);
+
 			opsRequest(opsDescription, "PATCH", location, json, "application/json");
 		}
 	}
@@ -89,7 +88,6 @@ public class SkillRegistration extends RegistrationMethods {
 
 			if (responseStatusCode == 200) {
 				logger.info("Skill " + skill + " removed from " + myOpsDescription.getId());
-				moduleRegistry.deleteSkill(myOpsDescription, skill);
 			} else {
 				logger.info("Skill: " + object.getClass().getAnnotation(Skill.class).skillIri()
 						+ " couldn't be deleted from " + "OPS " + myOpsDescription.getId());
