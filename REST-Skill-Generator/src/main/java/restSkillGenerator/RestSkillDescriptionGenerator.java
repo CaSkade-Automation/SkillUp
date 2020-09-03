@@ -56,22 +56,23 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 		String userSnippet = getUserSnippets(userFiles, skill.getClass().getClassLoader());
 
 		StringBuilder restSkillDescription = new StringBuilder();
-		// TODO: do we need to create module as well?
+		restSkillDescription.append("\n");
+
 		restSkillDescription.append("<${SkillIri}_RestSkill> a Cap:RestSkill ;\n");
+		// TODO: port ??
 		restSkillDescription.append("	WADL:hasBase \"http://${IpAddress}:8181/skills/${UUID}/\" ;\n");
 		restSkillDescription.append("	Cap:hasStateMachine <${SkillIri}_StateMachine> ;\n");
 		restSkillDescription.append("	Cap:hasCurrentState <${SkillIri}_StateMachine_${InitialState}> .\n");
-
-		restSkillDescription.append("<${CapabilityIri}> Cap:isExecutableViaRestSkill <${SkillIri}> .\n");
-		restSkillDescription.append("<${ModuleIri}> Cap:providesRestSkill <${SkillIri}> .\n");
+		
+		restSkillDescription.append("<${CapabilityIri}> Cap:isExecutableViaRestSkill <${SkillIri}_RestSkill> .\n");
+		restSkillDescription.append("<${ModuleIri}> Cap:providesRestSkill <${SkillIri}_RestSkill> .\n");
 
 		restSkillDescription.append("<${SkillIri}_Representation> a WADL:Representation ;\n");
-		restSkillDescription.append("	WADL:hasMediaType \"${MediaType}\" ;\n");
+		restSkillDescription.append("	WADL:hasMediaType \"${MediaType}\" .\n");
 		restSkillDescription.append("<${SkillIri}_Request> a WADL:Request ;\n");
 		restSkillDescription.append("	WADL:hasRepresentation <${SkillIri}_Representation> .\n");
 
 		for (TransitionName transition : TransitionName.values()) {
-			// TODO does this work as intended? (abort -> Abort)
 			String transitionCapitalized = transition.toString().substring(0, 1).toUpperCase()
 					+ transition.toString().substring(1);
 
@@ -84,8 +85,6 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 					+ "Resource> WADL:hasMethod <${SkillIri}_" + transitionCapitalized + "Method> .\n");
 			restSkillDescription.append(
 					"<${SkillIri}_" + transitionCapitalized + "Method> WADL:hasRequest <${SkillIri}_Request> .\n");
-			// TODO does this work correctly?
-			// invoke-DataProperty from the method to the stateMachine
 			restSkillDescription.append("<${SkillIri}_" + transitionCapitalized
 					+ "Method> Cap:invokes <${SkillIri}_StateMachine_" + transitionCapitalized + "_Command> .\n");
 		}
@@ -105,9 +104,11 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 				restSkillDescription.append("	Cap:hasVariableType \"" + field.getType().getSimpleName() + "\" ;\n");
 				restSkillDescription.append("	Cap:isRequired \""
 						+ Boolean.toString(field.getAnnotation(SkillParameter.class).isRequired()) + "\" ;\n");
-				// TODO how to evaluate hasDefaultValue ?
-				// field.get(skill).toString()
-				restSkillDescription.append("	Cap:hasDefaultValue \"" + "ERR: NOT IMPLEMENTED" + "\" .\n");
+				try {
+					restSkillDescription.append("	Cap:hasDefaultValue \"" + field.get(skill).toString() + "\" .\n");
+				} catch (IllegalArgumentException | IllegalAccessException e) {
+					e.printStackTrace();
+				}
 
 				// create connections to RestSkill and Representation
 				restSkillDescription.append("<${SkillIri}_RestSkill> Cap:hasSkillParameter <${SkillIri}_Param"
@@ -138,10 +139,12 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 				restSkillDescription.append("	Cap:hasVariableName \"" + field.getName() + "\" ;\n");
 				restSkillDescription.append("	Cap:hasVariableType \"" + field.getType().getSimpleName() + "\" ;\n");
 				restSkillDescription.append("	Cap:isRequired \""
-						+ Boolean.toString(field.getAnnotation(SkillParameter.class).isRequired()) + "\" ;\n");
-				// TODO how to get the default value?
-				// field.get(skill).toString()
-				restSkillDescription.append("	Cap:hasDefaultValue \"" + "ERR: NOT IMPLEMENTED" + "\" .\n");
+						+ Boolean.toString(field.getAnnotation(SkillOutput.class).isRequired()) + "\" ;\n");
+				try {
+					restSkillDescription.append("	Cap:hasDefaultValue \"" + field.get(skill).toString() + "\" .\n");
+				} catch (IllegalArgumentException | IllegalAccessException e) {
+					e.printStackTrace();
+				}
 
 				// create connections to RestSkill and Representation
 				restSkillDescription.append("<${SkillIri}_RestSkill> Cap:hasSkillOutput <${SkillIri}_Output"
@@ -168,12 +171,13 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 					.replace("${SkillIri}", skillAnnotation.skillIri())
 					// TODO: does this return the correct uuid?
 					.replace("${UUID}", restResource.getUuidByIri(skillAnnotation.skillIri()))
-					.replace("${InitialState}", stateMachine.getState().getClass().getSimpleName())
+					// Caution!: We have to cut the "state" from e.g. "IdleState" at the end of each State class name
+					.replace("${InitialState}", stateMachine.getState().getClass().getSimpleName().substring(0, stateMachine.getState().getClass().getSimpleName().length() - 5))
 					// for now we always assume JSON format
 					.replace("${MediaType}", "application/json")
 					.replace("${IpAddress}", getIpAddress());
 
-			// TODO: why need to create a file?
+			// For Debugging...
 			createFile(completeDescription, "restDescription.ttl");
 
 			return completeDescription;
