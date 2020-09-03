@@ -24,6 +24,7 @@ public class Broadcast {
 	private Logger logger = LoggerFactory.getLogger(Broadcast.class);
 	private Gson gson = new Gson();
 	private static DatagramSocket socket = null;
+	private List<String> opsIDs = new ArrayList<String>();
 
 	/**
 	 * Method to send broadcast message and to wait for answers of possible
@@ -96,7 +97,8 @@ public class Broadcast {
 
 		CompletableFuture.runAsync(receivingBroadcastResponseThread::run).orTimeout(20, TimeUnit.SECONDS)
 				.exceptionally(throwable -> {
-					logger.info("No more OPS found", throwable);
+					logger.info("No more OPS found");
+					opsIDs.clear();
 					return null;
 				});
 	}
@@ -119,14 +121,28 @@ public class Broadcast {
 		// Create OPS-Description with IP!
 		OpsDescription opsDescription = gson.fromJson(opsDescriptionAsString, OpsDescription.class);
 
-		int port = opsDescription.getPort();
-		String basePath = opsDescription.getBasePath();
-		String moduleEndpoint = opsDescription.getModuleEndpoint();
-		String id = opsDescription.getId();
-		String capabilityEndpoint = opsDescription.getCapabilityEndpoint();
-		String skillEndpoint = opsDescription.getSkillEndpoint();
+		boolean sameOps = false;
+		for (String opsID : opsIDs) {
+			if (opsDescription.getId().equals(opsID)) {
+				sameOps = true;
+			}
+		}
 
-		opsDescription = new OpsDescription(ip, id, port, basePath, moduleEndpoint, capabilityEndpoint, skillEndpoint);
-		moduleRegistry.addOps(opsDescription);
+		if (sameOps) {
+			logger.info("Response from same OPS in a different broadcast range");
+		} else {
+			opsIDs.add(opsDescription.getId());
+
+			int port = opsDescription.getPort();
+			String basePath = opsDescription.getBasePath();
+			String moduleEndpoint = opsDescription.getModuleEndpoint();
+			String id = opsDescription.getId();
+			String capabilityEndpoint = opsDescription.getCapabilityEndpoint();
+			String skillEndpoint = opsDescription.getSkillEndpoint();
+
+			opsDescription = new OpsDescription(ip, id, port, basePath, moduleEndpoint, capabilityEndpoint,
+					skillEndpoint);
+			moduleRegistry.addOps(opsDescription);
+		}
 	}
 }

@@ -1,5 +1,7 @@
 package enums;
 
+import java.lang.annotation.Annotation;
+
 import annotations.Aborting;
 import annotations.Clearing;
 import annotations.Completing;
@@ -21,15 +23,15 @@ public enum States {
 	Suspending(Suspending.class, ActiveStateName.Suspending), Unholding(Unholding.class, ActiveStateName.Unholding),
 	Unsuspending(Unsuspending.class, ActiveStateName.Unsuspending);
 
-	private final Class key;
+	private final Class<? extends Annotation> key;
 	private final ActiveStateName stateName;
 
-	States(Class key, ActiveStateName stateName) {
+	States(Class<? extends Annotation> key, ActiveStateName stateName) {
 		this.key = key;
 		this.stateName = stateName;
 	}
 
-	public Class getKey() {
+	public Class<? extends Annotation> getKey() {
 		return key;
 	}
 

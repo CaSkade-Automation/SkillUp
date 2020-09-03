@@ -98,7 +98,7 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 			Enumeration<String> userFiles) {
 		Skill skillAnnotation = skill.getClass().getAnnotation(Skill.class);
 
-		String opcUaServerDescription = null;
+		String opcUaServerDescription = "";
 		if (!serverDescription) {
 			opcUaServerDescription = generateOpcUaServerDescription(server);
 			serverDescription = true;
@@ -276,10 +276,7 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 						.replace("${Password}", server.getUserPassword());
 				opcUaServerDescription = opcUaServerDescription + opcUaServerUser;
 			}
-
 			opcUaServerDescription = opcUaServerDescription + opcUaServerSecurity;
-			opcUaServerDescription = opcUaServerDescription.replace("${ServerName}",
-					server.getServer().getConfig().getApplicationName().getText());
 		}
 		return opcUaServerDescription;
 	}

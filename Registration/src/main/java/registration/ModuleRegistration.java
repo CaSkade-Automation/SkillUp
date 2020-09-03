@@ -54,8 +54,6 @@ public class ModuleRegistration extends RegistrationMethods {
 
 			if (responseStatusCode == 200) {
 				delete.add(myOps);
-				logger.info("Remove OPS " + myOps.getId() + " from OPS-Skill-List...");
-				moduleRegistry.getOpsAndSkillList().remove(myOps.getId());
 				moduleRegistry.deleteModule(myOps, object);
 			}
 			else {
