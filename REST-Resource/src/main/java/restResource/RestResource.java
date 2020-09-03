@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -99,7 +99,7 @@ public class RestResource {
 		throw new Exception("No skill with that Iri found!");
 	}
 
-	@GET
+	@POST
 	@Produces(MediaType.TEXT_HTML)
 	public String landing() {
 		logger.info(getClass().getSimpleName() + ": Landing page called!");
@@ -120,7 +120,7 @@ public class RestResource {
 		return sb.toString();
 	}
 
-	@GET
+	@POST
 	@Path("{uid}")
 	@Produces(MediaType.TEXT_HTML)
 	public String info(@PathParam("uid") String uid) {
@@ -148,7 +148,7 @@ public class RestResource {
 		return sb.toString();
 	}
 
-	@GET
+	@POST
 	@Path("{uid}/start")
 	@Produces(MediaType.TEXT_HTML)
 	public String start(@PathParam("uid") String uid) {
@@ -186,7 +186,7 @@ public class RestResource {
 		return sb.toString();
 	}
 
-	@GET
+	@POST
 	@Path("{uid}/reset")
 	@Produces(MediaType.TEXT_HTML)
 	public String reset(@PathParam("uid") String uid) {
@@ -224,7 +224,7 @@ public class RestResource {
 		return sb.toString();
 	}
 
-	@GET
+	@POST
 	@Path("{uid}/hold")
 	@Produces(MediaType.TEXT_HTML)
 	public String hold(@PathParam("uid") String uid) {
@@ -262,7 +262,7 @@ public class RestResource {
 		return sb.toString();
 	}
 
-	@GET
+	@POST
 	@Path("{uid}/unhold")
 	@Produces(MediaType.TEXT_HTML)
 	public String unhold(@PathParam("uid") String uid) {
@@ -300,7 +300,7 @@ public class RestResource {
 		return sb.toString();
 	}
 
-	@GET
+	@POST
 	@Path("{uid}/suspend")
 	@Produces(MediaType.TEXT_HTML)
 	public String suspend(@PathParam("uid") String uid) {
@@ -338,7 +338,7 @@ public class RestResource {
 		return sb.toString();
 	}
 
-	@GET
+	@POST
 	@Path("{uid}/unsuspend")
 	@Produces(MediaType.TEXT_HTML)
 	public String unsuspend(@PathParam("uid") String uid) {
@@ -376,7 +376,7 @@ public class RestResource {
 		return sb.toString();
 	}
 
-	@GET
+	@POST
 	@Path("{uid}/stop")
 	@Produces(MediaType.TEXT_HTML)
 	public String stop(@PathParam("uid") String uid) {
@@ -414,7 +414,7 @@ public class RestResource {
 		return sb.toString();
 	}
 
-	@GET
+	@POST
 	@Path("{uid}/abort")
 	@Produces(MediaType.TEXT_HTML)
 	public String abort(@PathParam("uid") String uid) {
@@ -452,7 +452,7 @@ public class RestResource {
 		return sb.toString();
 	}
 
-	@GET
+	@POST
 	@Path("{uid}/clear")
 	@Produces(MediaType.TEXT_HTML)
 	public String clear(@PathParam("uid") String uid) {
