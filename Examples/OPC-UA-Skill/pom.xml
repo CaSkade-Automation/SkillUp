@@ -2,11 +2,14 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>de.hsu-hh.ifa.opcua-skill2</groupId>
-	<artifactId>OPC-UA-Skill2</artifactId>
+	<parent>
+		<groupId>de.hsu-hh.ifa.skillUp</groupId>
+		<artifactId>Examples</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+	<artifactId>OPC-UA-Skill</artifactId>
 	<packaging>bundle</packaging>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>OPC-UA-Skill2</name>
+	<name>OPC-UA-Skill</name>
 	<dependencies>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -14,7 +17,7 @@
 			<version>1.7.28</version>
 		</dependency>
 		<dependency>
-			<groupId>de.hsu-hh.ifa.action-generator</groupId>
+			<groupId>de.hsu-hh.ifa.skillUp</groupId>
 			<artifactId>Action-Generator</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>

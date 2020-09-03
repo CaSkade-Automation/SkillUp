@@ -2,29 +2,32 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>de.hsu-hh.ifa.opcua-skill-generator</groupId>
+	<parent>
+		<groupId>de.hsu-hh.ifa.skillUp</groupId>
+		<artifactId>Parent-Project</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
 	<artifactId>OPC-UA-Skill-Generator</artifactId>
 	<packaging>bundle</packaging>
-	<version>0.0.1-SNAPSHOT</version>
 	<name>OPC-UA-Skill-Generator</name>
 	<dependencies>
 		<dependency>
-			<groupId>de.hsu-hh.ifa.skill-generator-interface</groupId>
+			<groupId>de.hsu-hh.ifa.skillUp</groupId>
 			<artifactId>Skill-Generator-Interface</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>de.hsu-hh.ifa.action-generator</groupId>
+			<groupId>de.hsu-hh.ifa.skillUp</groupId>
 			<artifactId>Action-Generator</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>de.hsu-hh.ifa.description-generator</groupId>
+			<groupId>de.hsu-hh.ifa.skillUp</groupId>
 			<artifactId>Description-Generator</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>de.hsu-hh.ifa.opcua-server</groupId>
+			<groupId>de.hsu-hh.ifa.skillUp</groupId>
 			<artifactId>OPC-UA-Server</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>

@@ -2,10 +2,13 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>de.hsu-hh.ifa.smart-tracker</groupId>
+	<parent>
+		<groupId>de.hsu-hh.ifa.skillUp</groupId>
+		<artifactId>Parent-Project</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
 	<artifactId>Smart-Tracker</artifactId>
 	<packaging>bundle</packaging>
-	<version>0.0.1-SNAPSHOT</version>
 	<name>Smart Tracker</name>
 	<dependencies>
 		<dependency>
@@ -15,22 +18,22 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>de.hsu-hh.ifa.action-generator</groupId>
+			<groupId>de.hsu-hh.ifa.skillUp</groupId>
 			<artifactId>Action-Generator</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>de.hsu-hh.ifa.opcua-skill-generator</groupId>
+			<groupId>de.hsu-hh.ifa.skillUp</groupId>
 			<artifactId>OPC-UA-Skill-Generator</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>de.hsu-hh.ifa.registration</groupId>
+			<groupId>de.hsu-hh.ifa.skillUp</groupId>
 			<artifactId>Registration</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>de.hsu-hh.ifa.module-generator</groupId>
+			<groupId>de.hsu-hh.ifa.skillUp</groupId>
 			<artifactId>Module-Generator</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
