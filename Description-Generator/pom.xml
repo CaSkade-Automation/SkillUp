@@ -2,10 +2,13 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>de.hsu-hh.ifa.description-generator</groupId>
+	<parent>
+		<groupId>de.hsu-hh.ifa.skillUp</groupId>
+		<artifactId>Parent-Project</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
 	<artifactId>Description-Generator</artifactId>
 	<packaging>bundle</packaging>
-	<version>0.0.1-SNAPSHOT</version>
 	<name>Description Generator</name>
 	<dependencies>
 		<dependency>
@@ -14,7 +17,7 @@
 			<version>1.7.26</version>
 		</dependency>
 		<dependency>
-			<groupId>de.hsu-hh.ifa.action-generator</groupId>
+			<groupId>de.hsu-hh.ifa.skillUp</groupId>
 			<artifactId>Action-Generator</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
