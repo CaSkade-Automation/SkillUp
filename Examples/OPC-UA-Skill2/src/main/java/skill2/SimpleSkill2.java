@@ -10,7 +10,7 @@ import annotations.SkillParameter;
 import annotations.SkillOutput;
 import annotations.Starting;
 
-@Skill(skillIri = "https://www.bosch.com/skills#OpcUaSkill", capabilityIri = "https://www.bosch.com/capabilites#CrazyCapability", moduleIri = "https://siemens.de/modules#ModuleA")
+@Skill(skillIri = "https://hsu-hh.de/skills#OpcUaSkill2", capabilityIri = "https://hsu-hh.de/capabilites#CrazyCapability", moduleIri = "https://hsu-hh.de/modules#ModuleA")
 public class SimpleSkill2 {
 
 	private final Logger logger = LoggerFactory.getLogger(SimpleSkill2.class);
