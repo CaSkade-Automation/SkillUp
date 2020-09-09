@@ -35,6 +35,7 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 			+ "<${ModuleIri}_${ServerName}_NodeSet> OpcUa:containsNode <${SkillIri}> .";
 
 	private String opcUaMethodSnippet = "<${SkillIri}_${MethodName}> a OpcUa:UAMethod,\r\n"
+			+ "										Cap:${MethodName},\r\n"
 			+ "										owl:NamedIndiviual;\r\n"
 			+ "									OpcUa:browseName \"${BrowseName}\";  \r\n"
 			+ "									OpcUa:browseNamespace \"${BrowseNamespace}\";\r\n"
@@ -152,7 +153,7 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 					String methodDescription = generateOpcUaSkillDataPropertyDescription(opcUaMethodSnippet,
 							componentNode);
 
-					if (!componentNode.getBrowseName().getName().equals("getResult")) {
+					if (!componentNode.getBrowseName().getName().equals("getOutputs")) {
 						String opcUaMethodInvokesTransitionDescription = opcUaMethodInvokesTransitionSnippet.replace(
 								"${CommandName}", componentNode.getBrowseName().getName().substring(0, 1).toUpperCase()
 										+ componentNode.getBrowseName().getName().substring(1));
@@ -160,7 +161,8 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 					}
 
 					methodDescription = methodDescription.replace("${MethodName}",
-							componentNode.getBrowseName().getName());
+							componentNode.getBrowseName().getName().substring(0, 1).toUpperCase()
+									+ componentNode.getBrowseName().getName().substring(1));
 					opcUaSkillDescription = opcUaSkillDescription + methodDescription;
 				}
 

@@ -205,7 +205,7 @@ public class Namespace extends ManagedNamespace {
 
 	public void addGetResultMethod(UaFolderNode folder, Object skill) {
 
-		UaMethodNode skillNode = createMethodNode(folder, "getResult");
+		UaMethodNode skillNode = createMethodNode(folder, "getOutputs");
 		GetResultMethod newSkill = new GetResultMethod(skillNode, skill);
 		skillNode.setOutputArguments(newSkill.getOutputArguments());
 		skillNode.setInvocationHandler(newSkill);
