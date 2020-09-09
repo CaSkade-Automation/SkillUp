@@ -42,7 +42,6 @@ public class AttributeLoggingFilter implements AttributeFilter {
 			DataValue dataValue = (DataValue) value;
 			try {
 				setField(field, field.getType(), dataValue, skill);
-				logger.info("get nodeId={} attributeId={} value={}", ctx.getNode().getNodeId(), attributeId, value);
 
 			} catch (IllegalArgumentException e) {
 				// TODO Auto-generated catch block
