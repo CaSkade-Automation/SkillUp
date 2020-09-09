@@ -13,7 +13,7 @@ import annotations.Execute;
 import annotations.Skill;
 import annotations.SkillParameter;
 
-@Skill(skillIri = "https://siemens.de/skills#SwitchOnLED", capabilityIri = "https://siemens.de/capabilites#bestCapability", moduleIri = "https://siemens.de/modules#ModuleA")
+@Skill(skillIri = "https://hsu-hh.de/skills#SwitchOnLED", capabilityIri = "https://hsu-hh.de/capabilites#LEDCapability", moduleIri = "https://hsu-hh.de/modules#ModuleA")
 public class LEDSkill {
 
 	private final Logger logger = LoggerFactory.getLogger(LEDSkill.class);
