@@ -12,5 +12,5 @@ public @interface Skill {
 	public String type() default "OpcUaSkill"; 
 	public String skillIri(); 
 	public String moduleIri(); 
-	public String capabilityIri(); 
+	public String capabilityIri() default ""; 
 }

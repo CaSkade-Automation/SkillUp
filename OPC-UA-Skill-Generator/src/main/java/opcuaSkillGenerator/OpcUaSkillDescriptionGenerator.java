@@ -24,7 +24,6 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 
 	private String opcUaSkillSnippet = "<${ModuleIri}> Cap:providesOpcUaSkill <${SkillIri}> .\r\n"
 			+ "<${SkillIri}> a Cap:OpcUaSkill,\r\n" + "							owl:NamedIndividual.\r\n"
-			+ "<${CapabilityIri}> Cap:isExecutableViaOpcUaSkill <${SkillIri}> .\r\n"
 			+ "<${SkillIri}> OpcUa:browseName \"${BrowseName}\";  \r\n"
 			+ "						OpcUa:browseNamespace \"${BrowseNamespace}\";\r\n"
 			+ "						OpcUa:nodeId \"${NodeId}\";\r\n"
@@ -34,6 +33,8 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 			+ "						Cap:hasCurrentState <${SkillIri}_StateMachine_${StateName}>.\r\n"
 			+ "<${ModuleIri}_${ServerName}_NodeSet> OpcUa:containsNode <${SkillIri}> .";
 
+	private String capabilitySnippet = "<${CapabilityIri}> Cap:isExecutableViaOpcUaSkill <${SkillIri}> ."; 
+	
 	private String opcUaMethodSnippet = "<${SkillIri}_${MethodName}> a OpcUa:UAMethod,\r\n"
 			+ "										Cap:${MethodName},\r\n"
 			+ "										owl:NamedIndiviual;\r\n"
@@ -133,6 +134,7 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 	public String generateOpcUaSkillDescription(Object skill, Isa88StateMachine stateMachine, Server server) {
 
 		String skillName = skill.getClass().getAnnotation(Skill.class).skillIri();
+		String capability = skill.getClass().getAnnotation(Skill.class).capabilityIri();
 
 		String opcUaSkillDescription = null;
 		List<Node> opcUaNodes = server.getNamespace().getFolder().getOrganizesNodes();
@@ -143,6 +145,10 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 						.substring(stateMachine.getState().toString().lastIndexOf(".") + 1);
 				stateName = stateName.substring(0, stateName.lastIndexOf("State"));
 				opcUaSkillDescription = opcUaSkillSnippet.replace("${StateName}", stateName);
+				
+				if(!capability.isEmpty()) {
+					opcUaSkillDescription = opcUaSkillDescription + capabilitySnippet; 
+				}
 
 				opcUaSkillDescription = generateOpcUaSkillDataPropertyDescription(opcUaSkillDescription, node);
 
