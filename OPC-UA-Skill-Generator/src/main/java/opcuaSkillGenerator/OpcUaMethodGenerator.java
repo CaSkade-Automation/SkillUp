@@ -8,11 +8,10 @@ import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 
 import annotations.Skill;
 import opcUaServer.Server;
-import statemachine.StateMachine;
-
+import statemachine.Isa88StateMachine;
 public class OpcUaMethodGenerator {
 
-	public void generateSkill(Object skill, StateMachine stateMachine, Server opcUaServer) {
+	public void generateSkill(Object skill, Isa88StateMachine stateMachine, Server opcUaServer) {
 		// TODO Auto-generated method stub
 		
 		String skillName = skill.getClass().getAnnotation(Skill.class).skillIri();

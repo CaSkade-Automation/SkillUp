@@ -12,7 +12,7 @@ import org.eclipse.milo.opcua.stack.core.types.structured.Argument;
 
 import annotations.SkillOutput;
 import statemachine.IStateChangeObserver;
-import statemachine.StateMachine;
+import statemachine.Isa88StateMachine;
 import states.IState;
 import states.TransitionName;
 
@@ -21,12 +21,12 @@ import states.TransitionName;
  */
 public class GenericMethod extends AbstractMethodInvocationHandler implements IStateChangeObserver {
 
-	StateMachine stateMachine;
+	Isa88StateMachine stateMachine;
 	TransitionName transition;
 	UaVariableNode outputNode;
 	Object skill;
 
-	public GenericMethod(UaMethodNode node, StateMachine stateMachine, TransitionName transition,
+	public GenericMethod(UaMethodNode node, Isa88StateMachine stateMachine, TransitionName transition,
 			UaVariableNode outputNode, Object skill) {
 		super(node);
 		this.stateMachine = stateMachine;

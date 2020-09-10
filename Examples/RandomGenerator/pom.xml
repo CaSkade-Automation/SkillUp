@@ -4,17 +4,22 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>de.hsu-hh.ifa.skillUp</groupId>
-		<artifactId>Parent-Project</artifactId>
+		<artifactId>Examples</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>Skill-Generator-Interface</artifactId>
+	<artifactId>RandomGenerator</artifactId>
 	<packaging>bundle</packaging>
-	<name>Skill-Generator-Interface</name>
+	<name>Random-Generator</name>
 	<dependencies>
 		<dependency>
-			<groupId>com.github.aljoshakoecher</groupId>
-			<artifactId>isa88-state-machine</artifactId>
-			<version>2.0.0</version>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>1.7.28</version>
+		</dependency>
+		<dependency>
+			<groupId>de.hsu-hh.ifa.skillUp</groupId>
+			<artifactId>Action-Generator</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 	<build>

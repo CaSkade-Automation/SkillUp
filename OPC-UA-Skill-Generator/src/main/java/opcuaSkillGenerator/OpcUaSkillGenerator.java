@@ -7,7 +7,7 @@ import org.osgi.service.component.annotations.Reference;
 
 import opcUaServer.Server;
 import skillGeneratorInterface.SkillGeneratorInterface;
-import statemachine.StateMachine;
+import statemachine.Isa88StateMachine;
 
 @Component(immediate = true, property = "name=OpcUa")
 public class OpcUaSkillGenerator implements SkillGeneratorInterface {
@@ -18,13 +18,13 @@ public class OpcUaSkillGenerator implements SkillGeneratorInterface {
 	@Reference
 	Server opcUaServer;
 
-	public String generateDescription(Object skill, StateMachine stateMachine, Enumeration<String> userFiles) {
+	public String generateDescription(Object skill, Isa88StateMachine stateMachine, Enumeration<String> userFiles) {
 		String description = opcUaSkillDescriptionGenerator.generateOpcUaDescription(opcUaServer, skill, stateMachine,
 				userFiles);
 		return description;
 	}
 
-	public void generateSkill(Object skill, StateMachine stateMachine) {
+	public void generateSkill(Object skill, Isa88StateMachine stateMachine) {
 		opcUaSkillGenerator.generateSkill(skill, stateMachine, opcUaServer);
 	}
 

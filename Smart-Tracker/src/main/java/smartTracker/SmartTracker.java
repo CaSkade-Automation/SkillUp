@@ -29,7 +29,7 @@ import annotations.Skill;
 import moduleGenerator.ModuleGenerator;
 import registration.Registration;
 import skillGeneratorInterface.SkillGeneratorInterface;
-import statemachine.StateMachine;
+import statemachine.Isa88StateMachine;
 
 @Component(immediate = true)
 public class SmartTracker {
@@ -124,7 +124,8 @@ public class SmartTracker {
 											Object skillObj = newBundle.getDeclaredConstructor().newInstance();
 											skillClassObjects.put(bundle, skillObj);
 
-											StateMachine stateMachine = actionGenerator.generateAction(skillObj);
+											Isa88StateMachine stateMachine = actionGenerator.generateAction(skillObj);
+											
 											StateChangeObserver stateChangeObserver = new StateChangeObserver(
 													registration, skillObj);
 											stateMachine.addStateChangeObserver(stateChangeObserver);
@@ -141,6 +142,7 @@ public class SmartTracker {
 															stateMachine, userSnippets);
 
 													registration.registerSkill(skillDescription, skillObj);
+													break; 
 												} else {
 													logger.error("No SkillGenerator for this type of skill...");
 												}
