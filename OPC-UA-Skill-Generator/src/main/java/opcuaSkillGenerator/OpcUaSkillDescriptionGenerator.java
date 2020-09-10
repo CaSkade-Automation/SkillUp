@@ -18,7 +18,7 @@ import annotations.SkillOutput;
 import annotations.SkillParameter;
 import descriptionGenerator.SkillDescriptionGenerator;
 import opcUaServer.Server;
-import statemachine.StateMachine;
+import statemachine.Isa88StateMachine;
 
 public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 
@@ -95,7 +95,7 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 
 	private boolean serverDescription = false;
 
-	public String generateOpcUaDescription(Server server, Object skill, StateMachine stateMachine,
+	public String generateOpcUaDescription(Server server, Object skill, Isa88StateMachine stateMachine,
 			Enumeration<String> userFiles) {
 		Skill skillAnnotation = skill.getClass().getAnnotation(Skill.class);
 
@@ -130,7 +130,7 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 		return null;
 	}
 
-	public String generateOpcUaSkillDescription(Object skill, StateMachine stateMachine, Server server) {
+	public String generateOpcUaSkillDescription(Object skill, Isa88StateMachine stateMachine, Server server) {
 
 		String skillName = skill.getClass().getAnnotation(Skill.class).skillIri();
 
