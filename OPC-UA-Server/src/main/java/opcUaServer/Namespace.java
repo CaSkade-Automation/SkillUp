@@ -26,7 +26,7 @@ import annotations.SkillOutput;
 
 import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.ubyte;
 
-import statemachine.StateMachine;
+import statemachine.Isa88StateMachine;
 import states.TransitionName;
 
 public class Namespace extends ManagedNamespace {
@@ -187,7 +187,7 @@ public class Namespace extends ManagedNamespace {
 	 * @param methodName        name of the skill to add
 	 * @param skillRegistration instance of the skill to add
 	 */
-	public void addAllSkillMethods(UaFolderNode folder, StateMachine stateMachine, Object skill) {
+	public void addAllSkillMethods(UaFolderNode folder, Isa88StateMachine stateMachine, Object skill) {
 
 		for (TransitionName transition : TransitionName.values()) {
 
@@ -205,7 +205,7 @@ public class Namespace extends ManagedNamespace {
 
 	public void addGetResultMethod(UaFolderNode folder, Object skill) {
 
-		UaMethodNode skillNode = createMethodNode(folder, "getResult");
+		UaMethodNode skillNode = createMethodNode(folder, "getOutputs");
 		GetResultMethod newSkill = new GetResultMethod(skillNode, skill);
 		skillNode.setOutputArguments(newSkill.getOutputArguments());
 		skillNode.setInvocationHandler(newSkill);

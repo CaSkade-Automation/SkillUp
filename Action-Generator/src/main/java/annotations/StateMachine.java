@@ -6,11 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface Skill {
+@Target(ElementType.FIELD)
+public @interface StateMachine {
 
-	public String type() default "OpcUaSkill"; 
-	public String skillIri(); 
-	public String moduleIri(); 
-	public String capabilityIri() default ""; 
 }

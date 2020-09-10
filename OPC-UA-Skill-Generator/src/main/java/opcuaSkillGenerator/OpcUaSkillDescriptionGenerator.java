@@ -18,13 +18,12 @@ import annotations.SkillOutput;
 import annotations.SkillParameter;
 import descriptionGenerator.SkillDescriptionGenerator;
 import opcUaServer.Server;
-import statemachine.StateMachine;
+import statemachine.Isa88StateMachine;
 
 public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 
 	private String opcUaSkillSnippet = "<${ModuleIri}> Cap:providesOpcUaSkill <${SkillIri}> .\r\n"
 			+ "<${SkillIri}> a Cap:OpcUaSkill,\r\n" + "							owl:NamedIndividual.\r\n"
-			+ "<${CapabilityIri}> Cap:isExecutableViaOpcUaSkill <${SkillIri}> .\r\n"
 			+ "<${SkillIri}> OpcUa:browseName \"${BrowseName}\";  \r\n"
 			+ "						OpcUa:browseNamespace \"${BrowseNamespace}\";\r\n"
 			+ "						OpcUa:nodeId \"${NodeId}\";\r\n"
@@ -34,7 +33,10 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 			+ "						Cap:hasCurrentState <${SkillIri}_StateMachine_${StateName}>.\r\n"
 			+ "<${ModuleIri}_${ServerName}_NodeSet> OpcUa:containsNode <${SkillIri}> .";
 
+	private String capabilitySnippet = "<${CapabilityIri}> Cap:isExecutableViaOpcUaSkill <${SkillIri}> ."; 
+	
 	private String opcUaMethodSnippet = "<${SkillIri}_${MethodName}> a OpcUa:UAMethod,\r\n"
+			+ "										Cap:${MethodName},\r\n"
 			+ "										owl:NamedIndiviual;\r\n"
 			+ "									OpcUa:browseName \"${BrowseName}\";  \r\n"
 			+ "									OpcUa:browseNamespace \"${BrowseNamespace}\";\r\n"
@@ -94,7 +96,7 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 
 	private boolean serverDescription = false;
 
-	public String generateOpcUaDescription(Server server, Object skill, StateMachine stateMachine,
+	public String generateOpcUaDescription(Server server, Object skill, Isa88StateMachine stateMachine,
 			Enumeration<String> userFiles) {
 		Skill skillAnnotation = skill.getClass().getAnnotation(Skill.class);
 
@@ -129,9 +131,10 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 		return null;
 	}
 
-	public String generateOpcUaSkillDescription(Object skill, StateMachine stateMachine, Server server) {
+	public String generateOpcUaSkillDescription(Object skill, Isa88StateMachine stateMachine, Server server) {
 
 		String skillName = skill.getClass().getAnnotation(Skill.class).skillIri();
+		String capability = skill.getClass().getAnnotation(Skill.class).capabilityIri();
 
 		String opcUaSkillDescription = null;
 		List<Node> opcUaNodes = server.getNamespace().getFolder().getOrganizesNodes();
@@ -142,6 +145,10 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 						.substring(stateMachine.getState().toString().lastIndexOf(".") + 1);
 				stateName = stateName.substring(0, stateName.lastIndexOf("State"));
 				opcUaSkillDescription = opcUaSkillSnippet.replace("${StateName}", stateName);
+				
+				if(!capability.isEmpty()) {
+					opcUaSkillDescription = opcUaSkillDescription + capabilitySnippet; 
+				}
 
 				opcUaSkillDescription = generateOpcUaSkillDataPropertyDescription(opcUaSkillDescription, node);
 
@@ -152,7 +159,7 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 					String methodDescription = generateOpcUaSkillDataPropertyDescription(opcUaMethodSnippet,
 							componentNode);
 
-					if (!componentNode.getBrowseName().getName().equals("getResult")) {
+					if (!componentNode.getBrowseName().getName().equals("getOutputs")) {
 						String opcUaMethodInvokesTransitionDescription = opcUaMethodInvokesTransitionSnippet.replace(
 								"${CommandName}", componentNode.getBrowseName().getName().substring(0, 1).toUpperCase()
 										+ componentNode.getBrowseName().getName().substring(1));
@@ -160,7 +167,8 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 					}
 
 					methodDescription = methodDescription.replace("${MethodName}",
-							componentNode.getBrowseName().getName());
+							componentNode.getBrowseName().getName().substring(0, 1).toUpperCase()
+									+ componentNode.getBrowseName().getName().substring(1));
 					opcUaSkillDescription = opcUaSkillDescription + methodDescription;
 				}
 

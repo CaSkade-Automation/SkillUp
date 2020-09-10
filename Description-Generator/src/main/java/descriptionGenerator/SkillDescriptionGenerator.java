@@ -5,13 +5,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import descriptionGenerator.DescriptionGenerator;
-import statemachine.StateMachine;
+import statemachine.Isa88StateMachine;
 
 public class SkillDescriptionGenerator extends DescriptionGenerator{
 
 	private Logger logger = LoggerFactory.getLogger(SkillDescriptionGenerator.class);
 
-	public String generateStateMachineDescription(StateMachine stateMachine) {
+	public String generateStateMachineDescription(Isa88StateMachine stateMachine) {
 
 		String stateMachineDescription = null;
 
