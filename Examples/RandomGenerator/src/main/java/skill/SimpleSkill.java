@@ -2,13 +2,15 @@ package skill;
 
 import annotations.Execute;
 import annotations.SkillOutput;
+import annotations.StateMachine;
+import statemachine.Isa88StateMachine;
 import annotations.Skill;
 
-@Skill(skillIri = "https://www.hsu-hh.de/aut/skills#RandomGenerator", capabilityIri = "https://www.hsu-hh.de/aut/skills#RandomGeneration", moduleIri = "https://siemens.de/modules#ModuleA")
+@Skill(skillIri = "https://www.hsu-hh.de/aut/skills#RandomGenerator", capabilityIri = "https://www.hsu-hh.de/aut/skills#RandomGeneration", moduleIri = "https://hsu-hh.de/modules#ModuleA")
 public class SimpleSkill {
 
 	@StateMachine
-	StateMachine stateMachine;
+	Isa88StateMachine stateMachine;
 
 	@SkillOutput(isRequired = false)
 	private double random;
@@ -25,5 +27,4 @@ public class SimpleSkill {
 			stateMachine.abort();
 		}
 	}
-
 }
