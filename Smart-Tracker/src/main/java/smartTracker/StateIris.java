@@ -1,5 +1,10 @@
 package smartTracker;
 
+/**
+ * Enum with every possible state and its IRI to tell OPS to which state the
+ * skill has changed
+ *
+ */
 public enum StateIris {
 	IdleState("http://www.hsu-ifa.de/ontologies/ISA-TR88#Idle"),
 	StartingState("http://www.hsu-ifa.de/ontologies/ISA-TR88#Starting"),
