@@ -18,12 +18,22 @@ import org.slf4j.LoggerFactory;
 
 import annotations.SkillOutput;
 
-public class GetResultMethod extends AbstractMethodInvocationHandler {
+/**
+ * Class is used to reflect the skill method getOutputs to be added to the
+ * server
+ */
+public class GetOutputsMethod extends AbstractMethodInvocationHandler {
 
-	private final Logger logger = LoggerFactory.getLogger(GetResultMethod.class);
+	private final Logger logger = LoggerFactory.getLogger(GetOutputsMethod.class);
 	private Object skill;
 
-	public GetResultMethod(UaMethodNode node, Object skill) {
+	/**
+	 * Constructor of class {@link GetOutputsMethod}
+	 * 
+	 * @param node  method node
+	 * @param skill instance of skill
+	 */
+	public GetOutputsMethod(UaMethodNode node, Object skill) {
 		super(node);
 		// TODO Auto-generated constructor stub
 		this.skill = skill;
@@ -43,6 +53,11 @@ public class GetResultMethod extends AbstractMethodInvocationHandler {
 		return outputArguments;
 	}
 
+	/**
+	 * Method to create an output argument for every skill output
+	 * 
+	 * @return list of output arguments
+	 */
 	public List<Argument> createOutputArgument() {
 		List<Argument> outputArgumentsList = new ArrayList<Argument>();
 		Field[] fields = skill.getClass().getDeclaredFields();
@@ -61,6 +76,9 @@ public class GetResultMethod extends AbstractMethodInvocationHandler {
 		return outputArgumentsList;
 	}
 
+	/**
+	 * When this method is invoked, values of skill outputs are shown
+	 */
 	@Override
 	protected Variant[] invoke(InvocationContext invocationContext, Variant[] inputValues) throws UaException {
 		// TODO Auto-generated method stub
@@ -75,10 +93,7 @@ public class GetResultMethod extends AbstractMethodInvocationHandler {
 					logger.info("Output: " + field.get(skill));
 					Variant variant = new Variant(field.get(skill));
 					variants.add(variant);
-				} catch (IllegalArgumentException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
+				} catch (IllegalArgumentException | IllegalAccessException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
@@ -86,5 +101,4 @@ public class GetResultMethod extends AbstractMethodInvocationHandler {
 		}
 		return variants.toArray(new Variant[variants.size()]);
 	}
-
 }
