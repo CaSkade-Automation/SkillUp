@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import annotations.Module;
 
 /**
- * Class to register/delete modules on/from OPS 
+ * Class to register/delete modules on/from OPS
  */
 public class ModuleRegistration extends RegistrationMethods {
 
@@ -21,10 +21,7 @@ public class ModuleRegistration extends RegistrationMethods {
 			logger.info("Registering Module " + object.getClass().getAnnotation(Module.class).moduleIri()
 					+ " with description in rdf syntax to " + ops.getId());
 
-			String basePath = ops.getBasePath();
-			String moduleEndpoint = ops.getModuleEndpoint();
-
-			String location = basePath + moduleEndpoint;
+			String location = ops.getBasePath() + ops.getModuleEndpoint();
 
 			int responseStatusCode = opsRequest(ops, "POST", location, requestBody, "text/plain");
 
@@ -46,19 +43,18 @@ public class ModuleRegistration extends RegistrationMethods {
 
 		// module is deleted from every OPS, on which module is registered
 		for (OpsDescription myOps : moduleRegistry.getOpsDescriptionList()) {
-			Object deletedModule = null; 
+			Object deletedModule = null;
 			for (Object module : myOps.getModules()) {
 				if (object.equals(module)) {
 					logger.info("Delete Module from " + myOps.getId());
-					String basePath = myOps.getBasePath();
-					String moduleEndpoint = myOps.getModuleEndpoint();
-					String moduleIriEncoded = encodeValue(object.getClass().getAnnotation(Module.class).moduleIri());
-					String location = basePath + moduleEndpoint + "/" + moduleIriEncoded;
+
+					String location = myOps.getBasePath() + myOps.getModuleEndpoint() + "/"
+							+ encodeValue(object.getClass().getAnnotation(Module.class).moduleIri());
 
 					int responseStatusCode = opsRequest(myOps, "DELETE", location, "", "text/plain");
 
 					if (responseStatusCode == 200) {
-						deletedModule = module; 
+						deletedModule = module;
 					} else {
 						logger.info("Module couldn't be deleted from OPS...");
 					}
