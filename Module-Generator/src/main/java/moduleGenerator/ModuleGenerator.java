@@ -21,7 +21,8 @@ public class ModuleGenerator extends DescriptionGenerator {
 
 	// neessary/possible snippets for a module description
 	private String moduleSnippet = "<${ModuleIri}> a VDI2206:Module,\r\n" + "					owl:NamedIndividual. ";
-	private String capabilitySnippet = "<${ModuleIri}> Cap:hasCapability <${CapabilityIri}> .";
+	private String capabilitySnippet = "<${ModuleIri}> Cap:hasCapability <${CapabilityIri}> .\r\n"
+			+ "<${CapabilityIri}> a Cap:Capability,\r\n" + "					owl:NamedIndividual. ";
 
 	/**
 	 * Method to generate rdf description. Takes moduleSnippet and replaces dummies
