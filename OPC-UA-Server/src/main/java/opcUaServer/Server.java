@@ -44,6 +44,8 @@ import static org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig.USE
 import static org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig.USER_TOKEN_POLICY_X509;
 
 /**
+ * OPC-UA-Server
+ * 
  * @Component Indicates that annotated class is intended to be an OSGi
  *            component. <br>
  *            immediate=true, component configuration activates immediately <br>
@@ -90,7 +92,7 @@ public class Server {
 	/**
 	 * Constructor uses/creates security file, loads keystoreloader, sets username
 	 * and password and builds server while setting endpoints etc. and starts
-	 * namespace
+	 * namespace. For more details take a look at eclipse milo on github.
 	 * 
 	 * @throws Exception
 	 */
@@ -153,10 +155,11 @@ public class Server {
 	}
 
 	/**
-	 * Method creates TCP endpoints with and without security
+	 * Method creates TCP endpoints (without localhost because OPS have no access to
+	 * OPC-UA Server via localhost) with and without security
 	 * 
 	 * @param certificate
-	 * @return
+	 * @return endpoint configurations
 	 */
 	private Set<EndpointConfiguration> createEndpointConfigurations(X509Certificate certificate) {
 		Set<EndpointConfiguration> endpointConfigurations = new LinkedHashSet<>();
@@ -165,7 +168,7 @@ public class Server {
 		bindAddresses.add("0.0.0.0");
 
 		Set<String> hostnames = new LinkedHashSet<>();
-		// hostnames.add(HostnameUtil.getHostname());
+// 		hostnames.add(HostnameUtil.getHostname());
 //		hostnames.addAll(HostnameUtil.getHostnames("0.0.0.0"));
 
 		try {
@@ -188,6 +191,7 @@ public class Server {
 			throw new RuntimeException(e);
 		}
 
+		// add every address to endpoint configuration
 		for (String bindAddress : bindAddresses) {
 			for (String hostname : hostnames) {
 				EndpointConfiguration.Builder builder = EndpointConfiguration.newBuilder().setBindAddress(bindAddress)
@@ -197,12 +201,17 @@ public class Server {
 				EndpointConfiguration.Builder noSecurityBuilder = builder.copy().setSecurityPolicy(SecurityPolicy.None)
 						.setSecurityMode(MessageSecurityMode.None);
 
+				// every address added as endpoint with and without security
 				endpointConfigurations.add(buildTcpEndpoint(noSecurityBuilder));
-
 				// TCP Basic256Sha256 / SignAndEncrypt
 				endpointConfigurations
 						.add(buildTcpEndpoint(builder.copy().setSecurityPolicy(SecurityPolicy.Basic256Sha256)
 								.setSecurityMode(MessageSecurityMode.SignAndEncrypt)));
+
+				/*
+				 * discovery path taken out, because by creating description of server every
+				 * endpoint is added and this endpoint is not usable for OPS to execute methods.
+				 */
 
 				/*
 				 * It's good practice to provide a discovery-specific endpoint with no security.
@@ -225,14 +234,30 @@ public class Server {
 		return endpointConfigurations;
 	}
 
+	/**
+	 * Method to have access to user name for endpoint with security
+	 * 
+	 * @return userName
+	 */
 	public String getUserName() {
 		return this.userName;
 	}
 
+	/**
+	 * Method to have access to user password for endpoint with security
+	 * 
+	 * @return userPassword
+	 */
 	public String getUserPassword() {
 		return this.userPassword;
 	}
 
+	/**
+	 * Method to build tcp endpoint
+	 * 
+	 * @param base endpoint configuration builder
+	 * @return endpoint configuration
+	 */
 	private static EndpointConfiguration buildTcpEndpoint(EndpointConfiguration.Builder base) {
 		return base.copy().setTransportProfile(TransportProfile.TCP_UASC_UABINARY).setBindPort(TCP_BIND_PORT).build();
 	}
@@ -257,6 +282,6 @@ public class Server {
 	@Deactivate
 	public void deactivate() {
 		logger.info("OPC-UA-Server wird deaktiviert");
-		// hier: server.shutdown();
+		server.shutdown();
 	}
 }

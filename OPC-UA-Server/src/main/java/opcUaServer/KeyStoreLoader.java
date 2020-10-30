@@ -22,6 +22,9 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
 
+/**
+ * KeyStoreLoader of OPC-UA-Server. More information on eclipse milo github
+ */
 public class KeyStoreLoader {
 
 	private static final Pattern IP_ADDR_PATTERN = Pattern
