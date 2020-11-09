@@ -5,24 +5,24 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import statemachine.StateMachine;
+import statemachine.Isa88StateMachine;
 
 public class RestSkill {
 
 	private static Logger logger = LoggerFactory.getLogger(RestSkill.class);
 
 	private UUID uuid;
-	private StateMachine stateMachine;
+	private Isa88StateMachine stateMachine;
 	private String skillIri; // we need this to identify our skill later (to delete it...).
 
-	public RestSkill(StateMachine sm, String skillIri) {
+	public RestSkill(Isa88StateMachine sm, String skillIri) {
 		uuid = UUID.randomUUID();
 		this.stateMachine = sm;
 		this.skillIri = skillIri;
 		logger.info("RestSkill \"" + uuid + "\" (skillIri=" + this.skillIri + ") created.");
 	}
 
-	public void setStateMachine(StateMachine stateMachine) {
+	public void setStateMachine(Isa88StateMachine stateMachine) {
 		this.stateMachine = stateMachine;
 		logger.info("RestSkill \"" + uuid + "\": StateMachine set (" + stateMachine.toString() + ").");
 	}

@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import annotations.Skill;
-import statemachine.StateMachine;
+import statemachine.Isa88StateMachine;
 
 @Component(immediate = true, service = RestResource.class)
 @JaxrsResource
@@ -39,7 +39,7 @@ public class RestResource {
 		logger.info("Deactivating " + getClass().getSimpleName());
 	}
 
-	public void generateSkill(Object skill, StateMachine stateMachine) {
+	public void generateSkill(Object skill, Isa88StateMachine stateMachine) {
 		String skillIri = null;
 		if (skill.getClass().isAnnotationPresent(Skill.class)) {
 			skillIri = skill.getClass().getAnnotation(Skill.class).skillIri();
