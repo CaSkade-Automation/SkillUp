@@ -14,7 +14,7 @@ import annotations.SkillOutput;
 import annotations.SkillParameter;
 import descriptionGenerator.SkillDescriptionGenerator;
 import restResource.RestResource;
-import statemachine.StateMachine;
+import statemachine.Isa88StateMachine;
 import states.TransitionName;
 
 public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
@@ -46,7 +46,7 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 		return addresses.getFirst();
 	}
 
-	public String generateRestDescription(RestResource restResource, Object skill, StateMachine stateMachine,
+	public String generateRestDescription(RestResource restResource, Object skill, Isa88StateMachine stateMachine,
 			Enumeration<String> userFiles) {
 
 		Skill skillAnnotation = skill.getClass().getAnnotation(Skill.class);
