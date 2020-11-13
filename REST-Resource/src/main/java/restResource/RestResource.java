@@ -52,52 +52,19 @@ public class RestResource {
 		skillTable.put(newSkill.getUUID(), newSkill);
 	}
 
-	// we identify the skill by its "Skill"-Annotation (see Action-Generator:
-	// annotations) -> skillIri
+	// TODO: Test if this identifies the correct skill (maybe objects dont have the same reference)
+	// otherwise would need to check by skillIri
 	public void deleteSkill(Object skill) {
-		logger.info(getClass().getSimpleName() + ": Deleting skill \"" + skill.getClass().toString() + "\"...");
-
-		// get iri of the skill we need to delete
-		if (skill.getClass().isAnnotationPresent(Skill.class)) {
-			String skillIri = skill.getClass().getAnnotation(Skill.class).skillIri();
-			logger.info(getClass().getSimpleName() + ": skillIri=" + skillIri);
-
-			// check if iri is present in skillTable
-			Set<UUID> setOfKeys = skillTable.keySet();
-			for (UUID key : setOfKeys) {
-
-				// match
-				if (skillIri.equals(skillTable.get(key).getSkillIri())) {
-					logger.info(
-							getClass().getSimpleName() + ": Found match (uuid=" + skillTable.get(key).getUUID() + ").");
-					skillTable.remove(key);
-					logger.info(getClass().getSimpleName() + ": Skill (uuid=" + skillTable.get(key).getUUID()
-							+ ") removed.");
-
-					// TODO: can we omit the rest? (break) is there a check we do not have multiple
-					// skills with the same iri?
-					break;
-				}
+		logger.info(getClass().getSimpleName() + ": Deleting skill \"" + skill.toString() + "\"...");
+		
+		for (UUID key : skillDirectory.keySet()) {
+			if (skillDirectory.get(key).getSkillObject().equals(skill)) {
+				logger.info(getClass().getSimpleName() + ": Found skill in skill directory (" + skillDirectory.get(key).getSkillIri() + ", " + key.toString() + ")");
+				skillDirectory.remove(key);
 			}
-
-		} else {
-			logger.info(getClass().getSimpleName() + ": ERR while deleting skill: Object ("
-					+ skill.getClass().toString() + ") does not have \"Skill\"-Annotation.");
-			return;
 		}
 	}
 
-	public String getUuidByIri(String skillIri) throws Exception {
-		// check if iri is present in skillTable
-		Set<UUID> setOfKeys = skillTable.keySet();
-		for (UUID key : setOfKeys) {
-			// match
-			if (skillIri.equals(skillTable.get(key).getSkillIri())) {
-				return skillTable.get(key).getUUID().toString();
-			}
-		}
-		throw new Exception("No skill with that Iri found!");
-	}
 
 	@POST
 	@Produces(MediaType.TEXT_HTML)
