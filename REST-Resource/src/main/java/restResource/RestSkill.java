@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import annotations.Skill;
 import statemachine.Isa88StateMachine;
 
 public class RestSkill {
@@ -13,18 +14,13 @@ public class RestSkill {
 
 	private UUID uuid;
 	private Isa88StateMachine stateMachine;
-	private String skillIri; // we need this to identify our skill later (to delete it...).
+	private Object skillObject;
 
-	public RestSkill(Isa88StateMachine sm, String skillIri) {
+	public RestSkill(Isa88StateMachine sm, Object skillObject) {
 		uuid = UUID.randomUUID();
 		this.stateMachine = sm;
-		this.skillIri = skillIri;
-		logger.info("RestSkill \"" + uuid + "\" (skillIri=" + this.skillIri + ") created.");
-	}
-
-	public void setStateMachine(Isa88StateMachine stateMachine) {
-		this.stateMachine = stateMachine;
-		logger.info("RestSkill \"" + uuid + "\": StateMachine set (" + stateMachine.toString() + ").");
+		this.skillObject = skillObject;
+		logger.info("RestSkill \"" + uuid + "\" (skillIri=" + this.getSkillIri() + ") created.");
 	}
 
 	public void start() {
@@ -81,7 +77,7 @@ public class RestSkill {
 	}
 
 	public String getSkillIri() {
-		return skillIri;
+		return skillObject.getClass().getAnnotation(Skill.class).skillIri();
 	}
 
 }
