@@ -4,11 +4,16 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -92,53 +97,44 @@ public class RestResource {
 		}
 	}
 
-	@POST
-	@Produces(MediaType.TEXT_HTML)
-	public String landing() {
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response landing() {
 		logger.info(getClass().getSimpleName() + ": Landing page called!");
 
-		StringBuilder sb = new StringBuilder("<html><body>");
-		sb.append("<h1>Simple RESTful OSGi StateMachine</h1>");
-		sb.append("<h2>These are all available RestSkills</h2>");
+		JsonObjectBuilder objBuilder = Json.createObjectBuilder();
 
-		Set<UUID> setOfKeys = skillTable.keySet();
-		for (UUID key : setOfKeys) {
-			sb.append("<p>");
-			sb.append("Key: \"" + key + "\", UUID: \"" + skillTable.get(key).getUUID() + "\", skillIri: \""
-					+ skillTable.get(key).getSkillIri() + "\", State: \"" + skillTable.get(key).getState() + "\"");
-			sb.append("</p>");
+		for (RestSkill rSkill : skillDirectory.values()) {
+			objBuilder.add(rSkill.getSkillIri(), Json.createObjectBuilder().add("state", rSkill.getState()).add("uuid",
+					rSkill.getUUID().toString()));
 		}
-
-		sb.append("</body></html>");
-		return sb.toString();
+		
+		String responseString = objBuilder.build().toString();
+		return Response.status(Response.Status.OK).entity(responseString).build();
 	}
 
-	@POST
+	@GET
 	@Path("{uid}")
-	@Produces(MediaType.TEXT_HTML)
-	public String info(@PathParam("uid") String uid) {
-		UUID key = UUID.fromString(uid);
-		logger.info(getClass().getSimpleName() + ": RestSkill # " + key + ": Info page called!");
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response info(@PathParam("uid") String uid) {
 
-		StringBuilder sb = new StringBuilder("<html><body>");
-		sb.append("<h1>Simple RESTful OSGi StateMachine</h1>");
-		sb.append("<h2>Info page for RestSkill # " + key + "</h2>");
-
-		if (skillTable.containsKey(key)) {
-			// key exists
-			sb.append("<p>");
-			sb.append("Key: \"" + key + "\", UUID: \"" + skillTable.get(key).getUUID() + "\", skillIri: \""
-					+ skillTable.get(key).getSkillIri() + "\", State: \"" + skillTable.get(key).getState() + "\"");
-			sb.append("</p>");
-		} else {
-			// key does not exist
-			sb.append("<p>");
-			sb.append("Key: \"" + key + "\" is not a valid key. (Instance not found!)");
-			sb.append("</p>");
+		if (!isValidUUID(uid)) {
+			return Response.status(Response.Status.BAD_REQUEST).build();
 		}
-
-		sb.append("</body></html>");
-		return sb.toString();
+		UUID key = UUID.fromString(uid);
+		
+		for (RestSkill rSkill : skillDirectory.values()) {
+			if (rSkill.getUUID().equals(key)) {
+				JsonObject obj = Json.createObjectBuilder().add(rSkill.getSkillIri(), Json.createObjectBuilder().add("state", rSkill.getState()).add("uuid",
+						rSkill.getUUID().toString())).build();
+				
+				String responseString = obj.toString();
+				return Response.status(Response.Status.OK).entity(responseString).build();
+			}
+		}
+		
+		// no match found!
+		return Response.status(Response.Status.NOT_FOUND).build();
 	}
 
 	@POST
