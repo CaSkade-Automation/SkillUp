@@ -75,6 +75,10 @@ public class RestSkill {
 	public UUID getUUID() {
 		return uuid;
 	}
+	
+	public Object getSkillObject() {
+		return skillObject;
+	}
 
 	public String getSkillIri() {
 		return skillObject.getClass().getAnnotation(Skill.class).skillIri();
