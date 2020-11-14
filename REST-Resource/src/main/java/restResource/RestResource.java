@@ -1,11 +1,14 @@
 package restResource;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.UUID;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -22,6 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import annotations.Skill;
+import annotations.SkillOutput;
+import annotations.SkillParameter;
 import statemachine.Isa88StateMachine;
 
 @Component(immediate = true, service = RestResource.class)
@@ -136,6 +141,93 @@ public class RestResource {
 		return Response.status(Response.Status.NOT_FOUND).build();
 	}
 
+	@GET
+	@Path("{uid}/skillOutputs")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getSkillOutputs(@PathParam("uid") String uid) {
+		if (!isValidUUID(uid)) {
+			return Response.status(Response.Status.BAD_REQUEST).build();
+		}
+		UUID key = UUID.fromString(uid);
+
+		for (RestSkill rSkill : skillDirectory.values()) {
+			if (rSkill.getUUID().equals(key)) {
+				// found the correct skill
+				JsonObjectBuilder objBuilder = Json.createObjectBuilder();
+				// check every field of the skillObject for SkillOutput-Annotation
+				Field[] fields = rSkill.getSkillObject().getClass().getDeclaredFields();
+				for (Field field : fields) {
+					if (field.isAnnotationPresent(SkillOutput.class)) {
+						field.setAccessible(true);
+						JsonObjectBuilder jsonField = Json.createObjectBuilder();
+						jsonField.add("name", field.getAnnotation(SkillOutput.class).name()).add("type", field.getType().getSimpleName()).add("isRequired", Boolean.toString(field.getAnnotation(SkillOutput.class).isRequired())).add("description", field.getAnnotation(SkillOutput.class).description());
+						try {
+							String fieldValue = field.get(rSkill.getSkillObject()).toString();
+							jsonField.add("value", fieldValue);
+						} catch (IllegalArgumentException e) {
+							logger.error(getClass().getSimpleName() + ": ERR on generating skillOutput (value of output, IllegalArgumentException)" + e);
+						} catch (IllegalAccessException e) {
+							logger.error(getClass().getSimpleName() + ": ERR on generating skillOutput (value of output, IllegalAccessException)" + e);
+						} catch (NullPointerException e) {
+							logger.error(getClass().getSimpleName() + ": ERR on generating skillOutput (value of output, NullPointerException)" + e);
+							jsonField.add("value", "null");
+						}
+						objBuilder.add(field.getName(), jsonField);
+					}
+				}
+
+				String responseString = objBuilder.build().toString();
+				return Response.status(Response.Status.OK).entity(responseString).build();
+			}
+		}
+
+		// no match found!
+		return Response.status(Response.Status.NOT_FOUND).build();
+	}
+
+	@GET
+	@Path("{uid}/skillParameters")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getSkillParameters(@PathParam("uid") String uid) {
+		if (!isValidUUID(uid)) {
+			return Response.status(Response.Status.BAD_REQUEST).build();
+		}
+		UUID key = UUID.fromString(uid);
+
+		for (RestSkill rSkill : skillDirectory.values()) {
+			if (rSkill.getUUID().equals(key)) {
+				// found the correct skill
+				JsonObjectBuilder objBuilder = Json.createObjectBuilder();
+				// check every field of the skillObject for SkillOutput-Annotation
+				Field[] fields = rSkill.getSkillObject().getClass().getDeclaredFields();
+				for (Field field : fields) {
+					if (field.isAnnotationPresent(SkillParameter.class)) {
+						field.setAccessible(true);
+						JsonObjectBuilder jsonField = Json.createObjectBuilder();
+						jsonField.add("name", field.getAnnotation(SkillParameter.class).name()).add("type", field.getType().getSimpleName()).add("isRequired", Boolean.toString(field.getAnnotation(SkillParameter.class).isRequired())).add("description", field.getAnnotation(SkillParameter.class).description());
+						try {
+							String fieldValue = field.get(rSkill.getSkillObject()).toString();
+							jsonField.add("value", fieldValue);
+						} catch (IllegalArgumentException e) {
+							logger.error(getClass().getSimpleName() + ": ERR on generating skillParameter (value of param, IllegalArgumentException)" + e);
+						} catch (IllegalAccessException e) {
+							logger.error(getClass().getSimpleName() + ": ERR on generating skillParameter (value of param, IllegalAccessException)" + e);
+						} catch (NullPointerException e) {
+							logger.error(getClass().getSimpleName() + ": ERR on generating skillParameter (value of param, NullPointerException)" + e);
+							jsonField.add("value", "null");
+						}
+						objBuilder.add(field.getName(), jsonField);
+					}
+				}
+
+				String responseString = objBuilder.build().toString();
+				return Response.status(Response.Status.OK).entity(responseString).build();
+			}
+		}
+
+		// no match found!
+		return Response.status(Response.Status.NOT_FOUND).build();
+	}
 	@POST
 	@Path("{uid}/start")
 	@Produces(MediaType.APPLICATION_JSON)
