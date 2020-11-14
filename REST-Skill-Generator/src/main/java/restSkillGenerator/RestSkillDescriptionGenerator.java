@@ -169,8 +169,7 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 			completeDescription = completeDescription.replace("${ModuleIri}", skillAnnotation.moduleIri())
 					.replace("${CapabilityIri}", skillAnnotation.capabilityIri())
 					.replace("${SkillIri}", skillAnnotation.skillIri())
-					// TODO: does this return the correct uuid?
-					.replace("${UUID}", restResource.getUuidByIri(skillAnnotation.skillIri()))
+					.replace("${UUID}", restResource.getRestSkillBySkillObject(skill).getUUID().toString())
 					// Caution!: We have to cut the "state" from e.g. "IdleState" at the end of each State class name
 					.replace("${InitialState}", stateMachine.getState().getClass().getSimpleName().substring(0, stateMachine.getState().getClass().getSimpleName().length() - 5))
 					// for now we always assume JSON format

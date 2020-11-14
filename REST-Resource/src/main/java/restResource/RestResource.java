@@ -25,9 +25,13 @@ import statemachine.Isa88StateMachine;
 @Path("skills")
 public class RestResource {
 
-	private static Logger logger = LoggerFactory.getLogger(RestResource.class);
+	private static Logger logger;
+	private HashMap<UUID, RestSkill> skillDirectory;
 
-	private HashMap<UUID, RestSkill> skillTable = new HashMap<UUID, RestSkill>();
+	public RestResource() {
+		this.skillDirectory = new HashMap<UUID, RestSkill>();
+		RestResource.logger = LoggerFactory.getLogger(RestResource.class);
+	}
 
 	@Activate
 	public void activate() {
@@ -40,31 +44,53 @@ public class RestResource {
 	}
 
 	public void generateSkill(Object skill, Isa88StateMachine stateMachine) {
-		String skillIri = null;
-		if (skill.getClass().isAnnotationPresent(Skill.class)) {
-			skillIri = skill.getClass().getAnnotation(Skill.class).skillIri();
-		} else {
+		if (!skill.getClass().isAnnotationPresent(Skill.class)) {
 			logger.info(getClass().getSimpleName()
 					+ ": ERR while generating new skill: Object does not have \"Skill\"-Annotation.");
 			return;
 		}
-		RestSkill newSkill = new RestSkill(stateMachine, skillIri);
-		skillTable.put(newSkill.getUUID(), newSkill);
+		if (!skill.getClass().getAnnotation(Skill.class).type().equals("RestSkill")) {
+			logger.info(getClass().getSimpleName()
+					+ ": ERR while generating new skill: Object's \"Skill\"-Annotation Type is not \"RestSkill\".");
+			return;
+		}
+		RestSkill newSkill = null;
+		do {
+			newSkill = new RestSkill(stateMachine, skill);
+		} while (skillDirectory.containsKey(newSkill.getUUID()));
+		skillDirectory.put(newSkill.getUUID(), newSkill);
 	}
 
-	// TODO: Test if this identifies the correct skill (maybe objects dont have the same reference)
-	// otherwise would need to check by skillIri
+	public RestSkill getRestSkillBySkillObject(Object skillObject) {
+		for (RestSkill rSkill : skillDirectory.values()) {
+			if (rSkill.getSkillObject().equals(skillObject)) {
+				return rSkill;
+			}
+		}
+		return null;
+	}
+
 	public void deleteSkill(Object skill) {
 		logger.info(getClass().getSimpleName() + ": Deleting skill \"" + skill.toString() + "\"...");
-		
+
 		for (UUID key : skillDirectory.keySet()) {
 			if (skillDirectory.get(key).getSkillObject().equals(skill)) {
-				logger.info(getClass().getSimpleName() + ": Found skill in skill directory (" + skillDirectory.get(key).getSkillIri() + ", " + key.toString() + ")");
+				logger.info(getClass().getSimpleName() + ": Found skill in skill directory ("
+						+ skillDirectory.get(key).getSkillIri() + ", " + key.toString() + ")");
 				skillDirectory.remove(key);
 			}
 		}
 	}
 
+	public boolean isValidUUID(String toCheck) {
+		try {
+			UUID.fromString(toCheck);
+			return true;
+		} catch (Exception e) {
+			logger.error(getClass().getSimpleName() + ": ERR: (" + toCheck + ") is not a valid UUID.");
+			return false;
+		}
+	}
 
 	@POST
 	@Produces(MediaType.TEXT_HTML)
