@@ -104,10 +104,16 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 				restSkillDescription.append("	Cap:hasVariableType \"" + field.getType().getSimpleName() + "\" ;\n");
 				restSkillDescription.append("	Cap:isRequired \""
 						+ Boolean.toString(field.getAnnotation(SkillParameter.class).isRequired()) + "\" ;\n");
+				restSkillDescription.append("	Cap:hasDescription \"" + field.getAnnotation(SkillParameter.class).description() + "\" ;\n");
 				try {
-					restSkillDescription.append("	Cap:hasDefaultValue \"" + field.get(skill).toString() + "\" .\n");
+					String defaultFieldValue = field.get(skill).toString();
+					restSkillDescription.append("	Cap:hasDefaultValue \"" + defaultFieldValue + "\" .\n");
 				} catch (IllegalArgumentException | IllegalAccessException e) {
 					e.printStackTrace();
+				} catch (NullPointerException e) {
+					e.printStackTrace();
+					restSkillDescription.append("	Cap:hasDefaultValue \"" + "null" + "\" .\n");
+
 				}
 
 				// create connections to RestSkill and Representation
@@ -140,6 +146,8 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 				restSkillDescription.append("	Cap:hasVariableType \"" + field.getType().getSimpleName() + "\" ;\n");
 				restSkillDescription.append("	Cap:isRequired \""
 						+ Boolean.toString(field.getAnnotation(SkillOutput.class).isRequired()) + "\" ;\n");
+				restSkillDescription.append("	Cap:hasDescription \"" + field.getAnnotation(SkillOutput.class).description() + "\" ;\n");
+
 				try {
 					restSkillDescription.append("	Cap:hasDefaultValue \"" + field.get(skill).toString() + "\" .\n");
 				} catch (IllegalArgumentException | IllegalAccessException e) {
