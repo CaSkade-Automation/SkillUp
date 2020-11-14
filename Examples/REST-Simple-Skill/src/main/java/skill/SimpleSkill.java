@@ -15,24 +15,34 @@ public class SimpleSkill {
 
 	private final Logger logger = LoggerFactory.getLogger(SimpleSkill.class);
 
-	@SkillParameter(isRequired = true, option = {"4", "3", "2"})
-	private int j;
+	@SkillParameter(isRequired = true, option = {"4", "3", "2"}, name = "jay", description = "hello world")
+	private int j = 2;
+	
+	@SkillParameter(isRequired = false)
+	private String i;
 
-	@SkillOutput(isRequired = false)
+	@SkillOutput(isRequired = false, name = "ypsilon", description = "lorem ipsum")
 	private int y;
+	
+	@SkillOutput(isRequired = true)
+	private double z;
 
 	@Starting
 	public void starting() {
 		logger.info("Starting, j = " + j);
+		z = 123.45;
 	}
 
 	@Execute
 	public void execute() {
-		y = j * 2;
+		j = j * 2;
+		y = j;
 	}
 
 	@Completing
 	public void completing() {
+		j = j * 2;
+		y = j;
 		logger.info("Completing, y = " + y);
 	}
 }
