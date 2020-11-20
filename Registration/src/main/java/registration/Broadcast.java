@@ -30,7 +30,8 @@ public class Broadcast {
 	 * Method to send broadcast message and to wait for answers of possible
 	 * different OPSes.
 	 * 
-	 * @param broadcastMessage contains module description
+	 * @param moduleRegistry to add OPS to an list to know to to whom modules and
+	 *                       skills has to register
 	 * @throws IOException
 	 */
 	public void broadcast(ModuleRegistry moduleRegistry) throws IOException {
@@ -86,7 +87,7 @@ public class Broadcast {
 				try {
 					while (true) {
 						socket.receive(receivePacket);
-						broadcastResponse(receivePacket, moduleRegistry);
+						getOpsDescriptionFromResponse(receivePacket, moduleRegistry);
 					}
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -95,22 +96,25 @@ public class Broadcast {
 			}
 		};
 
+		// after 20 seconds without any OPS answering to the broadcast the thread is
+		// closed and no more answers are accepted
 		CompletableFuture.runAsync(receivingBroadcastResponseThread::run).orTimeout(20, TimeUnit.SECONDS)
 				.exceptionally(throwable -> {
 					logger.info("No more OPS found");
+					// list is cleared for future broadcasts
 					opsIDs.clear();
 					return null;
 				});
 	}
 
 	/**
-	 * The description of OPS is converted from string to OpsDescription and handed
-	 * over to method for registering the module
+	 * The description of OPS is converted from string to OpsDescription
 	 * 
-	 * @param receivePacket response to broadcast
-	 * @param moduleInsert  rdf description of module for registering it to OPS
+	 * @param receivePacket  response to broadcast
+	 * @param moduleRegistry to add OPS to an list to know to to whom modules and
+	 *                       skills has to register
 	 */
-	public void broadcastResponse(DatagramPacket receivePacket, ModuleRegistry moduleRegistry) {
+	public void getOpsDescriptionFromResponse(DatagramPacket receivePacket, ModuleRegistry moduleRegistry) {
 
 		String ip = receivePacket.getAddress().getHostAddress();
 		String opsDescriptionAsString = new String(receivePacket.getData()).trim();
@@ -122,27 +126,27 @@ public class Broadcast {
 		OpsDescription opsDescription = gson.fromJson(opsDescriptionAsString, OpsDescription.class);
 
 		boolean sameOps = false;
+		// checks if response is from same OPS with different IP in other broadcast
+		// range
 		for (String opsID : opsIDs) {
 			if (opsDescription.getId().equals(opsID)) {
 				sameOps = true;
 			}
 		}
-
 		if (sameOps) {
 			logger.info("Response from same OPS in a different broadcast range");
-		} else {
-			opsIDs.add(opsDescription.getId());
-
-			int port = opsDescription.getPort();
-			String basePath = opsDescription.getBasePath();
-			String moduleEndpoint = opsDescription.getModuleEndpoint();
-			String id = opsDescription.getId();
-			String capabilityEndpoint = opsDescription.getCapabilityEndpoint();
-			String skillEndpoint = opsDescription.getSkillEndpoint();
-
-			opsDescription = new OpsDescription(ip, id, port, basePath, moduleEndpoint, capabilityEndpoint,
-					skillEndpoint);
-			moduleRegistry.addOps(opsDescription);
+			return;
 		}
+		opsIDs.add(opsDescription.getId());
+
+		int port = opsDescription.getPort();
+		String basePath = opsDescription.getBasePath();
+		String moduleEndpoint = opsDescription.getModuleEndpoint();
+		String id = opsDescription.getId();
+		String capabilityEndpoint = opsDescription.getCapabilityEndpoint();
+		String skillEndpoint = opsDescription.getSkillEndpoint();
+
+		opsDescription = new OpsDescription(ip, id, port, basePath, moduleEndpoint, capabilityEndpoint, skillEndpoint);
+		moduleRegistry.addOps(opsDescription);
 	}
 }

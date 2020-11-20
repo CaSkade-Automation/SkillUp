@@ -1,6 +1,5 @@
 package opcuaSkillGenerator;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Enumeration;
 import java.util.List;
@@ -19,9 +18,15 @@ import annotations.SkillParameter;
 import descriptionGenerator.SkillDescriptionGenerator;
 import opcUaServer.Server;
 import statemachine.Isa88StateMachine;
+import states.TransitionName;
 
+/**
+ * Class to generate rdf description for OpcUa skill
+ *
+ */
 public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 
+	// Snippets to create OpcUa description
 	private String opcUaSkillSnippet = "<${ModuleIri}> Cap:providesOpcUaSkill <${SkillIri}> .\r\n"
 			+ "<${SkillIri}> a Cap:OpcUaSkill,\r\n" + "							owl:NamedIndividual.\r\n"
 			+ "<${SkillIri}> OpcUa:browseName \"${BrowseName}\";  \r\n"
@@ -33,8 +38,10 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 			+ "						Cap:hasCurrentState <${SkillIri}_StateMachine_${StateName}>.\r\n"
 			+ "<${ModuleIri}_${ServerName}_NodeSet> OpcUa:containsNode <${SkillIri}> .";
 
-	private String capabilitySnippet = "<${CapabilityIri}> Cap:isExecutableViaOpcUaSkill <${SkillIri}> ."; 
-	
+	private String capabilitySnippet = "<${CapabilityIri}> Cap:isExecutableViaOpcUaSkill <${SkillIri}>;\r\n"
+			+ "					a Cap:Capability,\r\n" + "					owl:NamedIndividual. \r\n"
+			+ "<${ModuleIri}> Cap:hasCapability <${CapabilityIri}> .";
+
 	private String opcUaMethodSnippet = "<${SkillIri}_${MethodName}> a OpcUa:UAMethod,\r\n"
 			+ "										Cap:${MethodName},\r\n"
 			+ "										owl:NamedIndiviual;\r\n"
@@ -96,162 +103,138 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 
 	private boolean serverDescription = false;
 
+	/**
+	 * Method to generate OpcUa description for a OpcUa skill
+	 * 
+	 * @param server       OpcUa Server to generate its description
+	 * @param skill        skills object to generate its description
+	 * @param stateMachine skills stateMachine to get current state
+	 * @param userFiles    additional user written rdf description
+	 * @return OpcUa rdf description
+	 */
 	public String generateOpcUaDescription(Server server, Object skill, Isa88StateMachine stateMachine,
 			Enumeration<String> userFiles) {
 		Skill skillAnnotation = skill.getClass().getAnnotation(Skill.class);
 
 		String opcUaServerDescription = "";
+		// if OpcUa server description already set, its not written another time
 		if (!serverDescription) {
 			opcUaServerDescription = generateOpcUaServerDescription(server);
 			serverDescription = true;
 		}
 
 		String opcUaSkillDescription = generateOpcUaSkillDescription(skill, stateMachine, server);
-		String stateMachineDescription = generateStateMachineDescription(stateMachine);
+		String stateMachineDescription = generateStateMachineDescription();
 
 		String userSnippet = getUserSnippets(userFiles, skill.getClass().getClassLoader());
 
-		String completeSkillDescription;
-		try {
-			completeSkillDescription = getFileFromResources(null, "prefix.ttl") + opcUaServerDescription
-					+ opcUaSkillDescription + stateMachineDescription + userSnippet;
+		// whole description of new skill
+		String completeSkillDescription = getFileFromResources(null, "prefix.ttl") + opcUaServerDescription
+				+ opcUaSkillDescription + stateMachineDescription + userSnippet;
 
-			completeSkillDescription = completeSkillDescription.replace("${ModuleIri}", skillAnnotation.moduleIri())
-					.replace("${ServerName}", server.getServer().getConfig().getApplicationName().getText())
-					.replace("${CapabilityIri}", skillAnnotation.capabilityIri())
-					.replace("${SkillIri}", skillAnnotation.skillIri());
+		// replace some dummies in description
+		completeSkillDescription = completeSkillDescription.replace("${ModuleIri}", skillAnnotation.moduleIri())
+				.replace("${ServerName}", server.getServer().getConfig().getApplicationName().getText())
+				.replace("${CapabilityIri}", skillAnnotation.capabilityIri())
+				.replace("${SkillIri}", skillAnnotation.skillIri());
 
-			createFile(completeSkillDescription, "opcUaDescription.ttl");
-
-			return completeSkillDescription;
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		return null;
+		// createFile(completeSkillDescription, "opcUaDescription.ttl");
+		return completeSkillDescription;
 	}
 
+	/**
+	 * Method to tell that OpcUa Server is gone so that server description has to be
+	 * written again next time a server comes up
+	 */
+	public void setServerDescriptionBoolBack() {
+		this.serverDescription = false;
+	}
+
+	/**
+	 * Method to generate OpcUa Server description in rdf syntax
+	 * 
+	 * @param server OpcUa server for the rdf description has to be created
+	 * @return OpcUa server description
+	 */
+	public String generateOpcUaServerDescription(Server server) {
+
+		OpcUaServer opcUaServer = server.getServer();
+		String opcUaServerDescription = opcUaServerSnippet;
+
+		List<EndpointDescription> endpointDescriptions = opcUaServer.getEndpointDescriptions();
+
+		// every endpoint description is added to the rdf descripiton
+		for (EndpointDescription endpointDescription : endpointDescriptions) {
+			String securityPolicy = endpointDescription.getSecurityPolicyUri();
+			securityPolicy = securityPolicy.substring(securityPolicy.lastIndexOf("/") + 1);
+			securityPolicy = securityPolicy.replace("#", "_");
+
+			// some dummies are replaced
+			String opcUaServerSecurity = opcUaServerSecuritySnippet
+					.replace("${EndpointUrl}", endpointDescription.getEndpointUrl())
+					.replace("${MessageSecurityMode}", endpointDescription.getSecurityMode().name())
+					.replace("${SecurityPolicy}", securityPolicy);
+
+			// if an password is necessary this is added to the description
+			if (endpointDescription.getSecurityMode().name().equals("SignAndEncrypt")) {
+				String opcUaServerUser = opcUaServerUserSnippet.replace("${UserName}", server.getUserName())
+						.replace("${Password}", server.getUserPassword());
+				opcUaServerDescription = opcUaServerDescription + opcUaServerUser;
+			}
+			opcUaServerDescription = opcUaServerDescription + opcUaServerSecurity;
+		}
+		return opcUaServerDescription;
+	}
+
+	/**
+	 * Method to generate OpcUa skill description with its variables and methods
+	 * 
+	 * @param skill        skills object to get IRIs etc.
+	 * @param stateMachine skills stateMachine to get current state
+	 * @param server       OpcUa server
+	 * @return OpcUa skill rdf description
+	 */
 	public String generateOpcUaSkillDescription(Object skill, Isa88StateMachine stateMachine, Server server) {
 
 		String skillName = skill.getClass().getAnnotation(Skill.class).skillIri();
 		String capability = skill.getClass().getAnnotation(Skill.class).capabilityIri();
 
-		String opcUaSkillDescription = null;
+		String opcUaSkillDescription = "";
 		List<Node> opcUaNodes = server.getNamespace().getFolder().getOrganizesNodes();
 
+		// description is only created for skill node
 		for (Node node : opcUaNodes) {
 			if (node.getBrowseName().getName().equals(skillName)) {
 				String stateName = stateMachine.getState().toString()
 						.substring(stateMachine.getState().toString().lastIndexOf(".") + 1);
 				stateName = stateName.substring(0, stateName.lastIndexOf("State"));
 				opcUaSkillDescription = opcUaSkillSnippet.replace("${StateName}", stateName);
-				
-				if(!capability.isEmpty()) {
-					opcUaSkillDescription = opcUaSkillDescription + capabilitySnippet; 
+
+				// if skill is connected with capability its added to the description
+				if (!capability.isEmpty()) {
+					opcUaSkillDescription = opcUaSkillDescription + capabilitySnippet;
 				}
 
 				opcUaSkillDescription = generateOpcUaSkillDataPropertyDescription(opcUaSkillDescription, node);
 
 				UaFolderNode folder = (UaFolderNode) node;
-				List<UaNode> componentNodes = folder.getComponentNodes();
 
-				for (UaNode componentNode : componentNodes) {
-					String methodDescription = generateOpcUaSkillDataPropertyDescription(opcUaMethodSnippet,
-							componentNode);
-
-					if (!componentNode.getBrowseName().getName().equals("getOutputs")) {
-						String opcUaMethodInvokesTransitionDescription = opcUaMethodInvokesTransitionSnippet.replace(
-								"${CommandName}", componentNode.getBrowseName().getName().substring(0, 1).toUpperCase()
-										+ componentNode.getBrowseName().getName().substring(1));
-						methodDescription = methodDescription + opcUaMethodInvokesTransitionDescription;
-					}
-
-					methodDescription = methodDescription.replace("${MethodName}",
-							componentNode.getBrowseName().getName().substring(0, 1).toUpperCase()
-									+ componentNode.getBrowseName().getName().substring(1));
-					opcUaSkillDescription = opcUaSkillDescription + methodDescription;
-				}
-
-				List<Node> organizedNodes = folder.getOrganizesNodes();
-
-				for (Node organizedNode : organizedNodes) {
-					UaVariableNode variableNode = (UaVariableNode) organizedNode;
-
-					String skillParameterDescription = "";
-					String skillOutputDescription = "";
-
-					Field[] fields = skill.getClass().getDeclaredFields();
-					for (Field field : fields) {
-						if (field.isAnnotationPresent(SkillParameter.class)) {
-							field.setAccessible(true);
-							if ((field.getAnnotation(SkillParameter.class).name()
-									.equals(variableNode.getBrowseName().getName()))
-									|| field.getName().equals(variableNode.getBrowseName().getName())) {
-
-								boolean isRequired = field.getAnnotation(SkillParameter.class).isRequired();
-								try {
-									skillParameterDescription = opcUaSkillParameterSnippet
-											.replace("${Required}", Boolean.toString(isRequired))
-											.replace("${DefaultValue}", field.get(skill).toString());
-									String options[] = field.getAnnotation(SkillParameter.class).option();
-									int i = 1;
-									if (options.length > 0) {
-										for (String option : options) {
-											if (!option.isEmpty()) {
-												skillParameterDescription = skillParameterDescription
-														+ opcUaSkillParameterOptionSnippet
-																.replace("${Number}", Integer.toString(i))
-																.replace("${OptionValue}", option);
-												i = i + 1;
-											}
-										}
-									}
-								} catch (IllegalArgumentException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								} catch (IllegalAccessException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-								break;
-							}
-						} else if (field.isAnnotationPresent(SkillOutput.class)) {
-							field.setAccessible(true);
-							if ((field.getAnnotation(SkillOutput.class).name()
-									.equals(variableNode.getBrowseName().getName()))
-									|| field.getName().equals(variableNode.getBrowseName().getName())) {
-
-								boolean isRequired = field.getAnnotation(SkillOutput.class).isRequired();
-
-								skillOutputDescription = opcUaSkillOutputSnippet.replace("${Required}",
-										Boolean.toString(isRequired));
-								break;
-							}
-						}
-					}
-
-					String variableType = variableNode.getDataType().getIdentifier().toString();
-
-					String variableDescription = skillParameterDescription + skillOutputDescription
-							+ opcUaVariableSnippet;
-					variableDescription = variableDescription
-							.replace("${VariableName}", variableNode.getBrowseName().getName())
-							.replace("${AccessLevel}", variableNode.getAccessLevel().toString())
-							.replace("${DataType}", variableNode.getDataType().toParseableString())
-							.replace("${VariableType}",
-									BuiltinDataType.getBackingClass(Integer.parseInt(variableType)).getSimpleName())
-							.replace("${Historizing}", variableNode.getHistorizing().toString())
-							.replace("${UserAccessLevel}", variableNode.getUserAccessLevel().toString())
-							.replace("${ValueRank}", variableNode.getValueRank().toString());
-
-					variableDescription = generateOpcUaSkillDataPropertyDescription(variableDescription, organizedNode);
-					opcUaSkillDescription = opcUaSkillDescription + variableDescription;
-				}
+				String methodDescription = generateOpcUaMethodDescription(folder);
+				String variableDescription = generateOpcUaVariableDescription(folder, skill);
+				opcUaSkillDescription = opcUaSkillDescription + methodDescription + variableDescription;
+				break;
 			}
 		}
 		return opcUaSkillDescription;
 	}
 
+	/**
+	 * Method generates for every OpcUa node default data properties like nodeId
+	 * 
+	 * @param description current rdf description
+	 * @param node        current node to replace its default data properties
+	 * @return changed rdf description
+	 */
 	public String generateOpcUaSkillDataPropertyDescription(String description, Node node) {
 		String newDescription = description.replace("${BrowseName}", node.getBrowseName().getName())
 				.replace("${BrowseNamespace}", node.getBrowseName().getNamespaceIndex().toString())
@@ -262,30 +245,132 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 		return newDescription;
 	}
 
-	public String generateOpcUaServerDescription(Server server) {
+	/**
+	 * Method to generate description of skills methods like start etc.
+	 * 
+	 * @param folder node to get all component nodes which represent methods
+	 * @return total description of all methods
+	 */
+	public String generateOpcUaMethodDescription(UaFolderNode folder) {
 
-		OpcUaServer opcUaServer = server.getServer();
-		String opcUaServerDescription = opcUaServerSnippet;
+		String totalMethodDescription = "";
 
-		List<EndpointDescription> endpointDescriptions = opcUaServer.getEndpointDescriptions();
+		// generate description for every component node (methods) of the skill
+		for (UaNode componentNode : folder.getComponentNodes()) {
+			String methodDescription = generateOpcUaSkillDataPropertyDescription(opcUaMethodSnippet, componentNode);
 
-		for (EndpointDescription endpointDescription : endpointDescriptions) {
-			String securityPolicy = endpointDescription.getSecurityPolicyUri();
-			securityPolicy = securityPolicy.substring(securityPolicy.lastIndexOf("/") + 1);
-			securityPolicy = securityPolicy.replace("#", "_");
-
-			String opcUaServerSecurity = opcUaServerSecuritySnippet
-					.replace("${EndpointUrl}", endpointDescription.getEndpointUrl())
-					.replace("${MessageSecurityMode}", endpointDescription.getSecurityMode().name())
-					.replace("${SecurityPolicy}", securityPolicy);
-
-			if (endpointDescription.getSecurityMode().name().equals("SignAndEncrypt")) {
-				String opcUaServerUser = opcUaServerUserSnippet.replace("${UserName}", server.getUserName())
-						.replace("${Password}", server.getUserPassword());
-				opcUaServerDescription = opcUaServerDescription + opcUaServerUser;
+			// for every method corresponding to an transition like start etc. this
+			// connection between method and transition is added
+			for (TransitionName transition : TransitionName.values()) {
+				if (componentNode.getBrowseName().getName().equals(transition.toString())) {
+					String opcUaMethodInvokesTransitionDescription = opcUaMethodInvokesTransitionSnippet.replace(
+							"${CommandName}", componentNode.getBrowseName().getName().substring(0, 1).toUpperCase()
+									+ componentNode.getBrowseName().getName().substring(1));
+					methodDescription = methodDescription + opcUaMethodInvokesTransitionDescription;
+					break;
+				}
 			}
-			opcUaServerDescription = opcUaServerDescription + opcUaServerSecurity;
+			methodDescription = methodDescription.replace("${MethodName}",
+					componentNode.getBrowseName().getName().substring(0, 1).toUpperCase()
+							+ componentNode.getBrowseName().getName().substring(1));
+			totalMethodDescription = totalMethodDescription + methodDescription;
 		}
-		return opcUaServerDescription;
+		return totalMethodDescription;
+	}
+
+	/**
+	 * Method to generate description of skills variables (parameter/output)
+	 * 
+	 * @param folder node to get all organized nodes which represent variables
+	 * @param skill  skills object to get fields
+	 * @return total description of all variables
+	 */
+	public String generateOpcUaVariableDescription(UaFolderNode folder, Object skill) {
+
+		String totalVariableDescription = "";
+
+		// generate description for every organized node (variables) of the skill
+		for (Node organizedNode : folder.getOrganizesNodes()) {
+			UaVariableNode variableNode = (UaVariableNode) organizedNode;
+
+			String skillParameterDescription = "";
+			String skillOutputDescription = "";
+
+			Field[] fields = skill.getClass().getDeclaredFields();
+			for (Field field : fields) {
+				// differentiation between skill parameter and output
+				if (field.isAnnotationPresent(SkillParameter.class)) {
+					field.setAccessible(true);
+					if ((field.getAnnotation(SkillParameter.class).name()
+							.equals(variableNode.getBrowseName().getName()))
+							|| field.getName().equals(variableNode.getBrowseName().getName())) {
+
+						boolean isRequired = field.getAnnotation(SkillParameter.class).isRequired();
+						try {
+							skillParameterDescription = opcUaSkillParameterSnippet
+									.replace("${Required}", Boolean.toString(isRequired))
+									.replace("${DefaultValue}", field.get(skill).toString());
+							// add parameter options to description
+							skillParameterDescription = generateOptionValuesDescription(field,
+									skillParameterDescription);
+						} catch (IllegalArgumentException | IllegalAccessException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						break;
+					}
+				} else if (field.isAnnotationPresent(SkillOutput.class)) {
+					field.setAccessible(true);
+					if ((field.getAnnotation(SkillOutput.class).name().equals(variableNode.getBrowseName().getName()))
+							|| field.getName().equals(variableNode.getBrowseName().getName())) {
+
+						boolean isRequired = field.getAnnotation(SkillOutput.class).isRequired();
+
+						skillOutputDescription = opcUaSkillOutputSnippet.replace("${Required}",
+								Boolean.toString(isRequired));
+						break;
+					}
+				}
+			}
+
+			String variableType = variableNode.getDataType().getIdentifier().toString();
+
+			String variableDescription = skillParameterDescription + skillOutputDescription + opcUaVariableSnippet;
+			variableDescription = variableDescription.replace("${VariableName}", variableNode.getBrowseName().getName())
+					.replace("${AccessLevel}", variableNode.getAccessLevel().toString())
+					.replace("${DataType}", variableNode.getDataType().toParseableString())
+					.replace("${VariableType}",
+							BuiltinDataType.getBackingClass(Integer.parseInt(variableType)).getSimpleName())
+					.replace("${Historizing}", variableNode.getHistorizing().toString())
+					.replace("${UserAccessLevel}", variableNode.getUserAccessLevel().toString())
+					.replace("${ValueRank}", variableNode.getValueRank().toString());
+
+			variableDescription = generateOpcUaSkillDataPropertyDescription(variableDescription, organizedNode);
+			totalVariableDescription = totalVariableDescription + variableDescription;
+		}
+		return totalVariableDescription;
+	}
+
+	/**
+	 * Method adds skill parameter option values to description
+	 * 
+	 * @param field                     Field of skill parameter
+	 * @param skillParameterDescription actual description
+	 * @return changed description
+	 */
+	public String generateOptionValuesDescription(Field field, String skillParameterDescription) {
+		String options[] = field.getAnnotation(SkillParameter.class).option();
+		int i = 1;
+		// only if options are not empty, option values are added to the description
+		if (options.length <= 0)
+			return skillParameterDescription;
+		for (String option : options) {
+			if (!option.isEmpty()) {
+				skillParameterDescription = skillParameterDescription + opcUaSkillParameterOptionSnippet
+						.replace("${Number}", Integer.toString(i)).replace("${OptionValue}", option);
+				i = i++;
+			}
+		}
+		return skillParameterDescription;
 	}
 }

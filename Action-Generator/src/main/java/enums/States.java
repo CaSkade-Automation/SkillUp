@@ -15,6 +15,11 @@ import annotations.Unholding;
 import annotations.Unsuspending;
 import states.ActiveStateName;
 
+/**
+ * Enum of states with corresponding annotation for state and its
+ * ActiveStateName. Annotation is required to know which method belongs to which
+ * state.
+ */
 public enum States {
 	Aborting(Aborting.class, ActiveStateName.Aborting), Clearing(Clearing.class, ActiveStateName.Clearing),
 	Completing(Completing.class, ActiveStateName.Completing), Execute(Execute.class, ActiveStateName.Execute),
