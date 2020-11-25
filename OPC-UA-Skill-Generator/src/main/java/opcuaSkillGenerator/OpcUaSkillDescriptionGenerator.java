@@ -27,8 +27,8 @@ import states.TransitionName;
 public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 
 	// Snippets to create OpcUa description
-	private String opcUaSkillSnippet = "<${ModuleIri}> Cap:providesOpcUaSkill <${SkillIri}> .\r\n"
-			+ "<${SkillIri}> a Cap:OpcUaSkill,\r\n" + "							owl:NamedIndividual.\r\n"
+	private String opcUaSkillSnippet = "<${ModuleIri}> Cap:providesOpcUaSkillMethod <${SkillIri}> .\r\n"
+			+ "<${SkillIri}> a Cap:OpcUaSkillMethod,\r\n" + "							owl:NamedIndividual.\r\n"
 			+ "<${SkillIri}> OpcUa:browseName \"${BrowseName}\";  \r\n"
 			+ "						OpcUa:browseNamespace \"${BrowseNamespace}\";\r\n"
 			+ "						OpcUa:nodeId \"${NodeId}\";\r\n"
@@ -38,7 +38,7 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 			+ "						Cap:hasCurrentState <${SkillIri}_StateMachine_${StateName}>.\r\n"
 			+ "<${ModuleIri}_${ServerName}_NodeSet> OpcUa:containsNode <${SkillIri}> .";
 
-	private String capabilitySnippet = "<${CapabilityIri}> Cap:isExecutableViaOpcUaSkill <${SkillIri}>;\r\n"
+	private String capabilitySnippet = "<${CapabilityIri}> Cap:isExecutableViaOpcUaSkillMethod <${SkillIri}>;\r\n"
 			+ "					a Cap:Capability,\r\n" + "					owl:NamedIndividual. \r\n"
 			+ "<${ModuleIri}> Cap:hasCapability <${CapabilityIri}> .";
 
