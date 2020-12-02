@@ -88,6 +88,25 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 			restSkillDescription.append("<${SkillIri}_" + transitionCapitalized
 					+ "Method> Cap:invokes <${SkillIri}_StateMachine_" + transitionCapitalized + "_Command> .\n");
 		}
+		// Resource for SkillParameter Queries
+		restSkillDescription.append("<${SkillIri}_SkillParameter_Resource> a WADL:Resource ;\n");
+		restSkillDescription.append("	WADL:hasPath \"skillParameters\" .\n");
+		restSkillDescription.append("<${SkillIri}_RestSkill> WADL:hasResource <${SkillIri}_SkillParameter_Resource> .\n");
+		restSkillDescription.append("<${SkillIri}_setSkillParameter_Method> a WADL:POST .\n");
+		restSkillDescription.append("<${SkillIri}_getSkillParameter_Method> a WADL:GET .\n");
+		restSkillDescription.append("<${SkillIri}_SkillParameter_Resource> WADL:hasMethod <${SkillIri}_setSkillParameter_Method> .\n");
+		restSkillDescription.append("<${SkillIri}_SkillParameter_Resource> WADL:hasMethod <${SkillIri}_getSkillParameter_Method> .\n");
+		restSkillDescription.append("<${SkillIri}_setSkillParameter_Method> WADL:hasRequest <${SkillIri}_Request> .\n");
+		restSkillDescription.append("<${SkillIri}_getSkillParameter_Method> WADL:hasRequest <${SkillIri}_Request> .\n");
+
+		// Resource for SkillOutput Queries
+		restSkillDescription.append("<${SkillIri}_SkillOutput_Resource> a WADL:Resource ;\n");
+		restSkillDescription.append("	WADL:hasPath \"skillOutputs\" .\n");
+		restSkillDescription.append("<${SkillIri}_RestSkill> WADL:hasResource <${SkillIri}_SkillOutput_Resource> .\n");
+		restSkillDescription.append("<${SkillIri}_getSkillOutput_Method> a WADL:GET .\n");
+		restSkillDescription.append("<${SkillIri}_SkillOutput_Resource> WADL:hasMethod <${SkillIri}_getSkillOutput_Method> .\n");
+		restSkillDescription.append("<${SkillIri}_getSkillOutput_Method> WADL:hasRequest <${SkillIri}_Request> .\n");
+
 
 		// connect SkillParameters and SkillOutputs!
 		int skillParamCounter = 0;
@@ -180,7 +199,6 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 					.replace("${UUID}", restResource.getRestSkillBySkillObject(skill).getUUID().toString())
 					// Caution!: We have to cut the "state" from e.g. "IdleState" at the end of each State class name
 					.replace("${InitialState}", stateMachine.getState().getClass().getSimpleName().substring(0, stateMachine.getState().getClass().getSimpleName().length() - 5))
-					// for now we always assume JSON format
 					.replace("${MediaType}", "application/json")
 					.replace("${IpAddress}", getIpAddress());
 
