@@ -1,5 +1,6 @@
 package opcuaSkillGenerator;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Enumeration;
 import java.util.List;
@@ -30,9 +31,9 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 	private String opcUaSkillSnippet = "<${ModuleIri}> Cap:providesOpcUaMethodSkill <${SkillIri}> .\r\n"
 			+ "<${SkillIri}> a Cap:OpcUaMethodSkill,\r\n" + "							owl:NamedIndividual.\r\n"
 			+ "<${SkillIri}> OpcUa:browseName \"${BrowseName}\";  \r\n"
-			+ "						OpcUa:browseNamespace \"${BrowseNamespace}\";\r\n"
+			+ "						OpcUa:browseNamespace ${BrowseNamespace};\r\n"
 			+ "						OpcUa:nodeId \"${NodeId}\";\r\n"
-			+ "						OpcUa:nodeNamespace \"${NodeNamespace}\";\r\n"
+			+ "						OpcUa:nodeNamespace ${NodeNamespace};\r\n"
 			+ "						OpcUa:displayName \"${DisplayName}\" ;\r\n"
 			+ "						Cap:hasStateMachine <${SkillIri}_StateMachine>;\r\n"
 			+ "						Cap:hasCurrentState <${SkillIri}_StateMachine_${StateName}>.\r\n"
@@ -46,46 +47,47 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 			+ "										Cap:${MethodName},\r\n"
 			+ "										owl:NamedIndiviual;\r\n"
 			+ "									OpcUa:browseName \"${BrowseName}\";  \r\n"
-			+ "									OpcUa:browseNamespace \"${BrowseNamespace}\";\r\n"
+			+ "									OpcUa:browseNamespace ${BrowseNamespace};\r\n"
 			+ "									OpcUa:nodeId \"${NodeId}\";\r\n"
-			+ "									OpcUa:nodeNamespace \"${NodeNamespace}\";\r\n"
+			+ "									OpcUa:nodeNamespace ${NodeNamespace};\r\n"
 			+ "									OpcUa:displayName \"${DisplayName}\".   \r\n"
-			+ "<${SkillIri}> OpcUa:hasComponent <${SkillIri}_${MethodName}>. \r\n";
+			+ "<${SkillIri}> Cap:hasSkillMethod <${SkillIri}_${MethodName}>; \r\n"
+			+ "									OpcUa:hasComponent <${SkillIri}_${MethodName}>. \r\n";
 
 	private String opcUaMethodInvokesTransitionSnippet = "<${SkillIri}_${MethodName}> Cap:invokes <${SkillIri}_StateMachine_${CommandName}_Command> .   \r\n";
 
 	private String opcUaVariableSnippet = "<${SkillIri}_${VariableName}> a OpcUa:UAVariable,\r\n"
 			+ "										owl:NamedIndividual;\r\n"
 			+ "									OpcUa:browseName \"${BrowseName}\";  \r\n"
-			+ "									OpcUa:browseNamespace \"${BrowseNamespace}\";\r\n"
+			+ "									OpcUa:browseNamespace ${BrowseNamespace};\r\n"
 			+ "									OpcUa:nodeId \"${NodeId}\";\r\n"
-			+ "									OpcUa:nodeNamespace \"${NodeNamespace}\";\r\n"
+			+ "									OpcUa:nodeNamespace ${NodeNamespace};\r\n"
 			+ "									OpcUa:displayName \"${DisplayName}\";\r\n"
-			+ "									OpcUa:accessLevel \"${AccessLevel}\";\r\n"
-			+ "									OpcUa:hasDataType \"${DataType}\";\r\n"
-			+ "									OpcUa:historizing \"${Historizing}\";\r\n"
-			+ "									OpcUa:userAccessLevel \"${UserAccessLevel}\";\r\n"
-			+ "									OpcUa:valueRank \"${ValueRank}\".\r\n"
+			+ "									OpcUa:accessLevel ${AccessLevel};\r\n"
+			+ "									OpcUa:hasDataType xsd:${DataType};\r\n"
+			+ "									OpcUa:historizing ${Historizing};\r\n"
+			+ "									OpcUa:userAccessLevel ${UserAccessLevel};\r\n"
+			+ "									OpcUa:valueRank ${ValueRank}.\r\n"
 			+ "<${SkillIri}> OpcUa:organizes <${SkillIri}_${VariableName}>. \r\n";
 
 	private String opcUaSkillParameterSnippet = "<${SkillIri}_${VariableName}> a Cap:SkillParameter,\r\n"
 			+ "										owl:NamedIndividual;\r\n"
 			+ "								Cap:hasVariableName \"${BrowseName}\";\r\n"
-			+ "								Cap:hasVariableType \"${VariableType}\";\r\n"
-			+ "								Cap:isRequired \"${Required}\";\r\n"
-			+ "								Cap:hasDefaultValue \"${DefaultValue}\".\r\n"
+			+ "								Cap:hasVariableType xsd:${VariableType};\r\n"
+			+ "								Cap:isRequired ${Required};\r\n"
+			+ "								Cap:hasDefaultValue ${DefaultValue}.\r\n"
 			+ "<${SkillIri}> Cap:hasSkillParameter <${SkillIri}_${VariableName}>.";
 
 	private String opcUaSkillParameterOptionSnippet = "<${SkillIri}_${VariableName}_Option${Number}> a Cap:SkillVariableOption,\r\n"
 			+ "										owl:NamedIndividual;\r\n"
-			+ "								Cap:hasOptionValue \"${OptionValue}\".\r\n"
+			+ "								Cap:hasOptionValue ${OptionValue}.\r\n"
 			+ "<${SkillIri}_${VariableName}> Cap:hasSkillVariableOption <${SkillIri}_${VariableName}_Option${Number}>.";
 
 	private String opcUaSkillOutputSnippet = "<${SkillIri}_${VariableName}> a Cap:SkillOutput,\r\n"
 			+ "										owl:NamedIndividual;\r\n"
 			+ "								Cap:hasVariableName \"${BrowseName}\";\r\n"
-			+ "								Cap:hasVariableType \"${VariableType}\";\r\n"
-			+ "								Cap:isRequired \"${Required}\".\r\n"
+			+ "								Cap:hasVariableType OpcUa:${VariableType};\r\n"
+			+ "								Cap:isRequired ${Required}.\r\n"
 			+ "<${SkillIri}> Cap:hasSkillOutput <${SkillIri}_${VariableName}>.";
 
 	private String opcUaServerSnippet = "<${ModuleIri}_${ServerName}> a OpcUa:UAServer,\r\n"
@@ -138,7 +140,12 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 				.replace("${CapabilityIri}", skillAnnotation.capabilityIri())
 				.replace("${SkillIri}", skillAnnotation.skillIri());
 
-		// createFile(completeSkillDescription, "opcUaDescription.ttl");
+		try {
+			createFile(completeSkillDescription, "opcUaDescription.ttl");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return completeSkillDescription;
 	}
 
@@ -334,13 +341,12 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 			}
 
 			String variableType = variableNode.getDataType().getIdentifier().toString();
+			String opcUaDataType = BuiltinDataType.getBackingClass(Integer.parseInt(variableType)).getSimpleName().toLowerCase();
 
 			String variableDescription = skillParameterDescription + skillOutputDescription + opcUaVariableSnippet;
 			variableDescription = variableDescription.replace("${VariableName}", variableNode.getBrowseName().getName())
 					.replace("${AccessLevel}", variableNode.getAccessLevel().toString())
-					.replace("${DataType}", variableNode.getDataType().toParseableString())
-					.replace("${VariableType}",
-							BuiltinDataType.getBackingClass(Integer.parseInt(variableType)).getSimpleName())
+					.replace("${DataType}", opcUaDataType).replace("${VariableType}", opcUaDataType)
 					.replace("${Historizing}", variableNode.getHistorizing().toString())
 					.replace("${UserAccessLevel}", variableNode.getUserAccessLevel().toString())
 					.replace("${ValueRank}", variableNode.getValueRank().toString());
@@ -368,7 +374,7 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 			if (!option.isEmpty()) {
 				skillParameterDescription = skillParameterDescription + opcUaSkillParameterOptionSnippet
 						.replace("${Number}", Integer.toString(i)).replace("${OptionValue}", option);
-				i = i++;
+				i++;
 			}
 		}
 		return skillParameterDescription;
