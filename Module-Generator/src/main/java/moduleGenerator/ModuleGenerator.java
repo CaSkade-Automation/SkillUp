@@ -1,5 +1,6 @@
 package moduleGenerator;
 
+import java.io.IOException;
 import java.util.Enumeration;
 
 import org.osgi.service.component.annotations.Component;
@@ -52,6 +53,13 @@ public class ModuleGenerator extends DescriptionGenerator {
 		// replace dummies
 		moduleDescription = moduleDescription.replace("${ModuleIri}", moduleAnnotation.moduleIri())
 				.replace("${CapabilityIri}", moduleAnnotation.capabilityIri());
+		
+		try {
+			createFile(moduleDescription, "moduleDescription.ttl");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return moduleDescription;
 	}
 }

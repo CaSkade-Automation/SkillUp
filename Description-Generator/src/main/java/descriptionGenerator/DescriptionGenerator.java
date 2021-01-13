@@ -1,6 +1,7 @@
 package descriptionGenerator;
 
 import java.io.BufferedReader;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -78,12 +79,12 @@ public class DescriptionGenerator {
 	}
 
 //	//nur zu Testzwecken, danach löschen 
-//	public void createFile(String turtleFile, String localFileName) throws IOException {
-//
-//		FileOutputStream fileOutputStream = new FileOutputStream("turtle-files/" + localFileName);
-//		byte[] strToBytes = turtleFile.getBytes();
-//		fileOutputStream.write(strToBytes);
-//
-//		fileOutputStream.close();
-//	}
+	public void createFile(String turtleFile, String localFileName) throws IOException {
+
+		FileOutputStream fileOutputStream = new FileOutputStream("turtle-files/" + localFileName);
+		byte[] strToBytes = turtleFile.getBytes();
+		fileOutputStream.write(strToBytes);
+
+		fileOutputStream.close();
+	}
 }
