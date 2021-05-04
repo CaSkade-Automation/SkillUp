@@ -11,7 +11,7 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
 import org.eclipse.milo.opcua.stack.core.types.structured.Argument;
 
-import annotations.SkillOutput;
+import skillup.annotations.SkillOutput;
 import statemachine.IStateChangeObserver;
 import statemachine.Isa88StateMachine;
 import states.IState;

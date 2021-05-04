@@ -5,8 +5,8 @@ import java.lang.reflect.Method;
 
 import org.osgi.service.component.annotations.Component;
 
-import annotations.StateMachine;
 import enums.States;
+import skillup.annotations.StateMachine;
 import statemachine.Isa88StateMachine;
 import statemachine.StateMachineBuilder;
 

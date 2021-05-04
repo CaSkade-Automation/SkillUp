@@ -5,8 +5,9 @@ import java.util.Enumeration;
 
 import org.osgi.service.component.annotations.Component;
 
-import annotations.Module;
 import descriptionGenerator.DescriptionGenerator;
+
+import skillup.annotations.Module;
 
 /**
  * Class to generate module description
@@ -53,7 +54,7 @@ public class ModuleGenerator extends DescriptionGenerator {
 		// replace dummies
 		moduleDescription = moduleDescription.replace("${ModuleIri}", moduleAnnotation.moduleIri())
 				.replace("${CapabilityIri}", moduleAnnotation.capabilityIri());
-		
+
 		try {
 			createFile(moduleDescription, "moduleDescription.ttl");
 		} catch (IOException e) {

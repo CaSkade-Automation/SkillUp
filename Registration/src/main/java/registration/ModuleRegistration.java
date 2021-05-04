@@ -3,7 +3,7 @@ package registration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import annotations.Module;
+import skillup.annotations.Module;
 
 /**
  * Class to register/delete modules on/from OPS

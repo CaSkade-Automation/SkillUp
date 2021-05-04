@@ -18,7 +18,7 @@ import statemachine.Isa88StateMachine;
  *            immediate=true, component configuration activates immediately <br>
  *            property type to differentiate the skill generators for different
  *            technologies (have to be a class that extends from
- *            actionGenerator.SkillType)
+ *            skillup.annotations.SkillType)
  */
 @Component(immediate = true, property = "type:String=OpcUaSkillType")
 public class OpcUaSkillGenerator implements SkillGeneratorInterface {

@@ -24,11 +24,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import actionGenerator.ActionGenerator;
-import annotations.Module;
-import annotations.Skill;
 import moduleGenerator.ModuleGenerator;
 import registration.Registration;
 import skillGeneratorInterface.SkillGeneratorInterface;
+import skillup.annotations.Module;
+import skillup.annotations.Skill;
 import statemachine.Isa88StateMachine;
 
 /**
@@ -72,7 +72,7 @@ public class SmartTracker {
 	void addSkillGeneratorInterface(SkillGeneratorInterface skillGenerator, Map<String, Object> properties) {
 		try {
 			this.skillGeneratorPropertyList.put(skillGenerator,
-					Class.forName("actionGenerator." + properties.get("type").toString()));
+					Class.forName("skillup.annotations." + properties.get("type").toString()));
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

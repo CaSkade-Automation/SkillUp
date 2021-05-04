@@ -12,8 +12,18 @@
 	<name>Module Generator</name>
 	<dependencies>
 		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.service.component.annotations</artifactId>
+			<version>1.4.0</version>
+		</dependency>
+		<dependency>
 			<groupId>de.hsu-hh.ifa.skillUp</groupId>
 			<artifactId>Description-Generator</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>de.hsu-hh.ifa.skillUp</groupId>
+			<artifactId>skillup.annotations</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>

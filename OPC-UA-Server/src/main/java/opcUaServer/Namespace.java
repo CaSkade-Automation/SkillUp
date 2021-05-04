@@ -23,8 +23,8 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
 
-import annotations.SkillParameter;
-import annotations.SkillOutput;
+import skillup.annotations.SkillParameter;
+import skillup.annotations.SkillOutput;
 
 import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.ubyte;
 

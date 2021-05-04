@@ -13,9 +13,9 @@ import org.eclipse.milo.opcua.sdk.server.nodes.UaVariableNode;
 import org.eclipse.milo.opcua.stack.core.BuiltinDataType;
 import org.eclipse.milo.opcua.stack.core.types.structured.EndpointDescription;
 
-import annotations.Skill;
-import annotations.SkillOutput;
-import annotations.SkillParameter;
+import skillup.annotations.Skill;
+import skillup.annotations.SkillOutput;
+import skillup.annotations.SkillParameter;
 import descriptionGenerator.SkillDescriptionGenerator;
 import opcUaServer.Server;
 import statemachine.Isa88StateMachine;
@@ -86,7 +86,7 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 	private String opcUaSkillOutputSnippet = "<${SkillIri}_${VariableName}> a Cap:SkillOutput,\r\n"
 			+ "										owl:NamedIndividual;\r\n"
 			+ "								Cap:hasVariableName \"${BrowseName}\";\r\n"
-			+ "								Cap:hasVariableType OpcUa:${VariableType};\r\n"
+			+ "								Cap:hasVariableType xsd:${VariableType};\r\n"
 			+ "								Cap:isRequired ${Required}.\r\n"
 			+ "<${SkillIri}> Cap:hasSkillOutput <${SkillIri}_${VariableName}>.";
 

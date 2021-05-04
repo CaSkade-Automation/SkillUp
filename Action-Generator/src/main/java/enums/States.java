@@ -2,17 +2,17 @@ package enums;
 
 import java.lang.annotation.Annotation;
 
-import annotations.Aborting;
-import annotations.Clearing;
-import annotations.Completing;
-import annotations.Execute;
-import annotations.Holding;
-import annotations.Resetting;
-import annotations.Starting;
-import annotations.Stopping;
-import annotations.Suspending;
-import annotations.Unholding;
-import annotations.Unsuspending;
+import skillup.annotations.Aborting;
+import skillup.annotations.Clearing;
+import skillup.annotations.Completing;
+import skillup.annotations.Execute;
+import skillup.annotations.Holding;
+import skillup.annotations.Resetting;
+import skillup.annotations.Starting;
+import skillup.annotations.Stopping;
+import skillup.annotations.Suspending;
+import skillup.annotations.Unholding;
+import skillup.annotations.Unsuspending;
 import states.ActiveStateName;
 
 /**

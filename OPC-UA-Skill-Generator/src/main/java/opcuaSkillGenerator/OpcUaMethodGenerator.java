@@ -6,7 +6,7 @@ import org.eclipse.milo.opcua.sdk.server.api.nodes.Node;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 
-import annotations.Skill;
+import skillup.annotations.Skill;
 import opcUaServer.FolderDescription;
 import opcUaServer.Server;
 import statemachine.Isa88StateMachine;

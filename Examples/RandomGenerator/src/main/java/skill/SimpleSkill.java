@@ -1,11 +1,11 @@
 package skill;
 
-import actionGenerator.OpcUaSkillType;
-import annotations.Execute;
-import annotations.SkillOutput;
-import annotations.StateMachine;
+import skillup.annotations.Execute;
+import skillup.annotations.OpcUaSkillType;
+import skillup.annotations.Skill;
+import skillup.annotations.SkillOutput;
+import skillup.annotations.StateMachine;
 import statemachine.Isa88StateMachine;
-import annotations.Skill;
 
 /**
  * Skill to generate a random value (every Skill has to be provided with

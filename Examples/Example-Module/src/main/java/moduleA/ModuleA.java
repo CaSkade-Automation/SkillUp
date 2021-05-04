@@ -1,6 +1,6 @@
 package moduleA;
 
-import annotations.Module;
+import skillup.annotations.Module;
 
 /**
  * An module example which has to be provided with annotation @Module

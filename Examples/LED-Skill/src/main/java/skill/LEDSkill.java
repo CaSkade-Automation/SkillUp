@@ -8,11 +8,11 @@ import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinDigitalOutput;
 import com.pi4j.io.gpio.RaspiPin;
 
-import actionGenerator.OpcUaSkillType;
-import annotations.Aborting;
-import annotations.Execute;
-import annotations.Skill;
-import annotations.SkillParameter;
+import skillup.annotations.Aborting;
+import skillup.annotations.Execute;
+import skillup.annotations.OpcUaSkillType;
+import skillup.annotations.Skill;
+import skillup.annotations.SkillParameter;
 
 /**
  * LED Skill (every Skill has to be provided with annotation @Skill)

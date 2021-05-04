@@ -3,13 +3,13 @@ package skill;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import actionGenerator.OpcUaSkillType;
-import annotations.Completing;
-import annotations.Execute;
-import annotations.SkillParameter;
-import annotations.SkillOutput;
-import annotations.Skill;
-import annotations.Starting;
+import skillup.annotations.Completing;
+import skillup.annotations.Execute;
+import skillup.annotations.OpcUaSkillType;
+import skillup.annotations.Skill;
+import skillup.annotations.SkillOutput;
+import skillup.annotations.SkillParameter;
+import skillup.annotations.Starting;
 
 /**
  * Skill to add two values (every Skill has to be provided with
