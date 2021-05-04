@@ -1,4 +1,4 @@
-package actionGenerator;
+package skillup.annotations;
 
 /**
  * Skill types like REST extend this class to tell that a skill is of that type.
