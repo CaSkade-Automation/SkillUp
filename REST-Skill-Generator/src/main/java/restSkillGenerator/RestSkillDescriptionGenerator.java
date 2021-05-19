@@ -5,22 +5,22 @@ import java.net.Inet4Address;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.LinkedList;
 import java.util.List;
 
-import annotations.Skill;
-import annotations.SkillOutput;
-import annotations.SkillParameter;
 import descriptionGenerator.SkillDescriptionGenerator;
 import restResource.RestResource;
+import skillup.annotations.Skill;
+import skillup.annotations.SkillOutput;
+import skillup.annotations.SkillParameter;
 import statemachine.Isa88StateMachine;
 import states.TransitionName;
 
 public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 
-	// find our local ip address for generating url in the descriptions
-	public String getIpAddress() {
+	// find our local ip address(es) for generating url in the descriptions
+	public ArrayList<String> getIpAddress() {
 		Enumeration<NetworkInterface> n = null;
 		try {
 			n = NetworkInterface.getNetworkInterfaces();
@@ -28,12 +28,17 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 			e.printStackTrace();
 		}
 
-		LinkedList<String> addresses = new LinkedList<String>();
+		ArrayList<String> addresses = new ArrayList<String>();
 
 		for (; n.hasMoreElements();) {
 			NetworkInterface e = n.nextElement();
-			if (e.isVirtual()) {
-				continue;
+			try {
+				if (e.isVirtual() || e.isLoopback() || !e.isUp()) {
+					continue;
+				}
+			} catch (SocketException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
 			List<InterfaceAddress> i = e.getInterfaceAddresses();
 			for (InterfaceAddress intAddr : i) {
@@ -42,8 +47,7 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 				}
 			}
 		}
-		// TODO is there a better way?
-		return addresses.getFirst();
+		return addresses;
 	}
 
 	public String generateRestDescription(RestResource restResource, Object skill, Isa88StateMachine stateMachine,
@@ -51,7 +55,7 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 
 		Skill skillAnnotation = skill.getClass().getAnnotation(Skill.class);
 
-		String stateMachineDescription = generateStateMachineDescription(stateMachine);
+		String stateMachineDescription = generateStateMachineDescription();
 
 		String userSnippet = getUserSnippets(userFiles, skill.getClass().getClassLoader());
 
@@ -59,17 +63,22 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 		restSkillDescription.append("\n");
 
 		restSkillDescription.append("<${SkillIri}_RestSkill> a Cap:RestSkill ;\n");
-		// TODO: port ??
-		restSkillDescription.append("	WADL:hasBase \"http://${IpAddress}:8181/skills/${UUID}/\" ;\n");
+
+		ArrayList<String> ipAddresses = getIpAddress();
+		for (String ipAddress : ipAddresses) {
+			restSkillDescription.append("	WADL:hasBase \"http://" + ipAddress + ":8181/skills/${UUID}/\" ;\n");
+		}
 		restSkillDescription.append("	Cap:hasStateMachine <${SkillIri}_StateMachine> ;\n");
 		restSkillDescription.append("	Cap:hasCurrentState <${SkillIri}_StateMachine_${InitialState}> .\n");
-		
+
 		restSkillDescription.append("<${CapabilityIri}> Cap:isExecutableViaRestSkill <${SkillIri}_RestSkill> .\n");
 		restSkillDescription.append("<${ModuleIri}> Cap:providesRestSkill <${SkillIri}_RestSkill> .\n");
 
 		restSkillDescription.append("<${SkillIri}_Representation> a WADL:Representation ;\n");
 		restSkillDescription.append("	WADL:hasMediaType \"${MediaType}\" .\n");
 		restSkillDescription.append("<${SkillIri}_Request> a WADL:Request ;\n");
+		restSkillDescription.append("	WADL:hasRepresentation <${SkillIri}_Representation> .\n");
+		restSkillDescription.append("<${SkillIri}_Response> a WADL:201 ;\n");
 		restSkillDescription.append("	WADL:hasRepresentation <${SkillIri}_Representation> .\n");
 
 		for (TransitionName transition : TransitionName.values()) {
@@ -91,22 +100,26 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 		// Resource for SkillParameter Queries
 		restSkillDescription.append("<${SkillIri}_SkillParameter_Resource> a WADL:Resource ;\n");
 		restSkillDescription.append("	WADL:hasPath \"skillParameters\" .\n");
-		restSkillDescription.append("<${SkillIri}_RestSkill> WADL:hasResource <${SkillIri}_SkillParameter_Resource> .\n");
+		restSkillDescription
+				.append("<${SkillIri}_RestSkill> WADL:hasResource <${SkillIri}_SkillParameter_Resource> .\n");
 		restSkillDescription.append("<${SkillIri}_setSkillParameter_Method> a WADL:POST .\n");
 		restSkillDescription.append("<${SkillIri}_getSkillParameter_Method> a WADL:GET .\n");
-		restSkillDescription.append("<${SkillIri}_SkillParameter_Resource> WADL:hasMethod <${SkillIri}_setSkillParameter_Method> .\n");
-		restSkillDescription.append("<${SkillIri}_SkillParameter_Resource> WADL:hasMethod <${SkillIri}_getSkillParameter_Method> .\n");
+		restSkillDescription.append(
+				"<${SkillIri}_SkillParameter_Resource> WADL:hasMethod <${SkillIri}_setSkillParameter_Method> .\n");
+		restSkillDescription.append(
+				"<${SkillIri}_SkillParameter_Resource> WADL:hasMethod <${SkillIri}_getSkillParameter_Method> .\n");
 		restSkillDescription.append("<${SkillIri}_setSkillParameter_Method> WADL:hasRequest <${SkillIri}_Request> .\n");
-		restSkillDescription.append("<${SkillIri}_getSkillParameter_Method> WADL:hasRequest <${SkillIri}_Request> .\n");
+		restSkillDescription
+				.append("<${SkillIri}_getSkillParameter_Method> WADL:hasResponse <${SkillIri}Response> .\n");
 
 		// Resource for SkillOutput Queries
 		restSkillDescription.append("<${SkillIri}_SkillOutput_Resource> a WADL:Resource ;\n");
 		restSkillDescription.append("	WADL:hasPath \"skillOutputs\" .\n");
 		restSkillDescription.append("<${SkillIri}_RestSkill> WADL:hasResource <${SkillIri}_SkillOutput_Resource> .\n");
 		restSkillDescription.append("<${SkillIri}_getSkillOutput_Method> a WADL:GET .\n");
-		restSkillDescription.append("<${SkillIri}_SkillOutput_Resource> WADL:hasMethod <${SkillIri}_getSkillOutput_Method> .\n");
-		restSkillDescription.append("<${SkillIri}_getSkillOutput_Method> WADL:hasRequest <${SkillIri}_Request> .\n");
-
+		restSkillDescription
+				.append("<${SkillIri}_SkillOutput_Resource> WADL:hasMethod <${SkillIri}_getSkillOutput_Method> .\n");
+		restSkillDescription.append("<${SkillIri}_getSkillOutput_Method> WADL:hasResponse <${SkillIri}_Response> .\n");
 
 		// connect SkillParameters and SkillOutputs!
 		int skillParamCounter = 0;
@@ -119,19 +132,21 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 				field.setAccessible(true);
 				skillParamCounter++;
 				restSkillDescription.append("<${SkillIri}_Param" + skillParamCounter + "> a Cap:SkillParameter ;\n");
+				restSkillDescription.append("	a WADL:QueryParameter ;\n");
 				restSkillDescription.append("	Cap:hasVariableName \"" + field.getName() + "\" ;\n");
-				restSkillDescription.append("	Cap:hasVariableType \"" + field.getType().getSimpleName() + "\" ;\n");
-				restSkillDescription.append("	Cap:isRequired \""
-						+ Boolean.toString(field.getAnnotation(SkillParameter.class).isRequired()) + "\" ;\n");
-				restSkillDescription.append("	Cap:hasDescription \"" + field.getAnnotation(SkillParameter.class).description() + "\" ;\n");
+				restSkillDescription.append("	Cap:hasVariableType xsd:" + field.getType().getSimpleName() + " ;\n");
+				restSkillDescription.append("	Cap:isRequired "
+						+ Boolean.toString(field.getAnnotation(SkillParameter.class).isRequired()) + " ;\n");
+				restSkillDescription.append("	Cap:hasDescription \""
+						+ field.getAnnotation(SkillParameter.class).description() + "\" ;\n");
 				try {
 					String defaultFieldValue = field.get(skill).toString();
-					restSkillDescription.append("	Cap:hasDefaultValue \"" + defaultFieldValue + "\" .\n");
+					restSkillDescription.append("	Cap:hasDefaultValue " + defaultFieldValue + " .\n");
 				} catch (IllegalArgumentException | IllegalAccessException e) {
 					e.printStackTrace();
 				} catch (NullPointerException e) {
 					e.printStackTrace();
-					restSkillDescription.append("	Cap:hasDefaultValue \"" + "null" + "\" .\n");
+					restSkillDescription.append("	Cap:hasDefaultValue " + "null" + " .\n");
 
 				}
 
@@ -149,7 +164,7 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 						skillOptionCounter++;
 						restSkillDescription.append("<${SkillIri}_Param" + skillParamCounter + "_Option"
 								+ skillOptionCounter + "> a WADL:Option ;\n");
-						restSkillDescription.append("	WADL:hasOptionValue \"" + option + "\" .\n");
+						restSkillDescription.append("	WADL:hasOptionValue " + option + " .\n");
 						restSkillDescription.append("<${SkillIri}_Param" + skillParamCounter
 								+ "> WADL:hasParameterOption <${SkillIri}_Param" + skillParamCounter + "_Option"
 								+ skillOptionCounter + "> .\n");
@@ -161,28 +176,19 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 				field.setAccessible(true);
 				skillOutputCounter++;
 				restSkillDescription.append("<${SkillIri}_Output" + skillOutputCounter + "> a Cap:SkillOutput ;\n");
+				restSkillDescription.append("	a WADL:QueryParameter ;\n");
 				restSkillDescription.append("	Cap:hasVariableName \"" + field.getName() + "\" ;\n");
-				restSkillDescription.append("	Cap:hasVariableType \"" + field.getType().getSimpleName() + "\" ;\n");
-				restSkillDescription.append("	Cap:isRequired \""
-						+ Boolean.toString(field.getAnnotation(SkillOutput.class).isRequired()) + "\" ;\n");
-				restSkillDescription.append("	Cap:hasDescription \"" + field.getAnnotation(SkillOutput.class).description() + "\" ;\n");
-
-				try {
-					restSkillDescription.append("	Cap:hasDefaultValue \"" + field.get(skill).toString() + "\" .\n");
-				} catch (IllegalArgumentException | IllegalAccessException e) {
-					e.printStackTrace();
-				}
+				restSkillDescription.append("	Cap:hasVariableType xsd:" + field.getType().getSimpleName() + " ;\n");
+				restSkillDescription.append("	Cap:isRequired "
+						+ Boolean.toString(field.getAnnotation(SkillOutput.class).isRequired()) + " ;\n");
+				restSkillDescription.append(
+						"	Cap:hasDescription \"" + field.getAnnotation(SkillOutput.class).description() + "\" .\n");
 
 				// create connections to RestSkill and Representation
 				restSkillDescription.append("<${SkillIri}_RestSkill> Cap:hasSkillOutput <${SkillIri}_Output"
 						+ skillOutputCounter + "> .\n");
-				// TODO how to connect representation with the output? what kind of object
-				// property?
 				restSkillDescription.append("<${SkillIri}_Representation> WADL:hasParameter <${SkillIri}_Output"
 						+ skillOutputCounter + "> .\n");
-
-				// TODO ParamOptions for SkillOutputs !
-
 			}
 		}
 
@@ -197,10 +203,12 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 					.replace("${CapabilityIri}", skillAnnotation.capabilityIri())
 					.replace("${SkillIri}", skillAnnotation.skillIri())
 					.replace("${UUID}", restResource.getRestSkillBySkillObject(skill).getUUID().toString())
-					// Caution!: We have to cut the "state" from e.g. "IdleState" at the end of each State class name
-					.replace("${InitialState}", stateMachine.getState().getClass().getSimpleName().substring(0, stateMachine.getState().getClass().getSimpleName().length() - 5))
-					.replace("${MediaType}", "application/json")
-					.replace("${IpAddress}", getIpAddress());
+					// Caution!: We have to cut the "state" from e.g. "IdleState" at the end of each
+					// State class name
+					.replace("${InitialState}",
+							stateMachine.getState().getClass().getSimpleName().substring(0,
+									stateMachine.getState().getClass().getSimpleName().length() - 5))
+					.replace("${MediaType}", "application/json");
 
 			// For Debugging...
 			createFile(completeDescription, "restDescription.ttl");
@@ -210,8 +218,6 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
-
 		return null;
 	}
-
 }
