@@ -19,7 +19,7 @@
 		</dependency>
 		<dependency>
 			<groupId>de.hsu-hh.ifa.skillUp</groupId>
-			<artifactId>Action-Generator</artifactId>
+			<artifactId>skillup.annotations</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>

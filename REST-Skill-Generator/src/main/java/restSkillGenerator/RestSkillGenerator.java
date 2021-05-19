@@ -13,7 +13,7 @@ import restResource.RestResource;
 import skillGeneratorInterface.SkillGeneratorInterface;
 import statemachine.Isa88StateMachine;
 
-@Component(immediate = true, property = "name=Rest")
+@Component(immediate = true, property = "type:String=RestSkillType")
 public class RestSkillGenerator implements SkillGeneratorInterface {
 
 	private static Logger logger = LoggerFactory.getLogger(RestSkillGenerator.class);

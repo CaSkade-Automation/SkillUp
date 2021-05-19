@@ -18,8 +18,13 @@
 		</dependency>
 		<dependency>
 			<groupId>de.hsu-hh.ifa.skillUp</groupId>
-			<artifactId>Action-Generator</artifactId>
+			<artifactId>skillup.annotations</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.service.component.annotations</artifactId>
+			<version>1.4.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.aries.spec</groupId>
@@ -35,17 +40,16 @@
 			<groupId>com.github.aljoshakoecher</groupId>
 			<artifactId>isa88-state-machine</artifactId>
 			<version>2.0.0</version>
-			<type>bundle</type>
 		</dependency>
 		<dependency>
 			<groupId>javax.json</groupId>
 			<artifactId>javax.json-api</artifactId>
-			<version>1.1</version>
+			<version>1.1.4</version>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish</groupId>
 			<artifactId>javax.json</artifactId>
-			<version>1.1</version>
+			<version>1.1.4</version>
 		</dependency>
 	</dependencies>
 	<build>

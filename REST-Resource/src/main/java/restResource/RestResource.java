@@ -27,9 +27,10 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import annotations.Skill;
-import annotations.SkillOutput;
-import annotations.SkillParameter;
+import skillup.annotations.RestSkillType;
+import skillup.annotations.Skill;
+import skillup.annotations.SkillOutput;
+import skillup.annotations.SkillParameter;
 import statemachine.Isa88StateMachine;
 
 @Component(immediate = true, service = RestResource.class)
@@ -61,7 +62,7 @@ public class RestResource {
 					+ ": ERR while generating new skill: Object does not have \"Skill\"-Annotation.");
 			return;
 		}
-		if (!skill.getClass().getAnnotation(Skill.class).type().equals("RestSkill")) {
+		if (!skill.getClass().getAnnotation(Skill.class).type().equals(RestSkillType.class)) {
 			logger.info(getClass().getSimpleName()
 					+ ": ERR while generating new skill: Object's \"Skill\"-Annotation Type is not \"RestSkill\".");
 			return;

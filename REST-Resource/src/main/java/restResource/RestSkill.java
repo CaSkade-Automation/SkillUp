@@ -5,7 +5,7 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import annotations.Skill;
+import skillup.annotations.Skill;
 import statemachine.Isa88StateMachine;
 
 public class RestSkill {
@@ -16,9 +16,9 @@ public class RestSkill {
 	private Isa88StateMachine stateMachine;
 	private Object skillObject;
 
-	public RestSkill(Isa88StateMachine sm, Object skillObject) {
+	public RestSkill(Isa88StateMachine stateMachine, Object skillObject) {
 		uuid = UUID.randomUUID();
-		this.stateMachine = sm;
+		this.stateMachine = stateMachine;
 		this.skillObject = skillObject;
 		logger.info("RestSkill \"" + uuid + "\" (skillIri=" + this.getSkillIri() + ") created.");
 	}
@@ -52,17 +52,17 @@ public class RestSkill {
 		stateMachine.unsuspend();
 		logger.info("RestSkill \"" + uuid + "\": StateMachine unsuspend.");
 	}
-	
+
 	public void stop() {
 		stateMachine.stop();
 		logger.info("RestSkill \"" + uuid + "\": StateMachine stop.");
 	}
-	
+
 	public void abort() {
 		stateMachine.abort();
 		logger.info("RestSkill \"" + uuid + "\": StateMachine abort.");
 	}
-	
+
 	public void clear() {
 		stateMachine.clear();
 		logger.info("RestSkill \"" + uuid + "\": StateMachine clear.");
@@ -75,7 +75,7 @@ public class RestSkill {
 	public UUID getUUID() {
 		return uuid;
 	}
-	
+
 	public Object getSkillObject() {
 		return skillObject;
 	}
@@ -83,5 +83,4 @@ public class RestSkill {
 	public String getSkillIri() {
 		return skillObject.getClass().getAnnotation(Skill.class).skillIri();
 	}
-
 }

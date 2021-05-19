@@ -3,14 +3,15 @@ package skill;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import annotations.Completing;
-import annotations.Execute;
-import annotations.SkillParameter;
-import annotations.SkillOutput;
-import annotations.Skill;
-import annotations.Starting;
+import skillup.annotations.Completing;
+import skillup.annotations.Execute;
+import skillup.annotations.RestSkillType;
+import skillup.annotations.Skill;
+import skillup.annotations.SkillOutput;
+import skillup.annotations.SkillParameter;
+import skillup.annotations.Starting;
 
-@Skill(type = "RestSkill", skillIri = "https://www.hsu-hh.de/aut/skills#RestMultiplier", capabilityIri = "https://www.hsu-hh.de/aut/skills#RandomGeneration", moduleIri = "https://hsu-hh.de/modules#ModuleA")
+@Skill(skillIri = "https://www.hsu-hh.de/aut/skills#RestMultiplier", capabilityIri = "https://www.hsu-hh.de/aut/skills#RandomGeneration", moduleIri = "https://hsu-hh.de/modules#ModuleA", type = RestSkillType.class)
 public class Multiplier {
 
 	private final Logger logger = LoggerFactory.getLogger(Multiplier.class);
