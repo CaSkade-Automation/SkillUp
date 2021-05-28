@@ -113,7 +113,8 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 		restSkillDescription.append("<${SkillIri}_SkillParameter_Resource> a WADL:Resource ;\n");
 		restSkillDescription.append("	WADL:hasPath \"skillParameters\" .\n");
 		restSkillDescription.append("<${SkillIri}> WADL:hasResource <${SkillIri}_SkillParameter_Resource> .\n");
-		restSkillDescription.append("<${SkillIri}_setSkillParameter_Method> a WADL:POST .\n");
+		restSkillDescription.append("<${SkillIri}_setSkillParameter_Method> a WADL:POST ;\n");
+		restSkillDescription.append("	a Cap:SetParameters ;\n");
 		restSkillDescription.append("<${SkillIri}_getSkillParameter_Method> a WADL:GET .\n");
 		restSkillDescription.append(
 				"<${SkillIri}_SkillParameter_Resource> WADL:hasMethod <${SkillIri}_setSkillParameter_Method> .\n");
@@ -127,7 +128,8 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 		restSkillDescription.append("<${SkillIri}_SkillOutput_Resource> a WADL:Resource ;\n");
 		restSkillDescription.append("	WADL:hasPath \"skillOutputs\" .\n");
 		restSkillDescription.append("<${SkillIri}> WADL:hasResource <${SkillIri}_SkillOutput_Resource> .\n");
-		restSkillDescription.append("<${SkillIri}_getSkillOutput_Method> a WADL:GET .\n");
+		restSkillDescription.append("<${SkillIri}_getSkillOutput_Method> a WADL:GET ;\n");
+		restSkillDescription.append("	a Cap:GetOutputs .\n");
 		restSkillDescription
 				.append("<${SkillIri}_SkillOutput_Resource> WADL:hasMethod <${SkillIri}_getSkillOutput_Method> .\n");
 		restSkillDescription.append("<${SkillIri}_getSkillOutput_Method> WADL:hasResponse <${SkillIri}_Response> .\n");
