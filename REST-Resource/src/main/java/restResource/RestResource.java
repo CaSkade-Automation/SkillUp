@@ -59,6 +59,15 @@ public class RestResource {
 		skillDirectory.add(newSkill);
 	}
 
+	public RestSkill getRestSkillBySkillObject(Object skillObject) {
+		for (RestSkill rSkill : skillDirectory) {
+			if (rSkill.getSkillObject().equals(skillObject)) {
+				return rSkill;
+			}
+		}
+		return null;
+	}
+
 	public void deleteSkill(Object skill) {
 		logger.info(getClass().getSimpleName() + ": Deleting skill \"" + skill.toString() + "\"...");
 
@@ -256,7 +265,7 @@ public class RestResource {
 		JsonReader jsonReader = Json.createReader(new StringReader(body));
 		JsonObject jobj = jsonReader.readObject();
 
-		// idea: We iterate over all fields of the skill that matches the UUID
+		// idea: We iterate over all fields of the skill that matches the skillIri
 		// check if the field is annotated with @SkillParameter
 		// for every annotated field we iterate through JSON object
 		// and check if the jsonKey matches with the variableName
