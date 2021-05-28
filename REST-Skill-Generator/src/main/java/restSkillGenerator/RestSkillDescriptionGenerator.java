@@ -1,10 +1,13 @@
 package restSkillGenerator;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.net.Inet4Address;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -64,9 +67,18 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 
 		restSkillDescription.append("<${SkillIri}> a Cap:RestSkill ;\n");
 
+		String encodedIri = null;
+		try {
+			encodedIri = URLEncoder.encode(skillAnnotation.skillIri(), StandardCharsets.UTF_8.toString());
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		ArrayList<String> ipAddresses = getIpAddress();
 		for (String ipAddress : ipAddresses) {
-			restSkillDescription.append("	WADL:hasBase \"http://" + ipAddress + ":8181/skills/${UUID}/\" ;\n");
+			restSkillDescription
+					.append("	WADL:hasBase \"http://" + ipAddress + ":8181/skills/" + encodedIri + "/\" ;\n");
 		}
 		restSkillDescription.append("	Cap:hasStateMachine <${SkillIri}_StateMachine> ;\n");
 		restSkillDescription.append("	Cap:hasCurrentState <${SkillIri}_StateMachine_${InitialState}> .\n");
@@ -87,8 +99,8 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 
 			restSkillDescription.append("<${SkillIri}_" + transitionCapitalized + "Resource> a WADL:Resource ;\n");
 			restSkillDescription.append("	WADL:hasPath \"" + transition.toString() + "\" .\n");
-			restSkillDescription.append(
-					"<${SkillIri}> WADL:hasResource <${SkillIri}_" + transitionCapitalized + "Resource> .\n");
+			restSkillDescription
+					.append("<${SkillIri}> WADL:hasResource <${SkillIri}_" + transitionCapitalized + "Resource> .\n");
 			restSkillDescription.append("<${SkillIri}_" + transitionCapitalized + "Method> a WADL:POST .\n");
 			restSkillDescription.append("<${SkillIri}_" + transitionCapitalized
 					+ "Resource> WADL:hasMethod <${SkillIri}_" + transitionCapitalized + "Method> .\n");
@@ -100,8 +112,7 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 		// Resource for SkillParameter Queries
 		restSkillDescription.append("<${SkillIri}_SkillParameter_Resource> a WADL:Resource ;\n");
 		restSkillDescription.append("	WADL:hasPath \"skillParameters\" .\n");
-		restSkillDescription
-				.append("<${SkillIri}> WADL:hasResource <${SkillIri}_SkillParameter_Resource> .\n");
+		restSkillDescription.append("<${SkillIri}> WADL:hasResource <${SkillIri}_SkillParameter_Resource> .\n");
 		restSkillDescription.append("<${SkillIri}_setSkillParameter_Method> a WADL:POST .\n");
 		restSkillDescription.append("<${SkillIri}_getSkillParameter_Method> a WADL:GET .\n");
 		restSkillDescription.append(
@@ -151,8 +162,8 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 				}
 
 				// create connections to RestSkill and Representation
-				restSkillDescription.append("<${SkillIri}> Cap:hasSkillParameter <${SkillIri}_Param"
-						+ skillParamCounter + "> .\n");
+				restSkillDescription
+						.append("<${SkillIri}> Cap:hasSkillParameter <${SkillIri}_Param" + skillParamCounter + "> .\n");
 				restSkillDescription.append("<${SkillIri}_Representation> WADL:hasParameter <${SkillIri}_Param"
 						+ skillParamCounter + "> .\n");
 
@@ -185,8 +196,8 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 						"	Cap:hasDescription \"" + field.getAnnotation(SkillOutput.class).description() + "\" .\n");
 
 				// create connections to RestSkill and Representation
-				restSkillDescription.append("<${SkillIri}> Cap:hasSkillOutput <${SkillIri}_Output"
-						+ skillOutputCounter + "> .\n");
+				restSkillDescription
+						.append("<${SkillIri}> Cap:hasSkillOutput <${SkillIri}_Output" + skillOutputCounter + "> .\n");
 				restSkillDescription.append("<${SkillIri}_Representation> WADL:hasParameter <${SkillIri}_Output"
 						+ skillOutputCounter + "> .\n");
 			}
@@ -202,7 +213,6 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 			completeDescription = completeDescription.replace("${ModuleIri}", skillAnnotation.moduleIri())
 					.replace("${CapabilityIri}", skillAnnotation.capabilityIri())
 					.replace("${SkillIri}", skillAnnotation.skillIri())
-					.replace("${UUID}", restResource.getRestSkillBySkillObject(skill).getUUID().toString())
 					// Caution!: We have to cut the "state" from e.g. "IdleState" at the end of each
 					// State class name
 					.replace("${InitialState}",
