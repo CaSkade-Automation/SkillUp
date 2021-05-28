@@ -2,7 +2,7 @@ package restResource;
 
 import java.io.StringReader;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.json.Json;
 import javax.json.JsonNumber;
@@ -26,6 +26,9 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.Gson;
+
+import skillup.annotations.Skill;
 import skillup.annotations.SkillOutput;
 import skillup.annotations.SkillParameter;
 import statemachine.Isa88StateMachine;
@@ -37,10 +40,10 @@ import states.TransitionName;
 public class RestResource {
 
 	private static Logger logger;
-	private ArrayList<RestSkill> skillDirectory;
+	private HashMap<String, RestSkill> skillDirectory;
 
 	public RestResource() {
-		this.skillDirectory = new ArrayList<RestSkill>();
+		this.skillDirectory = new HashMap<String, RestSkill>();
 		RestResource.logger = LoggerFactory.getLogger(RestResource.class);
 	}
 
@@ -56,13 +59,15 @@ public class RestResource {
 
 	public void generateSkill(Object skill, Isa88StateMachine stateMachine) {
 		RestSkill newSkill = new RestSkill(stateMachine, skill);
-		skillDirectory.add(newSkill);
+		skillDirectory.put(skill.getClass().getAnnotation(Skill.class).skillIri(), newSkill);
 	}
 
 	public RestSkill getRestSkillBySkillObject(Object skillObject) {
-		for (RestSkill rSkill : skillDirectory) {
-			if (rSkill.getSkillObject().equals(skillObject)) {
-				return rSkill;
+
+		for (String key : skillDirectory.keySet()) {
+			if (skillDirectory.get(key).getSkillObject().equals(skillObject)) {
+				logger.info(getClass().getSimpleName() + ": Found skill in skill directory (" + key + ")");
+				return skillDirectory.get(key);
 			}
 		}
 		return null;
@@ -71,13 +76,8 @@ public class RestResource {
 	public void deleteSkill(Object skill) {
 		logger.info(getClass().getSimpleName() + ": Deleting skill \"" + skill.toString() + "\"...");
 
-		for (RestSkill rSkill : skillDirectory) {
-			if (rSkill.getSkillObject().equals(skill)) {
-				logger.info(
-						getClass().getSimpleName() + ": Found skill in skill directory (" + rSkill.getSkillIri() + ")");
-				skillDirectory.remove(rSkill);
-			}
-		}
+		RestSkill restSkill = getRestSkillBySkillObject(skill);
+		skillDirectory.remove(restSkill.getSkillIri());
 	}
 
 	@GET
@@ -87,8 +87,8 @@ public class RestResource {
 
 		JsonObjectBuilder objBuilder = Json.createObjectBuilder();
 
-		for (RestSkill rSkill : skillDirectory) {
-			objBuilder.add(rSkill.getSkillIri(), Json.createObjectBuilder().add("state", rSkill.getState()));
+		for (String key : skillDirectory.keySet()) {
+			objBuilder.add(key, Json.createObjectBuilder().add("state", skillDirectory.get(key).getState()));
 		}
 
 		String responseString = objBuilder.build().toString();
@@ -101,18 +101,13 @@ public class RestResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response info(@PathParam("skillIri") String skillIri) {
 
-		for (RestSkill rSkill : skillDirectory) {
-			if (rSkill.getSkillIri().equals(skillIri)) {
-				JsonObject obj = Json.createObjectBuilder()
-						.add(rSkill.getSkillIri(), Json.createObjectBuilder().add("state", rSkill.getState())).build();
+		RestSkill skill = skillDirectory.get(skillIri);
+		JsonObject obj = Json.createObjectBuilder()
+				.add(skill.getSkillIri(), Json.createObjectBuilder().add("state", skill.getState())).build();
 
-				String responseString = obj.toString();
-				return Response.status(Response.Status.OK).entity(responseString).build();
-			}
-		}
+		String responseString = obj.toString();
+		return Response.status(Response.Status.OK).entity(responseString).build();
 
-		// no match found!
-		return Response.status(Response.Status.NOT_FOUND).build();
 	}
 
 	@GET
@@ -120,47 +115,29 @@ public class RestResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getSkillOutputs(@PathParam("skillIri") String skillIri) {
 
-		for (RestSkill rSkill : skillDirectory) {
-			if (rSkill.getSkillIri().equals(skillIri)) {
-				// found the correct skill
-				JsonObjectBuilder objBuilder = Json.createObjectBuilder();
-				// check every field of the skillObject for SkillOutput-Annotation
-				Field[] fields = rSkill.getSkillObject().getClass().getDeclaredFields();
-				for (Field field : fields) {
-					if (field.isAnnotationPresent(SkillOutput.class)) {
-						field.setAccessible(true);
-						JsonObjectBuilder jsonField = Json.createObjectBuilder();
-						jsonField.add("name", field.getAnnotation(SkillOutput.class).name())
-								.add("type", field.getType().getSimpleName())
-								.add("isRequired",
-										Boolean.toString(field.getAnnotation(SkillOutput.class).isRequired()))
-								.add("description", field.getAnnotation(SkillOutput.class).description());
-						try {
-							String fieldValue = field.get(rSkill.getSkillObject()).toString();
-							jsonField.add("value", fieldValue);
-						} catch (IllegalArgumentException e) {
-							logger.error(getClass().getSimpleName()
-									+ ": ERR on generating skillOutput (value of output, IllegalArgumentException)"
-									+ e);
-						} catch (IllegalAccessException e) {
-							logger.error(getClass().getSimpleName()
-									+ ": ERR on generating skillOutput (value of output, IllegalAccessException)" + e);
-						} catch (NullPointerException e) {
-							logger.error(getClass().getSimpleName()
-									+ ": ERR on generating skillOutput (value of output, NullPointerException)" + e);
-							jsonField.add("value", "null");
-						}
-						objBuilder.add(field.getName(), jsonField);
-					}
+		RestSkill skill = skillDirectory.get(skillIri);
+		// found the correct skill
+		String json = null;
+		// check every field of the skillObject for SkillOutput-Annotation
+		Field[] fields = skill.getSkillObject().getClass().getDeclaredFields();
+		for (Field field : fields) {
+			if (field.isAnnotationPresent(SkillOutput.class)) {
+				field.setAccessible(true);
+				SkillOutput annotation = field.getAnnotation(SkillOutput.class);
+				Gson gson = new Gson();
+				SkillVariable output;
+				try {
+					output = new SkillVariable(annotation.name(), annotation.description(), annotation.isRequired(),
+							field.getType().getSimpleName(), field.get(skill.getSkillObject()));
+					json += gson.toJson(output);
+				} catch (IllegalArgumentException | IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-
-				String responseString = objBuilder.build().toString();
-				return Response.status(Response.Status.OK).entity(responseString).build();
 			}
 		}
-
-		// no match found!
-		return Response.status(Response.Status.NOT_FOUND).build();
+		logger.info("Get Outputs of " + skillIri + ": " + json);
+		return Response.status(Response.Status.OK).entity(json).build();
 	}
 
 	@GET
@@ -168,48 +145,29 @@ public class RestResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getSkillParameters(@PathParam("skillIri") String skillIri) {
 
-		for (RestSkill rSkill : skillDirectory) {
-			if (rSkill.getSkillIri().equals(skillIri)) {
-				// found the correct skill
-				JsonObjectBuilder objBuilder = Json.createObjectBuilder();
-				// check every field of the skillObject for SkillOutput-Annotation
-				Field[] fields = rSkill.getSkillObject().getClass().getDeclaredFields();
-				for (Field field : fields) {
-					if (field.isAnnotationPresent(SkillParameter.class)) {
-						field.setAccessible(true);
-						JsonObjectBuilder jsonField = Json.createObjectBuilder();
-						jsonField.add("name", field.getAnnotation(SkillParameter.class).name())
-								.add("type", field.getType().getSimpleName())
-								.add("isRequired",
-										Boolean.toString(field.getAnnotation(SkillParameter.class).isRequired()))
-								.add("description", field.getAnnotation(SkillParameter.class).description());
-						try {
-							String fieldValue = field.get(rSkill.getSkillObject()).toString();
-							jsonField.add("value", fieldValue);
-						} catch (IllegalArgumentException e) {
-							logger.error(getClass().getSimpleName()
-									+ ": ERR on generating skillParameter (value of param, IllegalArgumentException)"
-									+ e);
-						} catch (IllegalAccessException e) {
-							logger.error(getClass().getSimpleName()
-									+ ": ERR on generating skillParameter (value of param, IllegalAccessException)"
-									+ e);
-						} catch (NullPointerException e) {
-							logger.error(getClass().getSimpleName()
-									+ ": ERR on generating skillParameter (value of param, NullPointerException)" + e);
-							jsonField.add("value", "null");
-						}
-						objBuilder.add(field.getName(), jsonField);
-					}
+		RestSkill skill = skillDirectory.get(skillIri);
+		// found the correct skill
+		String json = null;
+		// check every field of the skillObject for SkillOutput-Annotation
+		Field[] fields = skill.getSkillObject().getClass().getDeclaredFields();
+		for (Field field : fields) {
+			if (field.isAnnotationPresent(SkillParameter.class)) {
+				field.setAccessible(true);
+				SkillParameter annotation = field.getAnnotation(SkillParameter.class);
+				Gson gson = new Gson();
+				SkillVariable parameter;
+				try {
+					parameter = new SkillVariable(annotation.name(), annotation.description(), annotation.isRequired(),
+							field.getType().getSimpleName(), field.get(skill.getSkillObject()));
+					json += gson.toJson(parameter);
+				} catch (IllegalArgumentException | IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-
-				String responseString = objBuilder.build().toString();
-				return Response.status(Response.Status.OK).entity(responseString).build();
 			}
 		}
-
-		// no match found!
-		return Response.status(Response.Status.NOT_FOUND).build();
+		logger.info("Get Parameter of " + skillIri + ": " + json);
+		return Response.status(Response.Status.OK).entity(json).build();
 	}
 
 	// Caution: Matches the SkillParams by Cap:hasVariableName
@@ -237,27 +195,22 @@ public class RestResource {
 	public Response transition(@PathParam("skillIri") String skillIri, @PathParam("transition") String transition,
 			String body) {
 
-		for (RestSkill rSkill : skillDirectory) {
-			if (rSkill.getSkillIri().equals(skillIri)) {
-
-				// we found the correct skill by skillIri
-				setSkillParameter(skillIri, body);
-				for (TransitionName transitions : TransitionName.values()) {
-					if (transition.equals(transitions.toString())) {
-						rSkill.fireTransition(transitions);
-						break;
-					}
-				}
-				JsonObject obj = Json.createObjectBuilder().add(rSkill.getSkillIri(), Json.createObjectBuilder()
-						.add("state", rSkill.getState()).add("skillIri", rSkill.getSkillIri())).build();
-
-				String responseString = obj.toString();
-				return Response.status(Response.Status.OK).entity(responseString).build();
+		RestSkill skill = skillDirectory.get(skillIri);
+		// we found the correct skill by skillIri
+		setSkillParameter(skillIri, body);
+		for (TransitionName transitions : TransitionName.values()) {
+			if (transition.equals(transitions.toString())) {
+				skill.fireTransition(transitions);
+				break;
 			}
 		}
+		JsonObject obj = Json.createObjectBuilder()
+				.add(skill.getSkillIri(),
+						Json.createObjectBuilder().add("state", skill.getState()).add("skillIri", skill.getSkillIri()))
+				.build();
 
-		// no match found!
-		return Response.status(Response.Status.NOT_FOUND).build();
+		String responseString = obj.toString();
+		return Response.status(Response.Status.OK).entity(responseString).build();
 	}
 
 	private JsonObjectBuilder setSkillParameter(String skillIri, String body) {
@@ -275,28 +228,26 @@ public class RestResource {
 
 		JsonObjectBuilder objBuilder = Json.createObjectBuilder();
 
-		for (RestSkill rSkill : skillDirectory) {
-			if (rSkill.getSkillIri().equals(skillIri)) {
-				// we found the correct skill by UUID
-				Field[] fields = rSkill.getSkillObject().getClass().getDeclaredFields();
-				for (Field field : fields) {
-					if (field.isAnnotationPresent(SkillParameter.class)) {
-						field.setAccessible(true);
-						// we found a SkillParameter
-						// now go through all sent Params in JSON object
-						// and see if there is match (variableName and JSON key)
-						for (String jsonKey : jobj.keySet()) {
-							if (jsonKey.equals(field.getName())) {
-								// variableName matches JSON key
-								// -> update that variable's value!
-								logger.info(getClass().getSimpleName() + ": UPDATE SKILL PARAM (" + field.getName()
-										+ " to " + jobj.get(jsonKey).toString() + ")");
-								boolean success = updateSkillParam(rSkill.getSkillObject(), field, jobj.get(jsonKey));
-								objBuilder.add(jsonKey, success);
-								// break because we updated that field!
-								break;
-							}
-						}
+		RestSkill skill = skillDirectory.get(skillIri);
+
+		// we found the correct skill by UUID
+		Field[] fields = skill.getSkillObject().getClass().getDeclaredFields();
+		for (Field field : fields) {
+			if (field.isAnnotationPresent(SkillParameter.class)) {
+				field.setAccessible(true);
+				// we found a SkillParameter
+				// now go through all sent Params in JSON object
+				// and see if there is match (variableName and JSON key)
+				for (String jsonKey : jobj.keySet()) {
+					if (jsonKey.equals(field.getName())) {
+						// variableName matches JSON key
+						// -> update that variable's value!
+						logger.info(getClass().getSimpleName() + ": UPDATE SKILL PARAM (" + field.getName() + " to "
+								+ jobj.get(jsonKey).toString() + ")");
+						boolean success = updateSkillParam(skill.getSkillObject(), field, jobj.get(jsonKey));
+						objBuilder.add(jsonKey, success);
+						// break because we updated that field!
+						break;
 					}
 				}
 			}
