@@ -114,7 +114,7 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 		restSkillDescription.append("	WADL:hasPath \"skillParameters\" .\n");
 		restSkillDescription.append("<${SkillIri}> WADL:hasResource <${SkillIri}_SkillParameter_Resource> .\n");
 		restSkillDescription.append("<${SkillIri}_setSkillParameter_Method> a WADL:POST ;\n");
-		restSkillDescription.append("	a Cap:SetParameters ;\n");
+		restSkillDescription.append("	a Cap:SetParameters .\n");
 		restSkillDescription.append("<${SkillIri}_getSkillParameter_Method> a WADL:GET .\n");
 		restSkillDescription.append(
 				"<${SkillIri}_SkillParameter_Resource> WADL:hasMethod <${SkillIri}_setSkillParameter_Method> .\n");
@@ -151,15 +151,16 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 				restSkillDescription.append("	Cap:isRequired "
 						+ Boolean.toString(field.getAnnotation(SkillParameter.class).isRequired()) + " ;\n");
 				restSkillDescription.append("	Cap:hasDescription \""
-						+ field.getAnnotation(SkillParameter.class).description() + "\" ;\n");
+						+ field.getAnnotation(SkillParameter.class).description() + "\" .\n");
 				try {
 					String defaultFieldValue = field.get(skill).toString();
-					restSkillDescription.append("	Cap:hasDefaultValue " + defaultFieldValue + " .\n");
+					restSkillDescription.append("<${SkillIri}_Param" + skillParamCounter + "> Cap:hasDefaultValue "
+							+ defaultFieldValue + " .\n");
 				} catch (IllegalArgumentException | IllegalAccessException e) {
 					e.printStackTrace();
 				} catch (NullPointerException e) {
 					e.printStackTrace();
-					restSkillDescription.append("	Cap:hasDefaultValue " + "null" + " .\n");
+					// restSkillDescription.append(" Cap:hasDefaultValue " + "null" + " .\n");
 
 				}
 
