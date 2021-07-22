@@ -2,17 +2,20 @@ package opcuaSkillGenerator;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.NoSuchElementException;
 
+import org.eclipse.milo.opcua.sdk.core.nodes.Node;
 import org.eclipse.milo.opcua.sdk.server.OpcUaServer;
-import org.eclipse.milo.opcua.sdk.server.api.nodes.Node;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaVariableNode;
 import org.eclipse.milo.opcua.stack.core.BuiltinDataType;
 import org.eclipse.milo.opcua.stack.core.types.structured.EndpointDescription;
 
+import skillup.annotations.Helper;
 import skillup.annotations.Skill;
 import skillup.annotations.SkillOutput;
 import skillup.annotations.SkillParameter;
@@ -104,6 +107,7 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 			+ "					OpcUa:requiresPassword \"${Password}\" .";
 
 	private boolean serverDescription = false;
+	private Helper helper = new Helper();
 
 	/**
 	 * Method to generate OpcUa description for a OpcUa skill
@@ -210,28 +214,25 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 		List<Node> opcUaNodes = server.getNamespace().getFolder().getOrganizesNodes();
 
 		// description is only created for skill node
-		for (Node node : opcUaNodes) {
-			if (node.getBrowseName().getName().equals(skillName)) {
-				String stateName = stateMachine.getState().toString()
-						.substring(stateMachine.getState().toString().lastIndexOf(".") + 1);
-				stateName = stateName.substring(0, stateName.lastIndexOf("State"));
-				opcUaSkillDescription = opcUaSkillSnippet.replace("${StateName}", stateName);
+		Node skillNode = opcUaNodes.stream().filter(opcUaNode -> opcUaNode.getBrowseName().getName().equals(skillName))
+				.findFirst().get();
+		String stateName = stateMachine.getState().toString()
+				.substring(stateMachine.getState().toString().lastIndexOf(".") + 1);
+		stateName = stateName.substring(0, stateName.lastIndexOf("State"));
+		opcUaSkillDescription = opcUaSkillSnippet.replace("${StateName}", stateName);
 
-				// if skill is connected with capability its added to the description
-				if (!capability.isEmpty()) {
-					opcUaSkillDescription = opcUaSkillDescription + capabilitySnippet;
-				}
-
-				opcUaSkillDescription = generateOpcUaSkillDataPropertyDescription(opcUaSkillDescription, node);
-
-				UaFolderNode folder = (UaFolderNode) node;
-
-				String methodDescription = generateOpcUaMethodDescription(folder);
-				String variableDescription = generateOpcUaVariableDescription(folder, skill);
-				opcUaSkillDescription = opcUaSkillDescription + methodDescription + variableDescription;
-				break;
-			}
+		// if skill is connected with capability its added to the description
+		if (!capability.isEmpty()) {
+			opcUaSkillDescription = opcUaSkillDescription + capabilitySnippet;
 		}
+
+		opcUaSkillDescription = generateOpcUaSkillDataPropertyDescription(opcUaSkillDescription, skillNode);
+
+		UaFolderNode folder = (UaFolderNode) skillNode;
+
+		String methodDescription = generateOpcUaMethodDescription(folder);
+		String variableDescription = generateOpcUaVariableDescription(folder, skill);
+		opcUaSkillDescription = opcUaSkillDescription + methodDescription + variableDescription;
 		return opcUaSkillDescription;
 	}
 
@@ -268,14 +269,19 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 
 			// for every method corresponding to an transition like start etc. this
 			// connection between method and transition is added
-			for (TransitionName transition : TransitionName.values()) {
-				if (componentNode.getBrowseName().getName().equals(transition.toString())) {
-					String opcUaMethodInvokesTransitionDescription = opcUaMethodInvokesTransitionSnippet.replace(
-							"${CommandName}", componentNode.getBrowseName().getName().substring(0, 1).toUpperCase()
-									+ componentNode.getBrowseName().getName().substring(1));
-					methodDescription = methodDescription + opcUaMethodInvokesTransitionDescription;
-					break;
-				}
+
+			List<TransitionName> transitions = Arrays.asList(TransitionName.values());
+
+			try {
+				TransitionName transitionName = transitions.stream()
+						.filter(transition -> transition.toString().equals(componentNode.getBrowseName().getName()))
+						.findFirst().get();
+
+				String opcUaMethodInvokesTransitionDescription = opcUaMethodInvokesTransitionSnippet
+						.replace("${CommandName}", transitionName.toString().substring(0, 1).toUpperCase()
+								+ transitionName.toString().substring(1));
+				methodDescription = methodDescription + opcUaMethodInvokesTransitionDescription;
+			} catch (NoSuchElementException e) {
 			}
 			methodDescription = methodDescription.replace("${MethodName}",
 					componentNode.getBrowseName().getName().substring(0, 1).toUpperCase()
@@ -296,6 +302,9 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 
 		String totalVariableDescription = "";
 
+		List<Field> paramFields = helper.getVariables(skill, true);
+		List<Field> outputFields = helper.getVariables(skill, false);
+
 		// generate description for every organized node (variables) of the skill
 		for (Node organizedNode : folder.getOrganizesNodes()) {
 			UaVariableNode variableNode = (UaVariableNode) organizedNode;
@@ -303,45 +312,48 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 			String skillParameterDescription = "";
 			String skillOutputDescription = "";
 
-			Field[] fields = skill.getClass().getDeclaredFields();
-			for (Field field : fields) {
-				// differentiation between skill parameter and output
-				if (field.isAnnotationPresent(SkillParameter.class)) {
-					field.setAccessible(true);
-					if ((field.getAnnotation(SkillParameter.class).name()
-							.equals(variableNode.getBrowseName().getName()))
-							|| field.getName().equals(variableNode.getBrowseName().getName())) {
+			try {
+				Field paramField = paramFields.stream()
+						.filter(field -> field.getAnnotation(SkillParameter.class).name()
+								.equals(variableNode.getBrowseName().getName())
+								|| field.getName().equals(variableNode.getBrowseName().getName()))
+						.findFirst().get();
 
-						boolean isRequired = field.getAnnotation(SkillParameter.class).isRequired();
-						try {
-							skillParameterDescription = opcUaSkillParameterSnippet
-									.replace("${Required}", Boolean.toString(isRequired))
-									.replace("${DefaultValue}", field.get(skill).toString());
-							// add parameter options to description
-							skillParameterDescription = generateOptionValuesDescription(field,
-									skillParameterDescription);
-						} catch (IllegalArgumentException | IllegalAccessException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						break;
-					}
-				} else if (field.isAnnotationPresent(SkillOutput.class)) {
-					field.setAccessible(true);
-					if ((field.getAnnotation(SkillOutput.class).name().equals(variableNode.getBrowseName().getName()))
-							|| field.getName().equals(variableNode.getBrowseName().getName())) {
+				paramField.setAccessible(true);
 
-						boolean isRequired = field.getAnnotation(SkillOutput.class).isRequired();
+				boolean isRequired = paramField.getAnnotation(SkillParameter.class).isRequired();
 
-						skillOutputDescription = opcUaSkillOutputSnippet.replace("${Required}",
-								Boolean.toString(isRequired));
-						break;
-					}
-				}
+				skillParameterDescription = opcUaSkillParameterSnippet
+						.replace("${Required}", Boolean.toString(isRequired))
+						.replace("${DefaultValue}", paramField.get(skill).toString());
+				// add parameter options to description
+				skillParameterDescription = generateOptionValuesDescription(paramField, skillParameterDescription);
+				break;
+			} catch (IllegalArgumentException | IllegalAccessException | NoSuchElementException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			try {
+				Field outputField = outputFields.stream()
+						.filter(field -> field.getAnnotation(SkillOutput.class).name()
+								.equals(variableNode.getBrowseName().getName())
+								|| field.getName().equals(variableNode.getBrowseName().getName()))
+						.findFirst().get();
+
+				outputField.setAccessible(true);
+
+				boolean isRequiredOutput = outputField.getAnnotation(SkillOutput.class).isRequired();
+
+				skillOutputDescription = opcUaSkillOutputSnippet.replace("${Required}",
+						Boolean.toString(isRequiredOutput));
+			} catch (NoSuchElementException e) {
+				e.printStackTrace();
 			}
 
 			String variableType = variableNode.getDataType().getIdentifier().toString();
-			String opcUaDataType = BuiltinDataType.getBackingClass(Integer.parseInt(variableType)).getSimpleName().toLowerCase();
+			String opcUaDataType = BuiltinDataType.getBackingClass(Integer.parseInt(variableType)).getSimpleName()
+					.toLowerCase();
 
 			String variableDescription = skillParameterDescription + skillOutputDescription + opcUaVariableSnippet;
 			variableDescription = variableDescription.replace("${VariableName}", variableNode.getBrowseName().getName())
@@ -355,6 +367,7 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 			totalVariableDescription = totalVariableDescription + variableDescription;
 		}
 		return totalVariableDescription;
+
 	}
 
 	/**

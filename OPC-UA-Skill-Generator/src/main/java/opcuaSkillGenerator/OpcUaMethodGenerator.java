@@ -2,7 +2,7 @@ package opcuaSkillGenerator;
 
 import java.util.List;
 
-import org.eclipse.milo.opcua.sdk.server.api.nodes.Node;
+import org.eclipse.milo.opcua.sdk.core.nodes.Node;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 
@@ -48,12 +48,8 @@ public class OpcUaMethodGenerator {
 
 		String skillName = skill.getClass().getAnnotation(Skill.class).skillIri();
 		List<Node> organizedNodes = opcUaServer.getNamespace().getFolder().getOrganizesNodes();
-		UaNode skillNode = null;
-		for (Node organizedNode : organizedNodes) {
-			if (organizedNode.getBrowseName().getName().equals(skillName)) {
-				skillNode = (UaNode) organizedNode;
-				skillNode.delete();
-			}
-		}
+		UaNode skillNode = (UaNode) organizedNodes.stream()
+				.filter(organizedNode -> organizedNode.getBrowseName().getName().equals(skillName)).findFirst().get();
+		skillNode.delete();
 	}
 }
