@@ -3,6 +3,7 @@ package opcUaServer;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.nio.file.Path;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyStore;
@@ -39,10 +40,10 @@ public class KeyStoreLoader {
 	private X509Certificate serverCertificate;
 	private KeyPair serverKeyPair;
 
-	KeyStoreLoader load(File baseDir) throws Exception {
+	KeyStoreLoader load(Path baseDir) throws Exception {
 		KeyStore keyStore = KeyStore.getInstance("PKCS12");
 
-		File serverKeyStore = baseDir.toPath().resolve("server.pfx").toFile();
+		File serverKeyStore = baseDir.resolve("server.pfx").toFile();
 
 		logger.info("Loading KeyStore at {}", serverKeyStore);
 

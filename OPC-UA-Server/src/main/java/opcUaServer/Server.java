@@ -5,6 +5,9 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.Enumeration;
@@ -12,6 +15,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.eclipse.milo.opcua.sdk.server.OpcUaServer;
@@ -30,6 +36,7 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.MessageSecurityMode;
 import org.eclipse.milo.opcua.stack.core.types.structured.BuildInfo;
 import org.eclipse.milo.opcua.stack.core.util.CertificateUtil;
+import org.eclipse.milo.opcua.stack.core.util.NonceUtil;
 import org.eclipse.milo.opcua.stack.server.EndpointConfiguration;
 import org.eclipse.milo.opcua.stack.server.security.DefaultServerCertificateValidator;
 import org.osgi.service.component.annotations.Activate;
@@ -63,6 +70,13 @@ public class Server {
 	static {
 		// Required for SecurityPolicy.Aes256_Sha256_RsaPss
 		Security.addProvider(new BouncyCastleProvider());
+
+		try {
+			NonceUtil.blockUntilSecureRandomSeeded(10, TimeUnit.SECONDS);
+		} catch (ExecutionException | InterruptedException | TimeoutException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
 	}
 
 	/**
@@ -98,20 +112,23 @@ public class Server {
 	 */
 	public Server() throws Exception {
 
-		File securityTempDir = new File(System.getProperty("security-server"), "security");
-		if (!securityTempDir.exists() && !securityTempDir.mkdirs()) {
+		Path securityTempDir = Paths.get(System.getProperty("java.io.tmpdir"), "server", "security");
+		Files.createDirectories(securityTempDir);
+		if (!Files.exists(securityTempDir)) {
 			throw new Exception("unable to create security temp dir: " + securityTempDir);
 		}
-		LoggerFactory.getLogger(getClass()).info("security temp dir: {}", securityTempDir.getAbsolutePath());
+
+		File pkiDir = securityTempDir.resolve("pki").toFile();
+
+		LoggerFactory.getLogger(getClass()).info("security dir: {}", securityTempDir.toAbsolutePath());
+		LoggerFactory.getLogger(getClass()).info("security pki dir: {}", pkiDir.getAbsolutePath());
 
 		KeyStoreLoader loader = new KeyStoreLoader().load(securityTempDir);
 
 		DefaultCertificateManager certificateManager = new DefaultCertificateManager(loader.getServerKeyPair(),
 				loader.getServerCertificateChain());
 
-		File pkiDir = securityTempDir.toPath().resolve("pki").toFile();
 		DefaultTrustListManager trustListManager = new DefaultTrustListManager(pkiDir);
-		LoggerFactory.getLogger(getClass()).info("pki dir: {}", pkiDir.getAbsolutePath());
 
 		DefaultServerCertificateValidator certificateValidator = new DefaultServerCertificateValidator(
 				trustListManager);

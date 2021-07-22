@@ -6,9 +6,10 @@ import java.util.List;
 
 import org.eclipse.milo.opcua.sdk.core.AccessLevel;
 import org.eclipse.milo.opcua.sdk.core.Reference;
+import org.eclipse.milo.opcua.sdk.server.Lifecycle;
 import org.eclipse.milo.opcua.sdk.server.OpcUaServer;
 import org.eclipse.milo.opcua.sdk.server.api.DataItem;
-import org.eclipse.milo.opcua.sdk.server.api.ManagedNamespace;
+import org.eclipse.milo.opcua.sdk.server.api.ManagedNamespaceWithLifecycle;
 import org.eclipse.milo.opcua.sdk.server.api.MonitoredItem;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaMethodNode;
@@ -24,9 +25,8 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
 
 import skillup.annotations.SkillParameter;
+import skillup.annotations.Helper;
 import skillup.annotations.SkillOutput;
-
-import static org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.Unsigned.ubyte;
 
 import statemachine.Isa88StateMachine;
 import states.TransitionName;
@@ -34,31 +34,35 @@ import states.TransitionName;
 /**
  * Namespace of OPC-UA-Server with methods to add folders and nodes.
  */
-public class Namespace extends ManagedNamespace {
+public class Namespace extends ManagedNamespaceWithLifecycle {
 
 	public static final String URI = "urn:my:server:namespace";
 	private final SubscriptionModel subscriptionModel;
-
 	private UaFolderNode parentFolder = null;
 	private List<UaVariableNode> skillOutputs = new ArrayList<UaVariableNode>();
 	private GenericMethod newSkill;
+	private Helper helper = new Helper();
 
 	public Namespace(final OpcUaServer opcUaServer) {
 		super(opcUaServer, URI);
 		subscriptionModel = new SubscriptionModel(opcUaServer, this);
-	}
 
-	/**
-	 * When namespace is started a new folder for the server is created
-	 */
-	@Override
-	protected void onStartup() {
-		super.onStartup();
+		getLifecycleManager().addLifecycle(subscriptionModel);
 
-		subscriptionModel.startup();
+		getLifecycleManager().addLifecycle(new Lifecycle() {
+			/**
+			 * When namespace is started a new folder for the server is created
+			 */
+			@Override
+			public void startup() {
+				FolderDescription folderDescription = new FolderDescription("Skills", "Skills", "Example Skills");
+				parentFolder = addFolder(folderDescription);
+			}
 
-		FolderDescription folderDescription = new FolderDescription("Skills", "Skills", "Example Skills");
-		parentFolder = addFolder(folderDescription);
+			@Override
+			public void shutdown() {
+			}
+		});
 	}
 
 	/**
@@ -120,26 +124,24 @@ public class Namespace extends ManagedNamespace {
 		// for every new skill outputs are cleared
 		skillOutputs.clear();
 
-		Field[] fields = skill.getClass().getDeclaredFields();
-		for (Field field : fields) {
-			if (field.isAnnotationPresent(SkillParameter.class)) {
+		List<Field> paramFields = helper.getVariables(skill, true);
+		List<Field> outputFields = helper.getVariables(skill, false);
 
-				OpcUaVariableDescription variableDescription = setVariableDescription(field, skill, true);
-				UaVariableNode node = createVariableNode(variableDescription, folder, true);
+		for (Field field : paramFields) {
 
-				// node is monitored to change value of skill parameter when value of variable
-				// node changes
-				node.getFilterChain().addLast(new AttributeLoggingFilter(AttributeId.Value::equals, field, skill));
-			}
+			OpcUaVariableDescription variableDescription = setVariableDescription(field, skill, true);
+			UaVariableNode node = createVariableNode(variableDescription, folder, true);
+			// node is monitored to change value of skill parameter when value of variable
+			// node changes
+			node.getFilterChain().addLast(new AttributeLoggingFilter(AttributeId.Value::equals, field, skill));
+		}
 
-			else if (field.isAnnotationPresent(SkillOutput.class)) {
+		for (Field field : outputFields) {
 
-				OpcUaVariableDescription variableDescription = setVariableDescription(field, skill, false);
-				UaVariableNode node = createVariableNode(variableDescription, folder, false);
-
-				// add this node to list with skills outputs
-				skillOutputs.add(node);
-			}
+			OpcUaVariableDescription variableDescription = setVariableDescription(field, skill, false);
+			UaVariableNode node = createVariableNode(variableDescription, folder, false);
+			// add this node to list with skills outputs
+			skillOutputs.add(node);
 		}
 	}
 
@@ -164,16 +166,14 @@ public class Namespace extends ManagedNamespace {
 
 		try {
 			variant = new Variant(field.get(skill));
-		} catch (IllegalArgumentException e1) {
+		} catch (IllegalArgumentException | IllegalAccessException e) {
 			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (IllegalAccessException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			e.printStackTrace();
 		}
 
 		String fieldName;
 		String fieldDescription;
+
 		// differentiate between parameter and output
 		// set name and description of variable
 		if (skillParameter) {
@@ -182,24 +182,15 @@ public class Namespace extends ManagedNamespace {
 			} else {
 				fieldName = field.getName();
 			}
+			fieldDescription = field.getAnnotation(SkillParameter.class).description();
 
-			if (!field.getAnnotation(SkillParameter.class).description().isEmpty()) {
-				fieldDescription = field.getAnnotation(SkillParameter.class).description();
-			} else {
-				fieldDescription = field.getName();
-			}
 		} else {
 			if (!field.getAnnotation(SkillOutput.class).name().isEmpty()) {
 				fieldName = field.getAnnotation(SkillOutput.class).name();
 			} else {
 				fieldName = field.getName();
 			}
-
-			if (!field.getAnnotation(SkillOutput.class).description().isEmpty()) {
-				fieldDescription = field.getAnnotation(SkillOutput.class).description();
-			} else {
-				fieldDescription = field.getName();
-			}
+			fieldDescription = field.getAnnotation(SkillOutput.class).description();
 		}
 		OpcUaVariableDescription variableDescription = new OpcUaVariableDescription(typeId, fieldName, fieldDescription,
 				variant);
@@ -221,19 +212,19 @@ public class Namespace extends ManagedNamespace {
 		UaVariableNodeBuilder nodeBuilder = new UaVariableNode.UaVariableNodeBuilder(getNodeContext())
 				.setNodeId(newNodeId(folder.getBrowseName() + "/" + variableDescription.getVariableName()))
 				.setBrowseName(newQualifiedName(variableDescription.getVariableName()))
-				.setDisplayName(LocalizedText.english(variableDescription.getVariableDescription()))
+				.setDisplayName(LocalizedText.english(variableDescription.getVariableName()))
+				.setDescription(LocalizedText.english(variableDescription.getVariableDescription()))
 				.setDataType(variableDescription.getNodeId()).setTypeDefinition(Identifiers.BaseDataVariableType);
 
 		UaVariableNode node;
 
 		if (skillParameter) {
 			// skill parameter can be read and written
-			node = nodeBuilder.setAccessLevel(ubyte(AccessLevel.getMask(AccessLevel.READ_WRITE)))
-					.setUserAccessLevel(ubyte(AccessLevel.getMask(AccessLevel.READ_WRITE))).build();
+			node = nodeBuilder.setAccessLevel(AccessLevel.READ_WRITE).setUserAccessLevel(AccessLevel.READ_WRITE)
+					.build();
 		} else {
 			// skill output can only be read
-			node = nodeBuilder.setAccessLevel(ubyte(AccessLevel.getMask(AccessLevel.READ_ONLY)))
-					.setUserAccessLevel(ubyte(AccessLevel.getMask(AccessLevel.READ_ONLY))).build();
+			node = nodeBuilder.setAccessLevel(AccessLevel.READ_ONLY).setUserAccessLevel(AccessLevel.READ_ONLY).build();
 		}
 
 		// value of variable node matches to value of skill parameter/output of skills
