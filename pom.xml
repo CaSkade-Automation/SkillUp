@@ -12,12 +12,12 @@
 		<module>Description-Generator</module>
 		<module>Module-Generator</module>
 		<module>OPC-UA-Server</module>
+		<module>REST-Resource</module>
 		<module>Skill-Generator-Interface</module>
 		<module>OPC-UA-Skill-Generator</module>
+		<module>REST-Skill-Generator</module>
 		<module>Registration</module>
 		<module>Smart-Tracker</module>
 		<module>Examples</module>
-		<module>REST-Resource</module>
-		<module>REST-Skill-Generator</module>
 	</modules>
 </project>

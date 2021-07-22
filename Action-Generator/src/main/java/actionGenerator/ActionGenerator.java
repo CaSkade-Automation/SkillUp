@@ -2,6 +2,9 @@ package actionGenerator;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.osgi.service.component.annotations.Component;
 
@@ -32,43 +35,45 @@ public class ActionGenerator {
 
 		StateMachineBuilder stateMachineBuilder = new StateMachineBuilder();
 
-		Method[] methods = skill.getClass().getMethods();
+		// get all methods that the skill has
+		Method[] methodArray = skill.getClass().getMethods();
+		List<Method> methods = Arrays.asList(methodArray);
 
-		// iterate over every method that the skill has
-		for (int i = 0; i < methods.length; i++) {
+		// iterate over every possible state of an stateMachine
+		for (States state : States.values()) {
 
-			// iterate over every possible state of an stateMachine
-			for (States state : States.values()) {
+			// if method has annotation of the state like @Execute then a new SkillAction is
+			// build and added to the stateMachine for the corresponding state
+			List<Method> skillActions = methods.stream().filter(method -> method.isAnnotationPresent(state.getKey()))
+					.collect(Collectors.toList());
 
-				// if method has annotation of the state like @Execute then a new SkillAction is
-				// build and added to the stateMachine for the corresponding state
-				if (methods[i].isAnnotationPresent(state.getKey())) {
-
-					SkillAction action = new SkillAction(methods[i], skill);
-					stateMachineBuilder.withAction(action, state.getStateName());
-				}
+			for (Method method : skillActions) {
+				SkillAction action = new SkillAction(method, skill);
+				stateMachineBuilder.withAction(action, state.getStateName());
 			}
 		}
+
 		Isa88StateMachine stateMachine = stateMachineBuilder.build();
 
-		Field[] fields = skill.getClass().getDeclaredFields();
+		// get all fields that the skill has
+		Field[] fieldArray = skill.getClass().getDeclaredFields();
+		List<Field> fields = Arrays.asList(fieldArray);
 
-		// iterate over every field that the skill has
-		for (Field field : fields) {
+		// if field has annotation @StateMachine and is of type StateMachine the field
+		// is set to this stateMachine so that the stateMachine of the skill is known by
+		// the skill and transitions can be used (e.g. machine got too hot and has to be
+		// stopped)
+		List<Field> stateMachineFields = fields.stream().filter(
+				field -> field.isAnnotationPresent(StateMachine.class) && field.getType() == Isa88StateMachine.class)
+				.collect(Collectors.toList());
+
+		for (Field field : stateMachineFields) {
 			field.setAccessible(true);
-
-			// if field has annotation @StateMachine and is of type StateMachine the field
-			// is set to this stateMachine so that the stateMachine of the skill is known by
-			// the skill and transitions can be used (e.g. machine got too hot and has to be
-			// stopped)
-			if (field.isAnnotationPresent(StateMachine.class) && field.getType() == Isa88StateMachine.class) {
-				try {
-					field.set(skill, stateMachine);
-				} catch (IllegalArgumentException | IllegalAccessException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				break;
+			try {
+				field.set(skill, stateMachine);
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 		return stateMachine;
