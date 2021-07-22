@@ -57,7 +57,8 @@ public class AttributeLoggingFilter implements AttributeFilter {
 			return value;
 		DataValue dataValue = (DataValue) value;
 		try {
-			setField(field, field.getType(), dataValue, skill);
+//			setField(field, field.getType(), dataValue, skill);
+			field.set(skill, dataValue.getValue().getValue());
 
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			// TODO Auto-generated catch block
@@ -78,7 +79,8 @@ public class AttributeLoggingFilter implements AttributeFilter {
 			return;
 		DataValue dataValue = (DataValue) value;
 		try {
-			setField(field, field.getType(), dataValue, skill);
+//			setField(field, field.getType(), dataValue, skill);
+			field.set(skill, dataValue.getValue().getValue());
 			logger.info("set nodeId={} attributeId={} value={}", ctx.getNode().getNodeId(), attributeId, value);
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			// TODO Auto-generated catch block
@@ -97,22 +99,22 @@ public class AttributeLoggingFilter implements AttributeFilter {
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
-	public void setField(Field field, Class<?> type, DataValue dataValue, Object skill)
-			throws IllegalArgumentException, IllegalAccessException {
-		if (type == boolean.class) {
-			field.set(skill, (boolean) dataValue.getValue().getValue());
-		} else if (type == byte.class) {
-			field.set(skill, (byte) dataValue.getValue().getValue());
-		} else if (type == short.class) {
-			field.set(skill, (short) dataValue.getValue().getValue());
-		} else if (type == int.class) {
-			field.set(skill, (int) dataValue.getValue().getValue());
-		} else if (type == long.class) {
-			field.set(skill, (long) dataValue.getValue().getValue());
-		} else if (type == float.class) {
-			field.set(skill, (float) dataValue.getValue().getValue());
-		} else if (type == double.class) {
-			field.set(skill, (double) dataValue.getValue().getValue());
-		}
-	}
+//	public void setField(Field field, Class<?> type, DataValue dataValue, Object skill)
+//			throws IllegalArgumentException, IllegalAccessException {
+//		if (type == boolean.class) {
+//			field.set(skill, (boolean) dataValue.getValue().getValue());
+//		} else if (type == byte.class) {
+//			field.set(skill, (byte) dataValue.getValue().getValue());
+//		} else if (type == short.class) {
+//			field.set(skill, (short) dataValue.getValue().getValue());
+//		} else if (type == int.class) {
+//			field.set(skill, (int) dataValue.getValue().getValue());
+//		} else if (type == long.class) {
+//			field.set(skill, (long) dataValue.getValue().getValue());
+//		} else if (type == float.class) {
+//			field.set(skill, (float) dataValue.getValue().getValue());
+//		} else if (type == double.class) {
+//			field.set(skill, (double) dataValue.getValue().getValue());
+//		}
+//	}
 }

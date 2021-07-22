@@ -11,6 +11,7 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
 import org.eclipse.milo.opcua.stack.core.types.structured.Argument;
 
+import skillup.annotations.Helper;
 import skillup.annotations.SkillOutput;
 import statemachine.IStateChangeObserver;
 import statemachine.Isa88StateMachine;
@@ -28,6 +29,7 @@ public class GenericMethod extends AbstractMethodInvocationHandler implements IS
 	private TransitionName transition;
 	private List<UaVariableNode> outputNodes;
 	private Object skill;
+	private Helper helper = new Helper();
 
 	/**
 	 * Constructor of class {@link GenericMethod}
@@ -82,24 +84,21 @@ public class GenericMethod extends AbstractMethodInvocationHandler implements IS
 	 */
 	@Override
 	public void onStateChanged(IState newState) {
-		// TODO Auto-generated method stub
 
-		Field[] fields = skill.getClass().getDeclaredFields();
-		for (Field field : fields) {
-			if (field.isAnnotationPresent(SkillOutput.class)) {
+		List<Field> outputFields = helper.getVariables(skill, false);
 
-				field.setAccessible(true);
-				for (UaVariableNode outputNode : outputNodes) {
-					if ((outputNode.getBrowseName().getName().equals(field.getAnnotation(SkillOutput.class).name()))
-							|| (outputNode.getBrowseName().getName().equals(field.getName()))) {
-						try {
-							outputNode.setValue(new DataValue(new Variant(field.get(skill))));
-						} catch (IllegalArgumentException | IllegalAccessException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-				}
+		for (Field field : outputFields) {
+			field.setAccessible(true);
+
+			UaVariableNode outputNode = outputNodes.stream().filter(
+					output -> output.getBrowseName().getName().equals(field.getAnnotation(SkillOutput.class).name())
+							|| output.getBrowseName().getName().equals(field.getName()))
+					.findFirst().get();
+			try {
+				outputNode.setValue(new DataValue(new Variant(field.get(skill))));
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 	}

@@ -16,7 +16,7 @@ import org.eclipse.milo.opcua.stack.core.types.structured.Argument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import skillup.annotations.SkillOutput;
+import skillup.annotations.Helper;
 
 /**
  * Class is used to reflect the skill method getOutputs to be added to the
@@ -26,6 +26,7 @@ public class GetOutputsMethod extends AbstractMethodInvocationHandler {
 
 	private final Logger logger = LoggerFactory.getLogger(GetOutputsMethod.class);
 	private Object skill;
+	private Helper helper = new Helper();
 
 	/**
 	 * Constructor of class {@link GetOutputsMethod}
@@ -60,18 +61,17 @@ public class GetOutputsMethod extends AbstractMethodInvocationHandler {
 	 */
 	public List<Argument> createOutputArgument() {
 		List<Argument> outputArgumentsList = new ArrayList<Argument>();
-		Field[] fields = skill.getClass().getDeclaredFields();
-		for (Field field : fields) {
-			if (field.isAnnotationPresent(SkillOutput.class)) {
 
-				field.setAccessible(true);
-				Class<?> type = field.getType();
-				NodeId typeId = new NodeId(0, BuiltinDataType.getBuiltinTypeId(type));
-				Argument outputArgument = new Argument(field.getName(), typeId, ValueRanks.Scalar, null,
-						new LocalizedText(field.getName()));
+		List<Field> outputFields = helper.getVariables(skill, false);
 
-				outputArgumentsList.add(outputArgument);
-			}
+		for (Field field : outputFields) {
+			field.setAccessible(true);
+			Class<?> type = field.getType();
+			NodeId typeId = new NodeId(0, BuiltinDataType.getBuiltinTypeId(type));
+			Argument outputArgument = new Argument(field.getName(), typeId, ValueRanks.Scalar, null,
+					new LocalizedText(field.getName()));
+
+			outputArgumentsList.add(outputArgument);
 		}
 		return outputArgumentsList;
 	}
@@ -81,24 +81,23 @@ public class GetOutputsMethod extends AbstractMethodInvocationHandler {
 	 */
 	@Override
 	protected Variant[] invoke(InvocationContext invocationContext, Variant[] inputValues) throws UaException {
-		// TODO Auto-generated method stub
-		Field[] fields = skill.getClass().getDeclaredFields();
+
+		List<Field> outputFields = helper.getVariables(skill, false);
 		List<Variant> variants = new ArrayList<Variant>();
 
-		for (Field field : fields) {
-			if (field.isAnnotationPresent(SkillOutput.class)) {
+		for (Field field : outputFields) {
 
-				field.setAccessible(true);
-				try {
-					logger.info("Output: " + field.get(skill));
-					Variant variant = new Variant(field.get(skill));
-					variants.add(variant);
-				} catch (IllegalArgumentException | IllegalAccessException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+			field.setAccessible(true);
+			try {
+				logger.info("Output: " + field.get(skill));
+				Variant variant = new Variant(field.get(skill));
+				variants.add(variant);
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
+		logger.info("Get Outputs" + variants.toString());
 		return variants.toArray(new Variant[variants.size()]);
 	}
 }
