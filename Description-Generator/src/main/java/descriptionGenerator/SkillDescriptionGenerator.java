@@ -20,4 +20,21 @@ public class SkillDescriptionGenerator extends DescriptionGenerator {
 		String stateMachineDescription = getFileFromResources(null, "stateMachine.ttl");
 		return stateMachineDescription;
 	}
+
+	public Object convertOption(String option, Class<?> type) {
+
+		if (type == boolean.class) {
+			return Boolean.parseBoolean(option);
+		} else if (type == int.class) {
+			return Integer.parseInt(option);
+		} else if (type == float.class) {
+			return Float.parseFloat(option);
+		} else if (type == double.class) {
+			return Double.parseDouble(option);
+		} else if (type == long.class) {
+			return Long.parseLong(option);
+		} else {
+			return option;
+		}
+	}
 }
