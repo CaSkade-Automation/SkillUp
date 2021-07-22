@@ -43,25 +43,26 @@ public class ModuleRegistration extends RegistrationMethods {
 
 		// module is deleted from every OPS, on which module is registered
 		for (OpsDescription myOps : moduleRegistry.getOpsDescriptionList()) {
-			Object deletedModule = null;
-			for (Object module : myOps.getModules()) {
-				if (object.equals(module)) {
-					logger.info("Delete Module from " + myOps.getId());
 
-					String location = myOps.getBasePath() + myOps.getModuleEndpoint() + "/"
-							+ encodeValue(object.getClass().getAnnotation(Module.class).moduleIri());
+			try {
+				Object deleteModule = myOps.getModules().stream()
+						.filter(moduleToDelete -> moduleToDelete.equals(object)).findFirst().get();
 
-					int responseStatusCode = opsRequest(myOps, "DELETE", location, "", "text/plain");
+				logger.info("Delete Module from " + myOps.getId());
 
-					if (responseStatusCode == 200) {
-						deletedModule = module;
-					} else {
-						logger.info("Module couldn't be deleted from OPS...");
-					}
-					break;
+				String location = myOps.getBasePath() + myOps.getModuleEndpoint() + "/"
+						+ encodeValue(deleteModule.getClass().getAnnotation(Module.class).moduleIri());
+
+				int responseStatusCode = opsRequest(myOps, "DELETE", location, "", "text/plain");
+
+				if (responseStatusCode == 200) {
+					myOps.deleteModule(deleteModule);
+				} else {
+					logger.error("Module couldn't be deleted from OPS...");
 				}
+			} catch (Exception e) {
+				logger.error("No such module found...");
 			}
-			myOps.deleteModule(deletedModule);
 		}
 	}
 }

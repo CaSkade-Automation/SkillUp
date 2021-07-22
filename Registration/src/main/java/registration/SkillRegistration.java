@@ -59,23 +59,20 @@ public class SkillRegistration extends RegistrationMethods {
 
 		// new state is sent to every OPS on which skill is registered
 		for (OpsDescription ops : moduleRegistry.getOpsDescriptionList()) {
-			for (Object object : ops.getSkills()) {
-				if (skill.equals(object)) {
-					String location = ops.getBasePath() + ops.getModuleEndpoint() + "/" + encodeValue(moduleIri)
-							+ ops.getSkillEndpoint() + "/"
-							+ encodeValue(skill.getClass().getAnnotation(Skill.class).skillIri());
 
-//				String json = "{ \"newState\":" + " \"" + stateIri + "\" " + "}";
-					ChangedState newState = new ChangedState();
-					newState.newState = stateIri;
+			Object skillChanged = ops.getSkills().stream().filter(object -> object.equals(skill)).findFirst().get();
 
-					String json = gson.toJson(newState);
-					logger.info(json);
+			String location = ops.getBasePath() + ops.getModuleEndpoint() + "/" + encodeValue(moduleIri)
+					+ ops.getSkillEndpoint() + "/"
+					+ encodeValue(skillChanged.getClass().getAnnotation(Skill.class).skillIri());
 
-					opsRequest(ops, "PATCH", location, json, "application/json");
-					break;
-				}
-			}
+			ChangedState newState = new ChangedState();
+			newState.newState = stateIri;
+
+			String json = gson.toJson(newState);
+			logger.info(json);
+
+			opsRequest(ops, "PATCH", location, json, "application/json");
 		}
 	}
 
@@ -87,28 +84,25 @@ public class SkillRegistration extends RegistrationMethods {
 
 		// skill is deleted from every OPS on which skill is registered
 		for (OpsDescription ops : moduleRegistry.getOpsDescriptionList()) {
-			Object deletedSkill = null;
-			for (Object skill : ops.getSkills()) {
-				if (object.equals(skill)) {
-					String location = ops.getBasePath() + ops.getModuleEndpoint() + "/"
-							+ encodeValue(object.getClass().getAnnotation(Skill.class).moduleIri())
-							+ ops.getSkillEndpoint() + "/" + encodeValue(skillIri);
 
-					int responseStatusCode = opsRequest(ops, "DELETE", location, "", "text/plain");
+			try {
+				Object deleteSkill = ops.getSkills().stream().filter(skill -> skill.equals(object)).findFirst().get();
 
-					if (responseStatusCode == 200) {
-						logger.info("Skill " + skillIri + " removed from " + ops.getId());
-						deletedSkill = skill;
-					} else {
-						logger.info("Skill: " + object.getClass().getAnnotation(Skill.class).skillIri()
-								+ " couldn't be deleted from " + "OPS " + ops.getId());
-					}
-					break;
+				String location = ops.getBasePath() + ops.getModuleEndpoint() + "/"
+						+ encodeValue(deleteSkill.getClass().getAnnotation(Skill.class).moduleIri())
+						+ ops.getSkillEndpoint() + "/" + encodeValue(skillIri);
+
+				int responseStatusCode = opsRequest(ops, "DELETE", location, "", "text/plain");
+				if (responseStatusCode == 200) {
+					logger.info("Skill " + skillIri + " removed from " + ops.getId());
+					ops.deleteSkill(deleteSkill);
+				} else {
+					logger.info("Skill: " + object.getClass().getAnnotation(Skill.class).skillIri()
+							+ " couldn't be deleted from " + "OPS " + ops.getId());
 				}
+			} catch (NullPointerException e) {
+				e.printStackTrace();
 			}
-			// after for loop skill deleted from list, because while in a loop of list it's
-			// not possible to change list
-			ops.deleteSkill(deletedSkill);
 		}
 	}
 }

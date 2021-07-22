@@ -1,5 +1,6 @@
 package restSkillGenerator;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.net.Inet4Address;
@@ -14,6 +15,7 @@ import java.util.List;
 
 import descriptionGenerator.SkillDescriptionGenerator;
 import restResource.RestResource;
+import skillup.annotations.Helper;
 import skillup.annotations.Skill;
 import skillup.annotations.SkillOutput;
 import skillup.annotations.SkillParameter;
@@ -21,6 +23,8 @@ import statemachine.Isa88StateMachine;
 import states.TransitionName;
 
 public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
+
+	private Helper helper = new Helper();
 
 	// find our local ip address(es) for generating url in the descriptions
 	public ArrayList<String> getIpAddress() {
@@ -138,99 +142,98 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 		int skillParamCounter = 0;
 		int skillOutputCounter = 0;
 
-		Field[] fields = skill.getClass().getDeclaredFields();
-		for (Field field : fields) {
-			// field is a SkillParameter
-			if (field.isAnnotationPresent(SkillParameter.class)) {
-				field.setAccessible(true);
-				skillParamCounter++;
-				restSkillDescription.append("<${SkillIri}_Param" + skillParamCounter + "> a Cap:SkillParameter ;\n");
-				restSkillDescription.append("	a WADL:QueryParameter ;\n");
-				restSkillDescription.append("	Cap:hasVariableName \"" + field.getName() + "\" ;\n");
-				restSkillDescription.append("	Cap:hasVariableType xsd:" + field.getType().getSimpleName() + " ;\n");
-				restSkillDescription.append("	Cap:isRequired "
-						+ Boolean.toString(field.getAnnotation(SkillParameter.class).isRequired()) + " ;\n");
-				restSkillDescription.append("	Cap:hasDescription \""
-						+ field.getAnnotation(SkillParameter.class).description() + "\" .\n");
-				try {
-					String defaultFieldValue = field.get(skill).toString();
-					restSkillDescription.append("<${SkillIri}_Param" + skillParamCounter + "> Cap:hasDefaultValue "
-							+ defaultFieldValue + " .\n");
-				} catch (IllegalArgumentException | IllegalAccessException e) {
-					e.printStackTrace();
-				} catch (NullPointerException e) {
-					e.printStackTrace();
-					// restSkillDescription.append(" Cap:hasDefaultValue " + "null" + " .\n");
+		// fields are SkillParameter
+		List<Field> paramFields = helper.getVariables(skill, true);
 
+		for (Field field : paramFields) {
+
+			field.setAccessible(true);
+			skillParamCounter++;
+			restSkillDescription.append("<${SkillIri}_Param" + skillParamCounter + "> a Cap:SkillParameter ;\n");
+			restSkillDescription.append("	a WADL:QueryParameter ;\n");
+			restSkillDescription.append("	Cap:hasVariableName \"" + field.getName() + "\" ;\n");
+			restSkillDescription.append("	Cap:hasVariableType xsd:" + field.getType().getSimpleName() + " ;\n");
+			restSkillDescription.append("	Cap:isRequired "
+					+ Boolean.toString(field.getAnnotation(SkillParameter.class).isRequired()) + " ;\n");
+			restSkillDescription.append(
+					"	Cap:hasDescription \"" + field.getAnnotation(SkillParameter.class).description() + "\" .\n");
+			try {
+				String defaultFieldValue = field.get(skill).toString();
+				restSkillDescription.append("<${SkillIri}_Param" + skillParamCounter + "> Cap:hasDefaultValue "
+						+ defaultFieldValue + " .\n");
+			} catch (IllegalArgumentException | IllegalAccessException | NullPointerException e) {
+				e.printStackTrace();
+			}
+
+			// create connections to RestSkill and Representation
+			restSkillDescription
+					.append("<${SkillIri}> Cap:hasSkillParameter <${SkillIri}_Param" + skillParamCounter + "> .\n");
+			restSkillDescription.append(
+					"<${SkillIri}_Representation> WADL:hasParameter <${SkillIri}_Param" + skillParamCounter + "> .\n");
+
+			// create ParameterOptions
+			String options[] = field.getAnnotation(SkillParameter.class).option();
+			int skillOptionCounter = 0;
+			for (String option : options) {
+				if (!option.isEmpty()) {
+					skillOptionCounter++;
+//					Object newOption = convertOption(option, field.getType());
+					restSkillDescription.append("<${SkillIri}_Param" + skillParamCounter + "_Option"
+							+ skillOptionCounter + "> a WADL:Option ;\n");
+					restSkillDescription.append("	WADL:hasOptionValue " + option + " .\n");
+					restSkillDescription.append(
+							"<${SkillIri}_Param" + skillParamCounter + "> WADL:hasParameterOption <${SkillIri}_Param"
+									+ skillParamCounter + "_Option" + skillOptionCounter + "> .\n");
 				}
-
-				// create connections to RestSkill and Representation
-				restSkillDescription
-						.append("<${SkillIri}> Cap:hasSkillParameter <${SkillIri}_Param" + skillParamCounter + "> .\n");
-				restSkillDescription.append("<${SkillIri}_Representation> WADL:hasParameter <${SkillIri}_Param"
-						+ skillParamCounter + "> .\n");
-
-				// create ParameterOptions
-				String options[] = field.getAnnotation(SkillParameter.class).option();
-				int skillOptionCounter = 0;
-				for (String option : options) {
-					if (!option.isEmpty()) {
-						skillOptionCounter++;
-						restSkillDescription.append("<${SkillIri}_Param" + skillParamCounter + "_Option"
-								+ skillOptionCounter + "> a WADL:Option ;\n");
-						restSkillDescription.append("	WADL:hasOptionValue " + option + " .\n");
-						restSkillDescription.append("<${SkillIri}_Param" + skillParamCounter
-								+ "> WADL:hasParameterOption <${SkillIri}_Param" + skillParamCounter + "_Option"
-								+ skillOptionCounter + "> .\n");
-					}
-				}
-
-				// field is a SkillOutput
-			} else if (field.isAnnotationPresent(SkillOutput.class)) {
-				field.setAccessible(true);
-				skillOutputCounter++;
-				restSkillDescription.append("<${SkillIri}_Output" + skillOutputCounter + "> a Cap:SkillOutput ;\n");
-				restSkillDescription.append("	a WADL:QueryParameter ;\n");
-				restSkillDescription.append("	Cap:hasVariableName \"" + field.getName() + "\" ;\n");
-				restSkillDescription.append("	Cap:hasVariableType xsd:" + field.getType().getSimpleName() + " ;\n");
-				restSkillDescription.append("	Cap:isRequired "
-						+ Boolean.toString(field.getAnnotation(SkillOutput.class).isRequired()) + " ;\n");
-				restSkillDescription.append(
-						"	Cap:hasDescription \"" + field.getAnnotation(SkillOutput.class).description() + "\" .\n");
-
-				// create connections to RestSkill and Representation
-				restSkillDescription
-						.append("<${SkillIri}> Cap:hasSkillOutput <${SkillIri}_Output" + skillOutputCounter + "> .\n");
-				restSkillDescription.append("<${SkillIri}_Representation> WADL:hasParameter <${SkillIri}_Output"
-						+ skillOutputCounter + "> .\n");
 			}
 		}
 
+		// fields are SkillOutput
+		List<Field> outputFields = helper.getVariables(skill, false);
+
+		for (Field field : outputFields) {
+
+			field.setAccessible(true);
+			skillOutputCounter++;
+			restSkillDescription.append("<${SkillIri}_Output" + skillOutputCounter + "> a Cap:SkillOutput ;\n");
+			restSkillDescription.append("	a WADL:QueryParameter ;\n");
+			restSkillDescription.append("	Cap:hasVariableName \"" + field.getName() + "\" ;\n");
+			restSkillDescription.append("	Cap:hasVariableType xsd:" + field.getType().getSimpleName() + " ;\n");
+			restSkillDescription.append("	Cap:isRequired "
+					+ Boolean.toString(field.getAnnotation(SkillOutput.class).isRequired()) + " ;\n");
+			restSkillDescription.append(
+					"	Cap:hasDescription \"" + field.getAnnotation(SkillOutput.class).description() + "\" .\n");
+
+			// create connections to RestSkill and Representation
+			restSkillDescription
+					.append("<${SkillIri}> Cap:hasSkillOutput <${SkillIri}_Output" + skillOutputCounter + "> .\n");
+			restSkillDescription.append("<${SkillIri}_Representation> WADL:hasParameter <${SkillIri}_Output"
+					+ skillOutputCounter + "> .\n");
+		}
+
 		String completeDescription;
+
+		// put together
+		completeDescription = getFileFromResources(null, "prefix.ttl") + restSkillDescription.toString()
+				+ stateMachineDescription + userSnippet;
+
+		// replace markers
+		completeDescription = completeDescription.replace("${ModuleIri}", skillAnnotation.moduleIri())
+				.replace("${CapabilityIri}", skillAnnotation.capabilityIri())
+				.replace("${SkillIri}", skillAnnotation.skillIri())
+				// Caution!: We have to cut the "state" from e.g. "IdleState" at the end of each
+				// State class name
+				.replace("${InitialState}",
+						stateMachine.getState().getClass().getSimpleName().substring(0,
+								stateMachine.getState().getClass().getSimpleName().length() - 5))
+				.replace("${MediaType}", "application/json");
+
 		try {
-			// put together
-			completeDescription = getFileFromResources(null, "prefix.ttl") + restSkillDescription.toString()
-					+ stateMachineDescription + userSnippet;
-
-			// replace markers
-			completeDescription = completeDescription.replace("${ModuleIri}", skillAnnotation.moduleIri())
-					.replace("${CapabilityIri}", skillAnnotation.capabilityIri())
-					.replace("${SkillIri}", skillAnnotation.skillIri())
-					// Caution!: We have to cut the "state" from e.g. "IdleState" at the end of each
-					// State class name
-					.replace("${InitialState}",
-							stateMachine.getState().getClass().getSimpleName().substring(0,
-									stateMachine.getState().getClass().getSimpleName().length() - 5))
-					.replace("${MediaType}", "application/json");
-
 			// For Debugging...
 			createFile(completeDescription, "restDescription.ttl");
-
-			return completeDescription;
-
-		} catch (Exception e1) {
-			e1.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		return null;
+		return completeDescription;
 	}
 }

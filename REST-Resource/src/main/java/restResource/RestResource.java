@@ -3,10 +3,8 @@ package restResource;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -30,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import skillup.annotations.Helper;
 import skillup.annotations.Skill;
 import skillup.annotations.SkillOutput;
 import skillup.annotations.SkillParameter;
@@ -43,6 +42,7 @@ public class RestResource {
 
 	private static Logger logger;
 	private HashMap<String, RestSkill> skillDirectory;
+	private Helper helper = new Helper();
 
 	public RestResource() {
 		this.skillDirectory = new HashMap<String, RestSkill>();
@@ -120,15 +120,12 @@ public class RestResource {
 		RestSkill skill = skillDirectory.get(skillIri);
 		// found the correct skill
 		// check every field of the skillObject for SkillOutput-Annotation
-		Field[] fieldArray = skill.getSkillObject().getClass().getDeclaredFields();
-		List<Field> fields = Arrays.asList(fieldArray);
 
-		List<Field> paramFields = fields.stream().filter(field -> field.isAnnotationPresent(SkillOutput.class))
-				.collect(Collectors.toList());
+		List<Field> outputFields = helper.getVariables(skill.getSkillObject(), false);
 
 		List<SkillVariable> skillVariables = new ArrayList<SkillVariable>();
 
-		for (Field field : paramFields) {
+		for (Field field : outputFields) {
 			field.setAccessible(true);
 			SkillOutput annotation = field.getAnnotation(SkillOutput.class);
 			SkillVariable output;
@@ -158,29 +155,30 @@ public class RestResource {
 
 		RestSkill skill = skillDirectory.get(skillIri);
 		// found the correct skill
-		String json = null;
-		// check every field of the skillObject for SkillOutput-Annotation
-		Field[] fields = skill.getSkillObject().getClass().getDeclaredFields();
-		for (Field field : fields) {
-			if (field.isAnnotationPresent(SkillParameter.class)) {
-				field.setAccessible(true);
-				SkillParameter annotation = field.getAnnotation(SkillParameter.class);
-				Gson gson = new Gson();
-				SkillVariable parameter;
-				try {
-					parameter = new SkillVariable(annotation.name(), annotation.description(), annotation.isRequired(),
-							field.getType().getSimpleName(), field.get(skill.getSkillObject()));
-					json += gson.toJson(parameter);
-				} catch (IllegalArgumentException | IllegalAccessException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (NullPointerException e) {
-					parameter = new SkillVariable(annotation.name(), annotation.description(), annotation.isRequired(),
-							field.getType().getSimpleName(), null);
-				}
+		// check every field of the skillObject for SkillParameter-Annotation
+		List<Field> paramFields = helper.getVariables(skill.getSkillObject(), true);
+		List<SkillVariable> skillVariables = new ArrayList<SkillVariable>();
+
+		for (Field field : paramFields) {
+			field.setAccessible(true);
+			SkillParameter annotation = field.getAnnotation(SkillParameter.class);
+			SkillVariable parameter;
+			try {
+				parameter = new SkillVariable(annotation.name(), annotation.description(), annotation.isRequired(),
+						field.getType().getSimpleName(), field.get(skill.getSkillObject()));
+				skillVariables.add(parameter);
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (NullPointerException e) {
+				parameter = new SkillVariable(annotation.name(), annotation.description(), annotation.isRequired(),
+						field.getType().getSimpleName(), null);
 			}
 		}
-		logger.info("Get Parameter of " + skillIri + ": " + json);
+
+		Gson gson = new Gson();
+		String json = gson.toJson(skillVariables);
+		logger.info("Get Parameters of " + skillIri + ": " + json);
 		return Response.status(Response.Status.OK).entity(json).build();
 	}
 
@@ -208,7 +206,6 @@ public class RestResource {
 
 		setSkillParameter(skill, skillVariables);
 
-//		String responseString = objBuilder.build().toString();
 		return Response.status(Response.Status.OK).build();
 	}
 
@@ -235,13 +232,13 @@ public class RestResource {
 				break;
 			}
 		}
-		JsonObject obj = Json.createObjectBuilder()
-				.add(skill.getSkillIri(),
-						Json.createObjectBuilder().add("state", skill.getState()).add("skillIri", skill.getSkillIri()))
-				.build();
-
-		String responseString = obj.toString();
-		return Response.status(Response.Status.OK).entity(responseString).build();
+//		JsonObject obj = Json.createObjectBuilder()
+//				.add(skill.getSkillIri(),
+//						Json.createObjectBuilder().add("state", skill.getState()).add("skillIri", skill.getSkillIri()))
+//				.build();
+//
+//		String responseString = obj.toString();
+		return Response.status(Response.Status.OK).build();
 	}
 
 	private void setSkillParameter(RestSkill skill, ArrayList<SkillVariable> skillVariables) {
@@ -252,14 +249,7 @@ public class RestResource {
 		// and check if the jsonKey matches with the variableName
 		// match => update the variable's value
 
-		// may need to do some casting magic...
-
-		// we found the correct skill by UUID
-		Field[] fieldArray = skill.getSkillObject().getClass().getDeclaredFields();
-		List<Field> fields = Arrays.asList(fieldArray);
-
-		List<Field> paramFields = fields.stream().filter(field -> field.isAnnotationPresent(SkillParameter.class))
-				.collect(Collectors.toList());
+		List<Field> paramFields = helper.getVariables(skill.getSkillObject(), true);
 
 		for (Field paramField : paramFields) {
 			paramField.setAccessible(true);
@@ -276,83 +266,26 @@ public class RestResource {
 		}
 	}
 
-	// Idea: we cast any JsonValue to a String and then convert that String to the
-	// Field's Type!
 	private void updateSkillParam(Object skillObject, Field fieldToSet, Object newValue) {
+		if (newValue.getClass().equals(String.class)) {
+			Class<?> type = fieldToSet.getType();
+			if (type == boolean.class) {
+				newValue = Boolean.parseBoolean(newValue.toString());
+			} else if (type == int.class) {
+				newValue = Integer.parseInt(newValue.toString());
+			} else if (type == float.class) {
+				newValue = Float.parseFloat(newValue.toString());
+			} else if (type == double.class) {
+				newValue = Double.parseDouble(newValue.toString());
+			} else if (type == long.class) {
+				newValue = Long.parseLong(newValue.toString());
+			}
+		}
 		try {
 			fieldToSet.set(skillObject, newValue);
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-//		if (fieldToSet.getType().equals(Integer.class) || fieldToSet.getType().equals(int.class)) {
-//			logger.info("INTEGER");
-//			if (newValue.) {
-//				try {
-//					fieldToSet.setInt(skillObject, Integer.valueOf(((JsonNumber) newValue).toString()));
-//					return true;
-//				} catch (IllegalArgumentException | IllegalAccessException e) {
-//					logger.error("Error while casting JsonValue to Integer");
-//					logger.error(e.toString());
-//					return false;
-//				}
-//			} else {
-//				logger.error("JsonValue not instanceof JsonNumber!");
-//				return false;
-//			}
-//		}
-//		if (fieldToSet.getType().equals(Double.class) || fieldToSet.getType().equals(double.class)) {
-//			logger.info("DOUBLE");
-//			if (newValue instanceof JsonNumber) {
-//				try {
-//					fieldToSet.setDouble(skillObject, Double.valueOf(((JsonNumber) newValue).toString()));
-//					return true;
-//				} catch (IllegalArgumentException | IllegalAccessException e) {
-//					logger.error("Error while casting JsonValue to Double");
-//					logger.error(e.toString());
-//					return false;
-//				}
-//			} else {
-//				logger.error("JsonValue not instanceof JsonNumber!");
-//				return false;
-//			}
-//		}
-//		if (fieldToSet.getType().equals(Boolean.class) || fieldToSet.getType().equals(boolean.class)) {
-//			logger.info("BOOLEAN");
-//			if (newValue == JsonValue.TRUE || newValue == JsonValue.FALSE) {
-//				try {
-//					fieldToSet.setBoolean(skillObject, Boolean.getBoolean(newValue.toString()));
-//					return true;
-//				} catch (IllegalArgumentException | IllegalAccessException e) {
-//					logger.error("Error while casting JsonValue to Boolean");
-//					logger.error(e.toString());
-//					return false;
-//				}
-//			} else {
-//				logger.error("JsonValue not a Boolean!");
-//				return false;
-//			}
-//		}
-//		if (fieldToSet.getType().equals(String.class)) {
-//			logger.info("STRING");
-//			if (newValue.getValueType() == JsonValue.ValueType.STRING) {
-//				try {
-//					String value = newValue.toString();
-//					// we strip first and last index to remove quotes!
-//					value = value.substring(1, value.length() - 1);
-//					fieldToSet.set(skillObject, value);
-//					return true;
-//				} catch (IllegalArgumentException | IllegalAccessException e) {
-//					logger.error("Error while casting JsonValue to String");
-//					logger.error(e.toString());
-//					return false;
-//				}
-//			} else {
-//				logger.error("JsonValue not a String!");
-//				return false;
-//			}
-//		}
-//		logger.error("End of updateSkillParam -> unknown Datatype?");
-//		return false;
 	}
 }
