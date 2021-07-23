@@ -231,7 +231,7 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 		UaFolderNode folder = (UaFolderNode) skillNode;
 
 		String methodDescription = generateOpcUaMethodDescription(folder);
-		String variableDescription = generateOpcUaVariableDescription(folder, skill);
+		String variableDescription = generateOpcUaVariablesDescription(folder, skill);
 		opcUaSkillDescription = opcUaSkillDescription + methodDescription + variableDescription;
 		return opcUaSkillDescription;
 	}
@@ -261,10 +261,12 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 	 */
 	public String generateOpcUaMethodDescription(UaFolderNode folder) {
 
+		UaFolderNode methodFolder = getFolder(folder, "SkillMethods");
+
 		String totalMethodDescription = "";
 
 		// generate description for every component node (methods) of the skill
-		for (UaNode componentNode : folder.getComponentNodes()) {
+		for (UaNode componentNode : methodFolder.getComponentNodes()) {
 			String methodDescription = generateOpcUaSkillDataPropertyDescription(opcUaMethodSnippet, componentNode);
 
 			// for every method corresponding to an transition like start etc. this
@@ -298,19 +300,21 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 	 * @param skill  skills object to get fields
 	 * @return total description of all variables
 	 */
-	public String generateOpcUaVariableDescription(UaFolderNode folder, Object skill) {
+	public String generateOpcUaVariablesDescription(UaFolderNode folder, Object skill) {
 
-		String totalVariableDescription = "";
+		String variablesDescription = "";
 
 		List<Field> paramFields = helper.getVariables(skill, true);
 		List<Field> outputFields = helper.getVariables(skill, false);
 
-		// generate description for every organized node (variables) of the skill
-		for (Node organizedNode : folder.getOrganizesNodes()) {
-			UaVariableNode variableNode = (UaVariableNode) organizedNode;
+		String skillParameterDescription = "";
+		String skillOutputDescription = "";
 
-			String skillParameterDescription = "";
-			String skillOutputDescription = "";
+		UaFolderNode paramFolder = getFolder(folder, "SkillParameters");
+
+		// generate description for every variable of the skill
+		for (Node organizedNode : paramFolder.getOrganizesNodes()) {
+			UaVariableNode variableNode = (UaVariableNode) organizedNode;
 
 			try {
 				Field paramField = paramFields.stream()
@@ -323,16 +327,25 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 
 				boolean isRequired = paramField.getAnnotation(SkillParameter.class).isRequired();
 
-				skillParameterDescription = opcUaSkillParameterSnippet
-						.replace("${Required}", Boolean.toString(isRequired))
-						.replace("${DefaultValue}", paramField.get(skill).toString());
+				skillParameterDescription = skillParameterDescription
+						+ opcUaSkillParameterSnippet.replace("${Required}", Boolean.toString(isRequired))
+								.replace("${DefaultValue}", paramField.get(skill).toString());
 				// add parameter options to description
 				skillParameterDescription = generateOptionValuesDescription(paramField, skillParameterDescription);
-				break;
 			} catch (IllegalArgumentException | IllegalAccessException | NoSuchElementException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+
+			skillParameterDescription = generateOpcUaVariableDescription(variableNode, skillParameterDescription);
+			skillParameterDescription = generateOpcUaSkillDataPropertyDescription(skillParameterDescription,
+					organizedNode);
+		}
+
+		UaFolderNode outputFolder = getFolder(folder, "SkillOutputs");
+
+		for (Node organizedNode : outputFolder.getOrganizesNodes()) {
+			UaVariableNode variableNode = (UaVariableNode) organizedNode;
 
 			try {
 				Field outputField = outputFields.stream()
@@ -345,29 +358,18 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 
 				boolean isRequiredOutput = outputField.getAnnotation(SkillOutput.class).isRequired();
 
-				skillOutputDescription = opcUaSkillOutputSnippet.replace("${Required}",
-						Boolean.toString(isRequiredOutput));
+				skillOutputDescription = skillOutputDescription
+						+ opcUaSkillOutputSnippet.replace("${Required}", Boolean.toString(isRequiredOutput));
 			} catch (NoSuchElementException e) {
 				e.printStackTrace();
 			}
 
-			String variableType = variableNode.getDataType().getIdentifier().toString();
-			String opcUaDataType = BuiltinDataType.getBackingClass(Integer.parseInt(variableType)).getSimpleName()
-					.toLowerCase();
-
-			String variableDescription = skillParameterDescription + skillOutputDescription + opcUaVariableSnippet;
-			variableDescription = variableDescription.replace("${VariableName}", variableNode.getBrowseName().getName())
-					.replace("${AccessLevel}", variableNode.getAccessLevel().toString())
-					.replace("${DataType}", opcUaDataType).replace("${VariableType}", opcUaDataType)
-					.replace("${Historizing}", variableNode.getHistorizing().toString())
-					.replace("${UserAccessLevel}", variableNode.getUserAccessLevel().toString())
-					.replace("${ValueRank}", variableNode.getValueRank().toString());
-
-			variableDescription = generateOpcUaSkillDataPropertyDescription(variableDescription, organizedNode);
-			totalVariableDescription = totalVariableDescription + variableDescription;
+			skillOutputDescription = generateOpcUaVariableDescription(variableNode, skillOutputDescription);
+			skillOutputDescription = generateOpcUaSkillDataPropertyDescription(skillOutputDescription, organizedNode);
 		}
-		return totalVariableDescription;
 
+		variablesDescription = skillParameterDescription + skillOutputDescription;
+		return variablesDescription;
 	}
 
 	/**
@@ -391,5 +393,32 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 			}
 		}
 		return skillParameterDescription;
+	}
+
+	public UaFolderNode getFolder(UaFolderNode skillFolder, String folderName) {
+
+		List<Node> skillNodes = skillFolder.getOrganizesNodes();
+		Node searchedNode = skillNodes.stream().filter(node -> node.getBrowseName().getName().equals(folderName))
+				.findFirst().get();
+
+		UaFolderNode searchedFolder = (UaFolderNode) searchedNode;
+		return searchedFolder;
+	}
+
+	public String generateOpcUaVariableDescription(UaVariableNode variableNode, String variableDescription) {
+
+		variableDescription = variableDescription + opcUaVariableSnippet;
+		String variableType = variableNode.getDataType().getIdentifier().toString();
+		String opcUaDataType = BuiltinDataType.getBackingClass(Integer.parseInt(variableType)).getSimpleName()
+				.toLowerCase();
+
+		variableDescription = variableDescription.replace("${VariableName}", variableNode.getBrowseName().getName())
+				.replace("${AccessLevel}", variableNode.getAccessLevel().toString())
+				.replace("${DataType}", opcUaDataType).replace("${VariableType}", opcUaDataType)
+				.replace("${Historizing}", variableNode.getHistorizing().toString())
+				.replace("${UserAccessLevel}", variableNode.getUserAccessLevel().toString())
+				.replace("${ValueRank}", variableNode.getValueRank().toString());
+
+		return variableDescription;
 	}
 }
