@@ -129,8 +129,11 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
 
 		for (Field field : paramFields) {
 
+			FolderDescription paramFolderDescription = new FolderDescription("SkillParameters", "SkillParameters",
+					"SkillParameters", folder);
+			UaFolderNode paramFolder = addFolder(paramFolderDescription);
 			OpcUaVariableDescription variableDescription = setVariableDescription(field, skill, true);
-			UaVariableNode node = createVariableNode(variableDescription, folder, true);
+			UaVariableNode node = createVariableNode(variableDescription, paramFolder, true);
 			// node is monitored to change value of skill parameter when value of variable
 			// node changes
 			node.getFilterChain().addLast(new AttributeLoggingFilter(AttributeId.Value::equals, field, skill));
@@ -138,8 +141,11 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
 
 		for (Field field : outputFields) {
 
+			FolderDescription outputFolderDescription = new FolderDescription("SkillOutputs", "SkillOutputs",
+					"SkillOutputs", folder);
+			UaFolderNode outputFolder = addFolder(outputFolderDescription);
 			OpcUaVariableDescription variableDescription = setVariableDescription(field, skill, false);
-			UaVariableNode node = createVariableNode(variableDescription, folder, false);
+			UaVariableNode node = createVariableNode(variableDescription, outputFolder, false);
 			// add this node to list with skills outputs
 			skillOutputs.add(node);
 		}
@@ -247,9 +253,13 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
 	 */
 	public void addAllSkillMethods(UaFolderNode folder, Isa88StateMachine stateMachine, Object skill) {
 
+		FolderDescription methodFolderDescription = new FolderDescription("SkillMethods", "SkillMethods",
+				"SkillMethods", folder);
+		UaFolderNode methodFolder = addFolder(methodFolderDescription);
+
 		for (TransitionName transition : TransitionName.values()) {
 
-			UaMethodNode skillNode = createMethodNode(folder, transition.toString());
+			UaMethodNode skillNode = createMethodNode(methodFolder, transition.toString());
 			newSkill = new GenericMethod(skillNode, stateMachine, transition, skillOutputs, skill);
 
 			skillNode.setInvocationHandler(newSkill);
@@ -258,9 +268,9 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
 			// make sure our new method node shows up as a component under the skills
 			// folder.
 			skillNode.addReference(new Reference(skillNode.getNodeId(), Identifiers.HasComponent,
-					folder.getNodeId().expanded(), false));
+					methodFolder.getNodeId().expanded(), false));
 		}
-		addGetOutputs(folder, skill);
+		addGetOutputs(methodFolder, skill);
 	}
 
 	/**
