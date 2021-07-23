@@ -51,7 +51,6 @@ public class GenericMethod extends AbstractMethodInvocationHandler implements IS
 
 	@Override
 	public Argument[] getInputArguments() {
-		// TODO Auto-generated method stub
 		// important!! new Argument[0], because AbstractMethodInvocationHandler checks
 		// in line 63 if length of inputValues == length of Argument
 		// and by returning null it occurs an error. Then
@@ -62,7 +61,6 @@ public class GenericMethod extends AbstractMethodInvocationHandler implements IS
 
 	@Override
 	public Argument[] getOutputArguments() {
-		// TODO Auto-generated method stub
 		return new Argument[0];
 	}
 
@@ -73,7 +71,6 @@ public class GenericMethod extends AbstractMethodInvocationHandler implements IS
 	 */
 	@Override
 	protected Variant[] invoke(InvocationContext invocationContext, Variant[] inputs) throws UaException {
-		// TODO Auto-generated method stub
 
 		stateMachine.invokeTransition(transition);
 		return null;
@@ -97,7 +94,6 @@ public class GenericMethod extends AbstractMethodInvocationHandler implements IS
 			try {
 				outputNode.setValue(new DataValue(new Variant(field.get(skill))));
 			} catch (IllegalArgumentException | IllegalAccessException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

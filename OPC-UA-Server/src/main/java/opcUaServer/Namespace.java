@@ -133,7 +133,7 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
 					"SkillParameters", folder);
 			UaFolderNode paramFolder = addFolder(paramFolderDescription);
 			OpcUaVariableDescription variableDescription = setVariableDescription(field, skill, true);
-			UaVariableNode node = createVariableNode(variableDescription, paramFolder, true);
+			UaVariableNode node = createVariableNode(variableDescription, folder, paramFolder, true);
 			// node is monitored to change value of skill parameter when value of variable
 			// node changes
 			node.getFilterChain().addLast(new AttributeLoggingFilter(AttributeId.Value::equals, field, skill));
@@ -145,7 +145,7 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
 					"SkillOutputs", folder);
 			UaFolderNode outputFolder = addFolder(outputFolderDescription);
 			OpcUaVariableDescription variableDescription = setVariableDescription(field, skill, false);
-			UaVariableNode node = createVariableNode(variableDescription, outputFolder, false);
+			UaVariableNode node = createVariableNode(variableDescription, folder, outputFolder, false);
 			// add this node to list with skills outputs
 			skillOutputs.add(node);
 		}
@@ -212,11 +212,11 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
 	 *                            parameter and output
 	 * @return the created variable node
 	 */
-	public UaVariableNode createVariableNode(OpcUaVariableDescription variableDescription, UaFolderNode folder,
-			boolean skillParameter) {
+	public UaVariableNode createVariableNode(OpcUaVariableDescription variableDescription, UaFolderNode skillFolder,
+			UaFolderNode skillVariableFolder, boolean skillParameter) {
 
 		UaVariableNodeBuilder nodeBuilder = new UaVariableNode.UaVariableNodeBuilder(getNodeContext())
-				.setNodeId(newNodeId(folder.getBrowseName() + "/" + variableDescription.getVariableName()))
+				.setNodeId(newNodeId(skillFolder.getBrowseName() + "/" + variableDescription.getVariableName()))
 				.setBrowseName(newQualifiedName(variableDescription.getVariableName()))
 				.setDisplayName(LocalizedText.english(variableDescription.getVariableName()))
 				.setDescription(LocalizedText.english(variableDescription.getVariableDescription()))
@@ -238,7 +238,7 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
 		node.setValue(new DataValue(variableDescription.getVariant()));
 
 		getNodeManager().addNode(node);
-		folder.addOrganizes(node);
+		skillVariableFolder.addOrganizes(node);
 
 		return node;
 	}
@@ -259,7 +259,7 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
 
 		for (TransitionName transition : TransitionName.values()) {
 
-			UaMethodNode skillNode = createMethodNode(methodFolder, transition.toString());
+			UaMethodNode skillNode = createMethodNode(folder, transition.toString());
 			newSkill = new GenericMethod(skillNode, stateMachine, transition, skillOutputs, skill);
 
 			skillNode.setInvocationHandler(newSkill);
@@ -270,7 +270,7 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
 			skillNode.addReference(new Reference(skillNode.getNodeId(), Identifiers.HasComponent,
 					methodFolder.getNodeId().expanded(), false));
 		}
-		addGetOutputs(methodFolder, skill);
+		addGetOutputs(folder, methodFolder, skill);
 	}
 
 	/**
@@ -281,7 +281,7 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
 	 * @param skill  object of skill to get actual value of skill output (which is a
 	 *               field of skills object)
 	 */
-	public void addGetOutputs(UaFolderNode folder, Object skill) {
+	public void addGetOutputs(UaFolderNode folder, UaFolderNode skillMethodFolder, Object skill) {
 
 		UaMethodNode skillNode = createMethodNode(folder, "getOutputs");
 		GetOutputsMethod newSkill = new GetOutputsMethod(skillNode, skill);
@@ -291,8 +291,8 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
 
 		// make sure our new method noded shows up as a component under the skills
 		// folder.
-		skillNode.addReference(
-				new Reference(skillNode.getNodeId(), Identifiers.HasComponent, folder.getNodeId().expanded(), false));
+		skillNode.addReference(new Reference(skillNode.getNodeId(), Identifiers.HasComponent,
+				skillMethodFolder.getNodeId().expanded(), false));
 	}
 
 	/**
