@@ -7,17 +7,17 @@
 	<version>1.0.0</version>
 	<packaging>pom</packaging>
 	<modules>
-		<module>skillup.annotations</module>
-		<module>skillup.action-generator</module>
-		<module>skillup.description-generator</module>
-		<module>skillup.module-generator</module>
-		<module>skillup.opc-ua-server</module>
-		<module>skillup.rest-resource</module>
-		<module>skillup.skill-generator-interface</module>
-		<module>skillup.opc-ua-skill-generator</module>
-		<module>skillup.rest-skill-generator</module>
-		<module>skillup.registration</module>
-		<module>skillup.smart-tracker</module>
-		<module>skillup.examples</module>
+		<module>annotations</module>
+		<module>action-generator</module>
+		<module>description-generator</module>
+		<module>module-generator</module>
+		<module>opc-ua-server</module>
+		<module>rest-resource</module>
+		<module>skill-generator-interface</module>
+		<module>opc-ua-skill-generator</module>
+		<module>rest-skill-generator</module>
+		<module>registration</module>
+		<module>smart-tracker</module>
+		<module>examples</module>
 	</modules>
 </project>

@@ -4,12 +4,12 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>io.github.aljoshakoecher.skillup</groupId>
-		<artifactId>skillup.examples</artifactId>
+		<artifactId>examples</artifactId>
 		<version>1.0.0</version>
 	</parent>
-	<artifactId>skillup.examples.rest-simple-skill</artifactId>
+	<artifactId>skillup.examples.opc-ua-skill2</artifactId>
 	<packaging>bundle</packaging>
-	<name>REST-Skill</name>
+	<name>OPC-UA-Skill2</name>
 	<dependencies>
 		<dependency>
 			<groupId>org.slf4j</groupId>
