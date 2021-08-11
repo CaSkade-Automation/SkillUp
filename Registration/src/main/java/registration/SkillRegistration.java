@@ -1,7 +1,5 @@
 package registration;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -9,8 +7,11 @@ import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 
-import annotations.Skill;
+import skillup.annotations.Skill;
 
+/**
+ * Class to register/delete skills on/from OPS
+ */
 public class SkillRegistration extends RegistrationMethods {
 
 	private Logger logger = LoggerFactory.getLogger(SkillRegistration.class);
@@ -26,71 +27,81 @@ public class SkillRegistration extends RegistrationMethods {
 
 		List<OpsDescription> opsList = moduleRegistry.skillRegisterOpsList(moduleIri);
 
-		for (OpsDescription opsDescription : opsList) {
-			String basePath = opsDescription.getBasePath();
-			String moduleEndpoint = opsDescription.getModuleEndpoint();
-			String moduleIriEncoded = encodeValue(moduleIri);
-			String skillEndpoint = opsDescription.getSkillEndpoint();
-			String location = basePath + moduleEndpoint + "/" + moduleIriEncoded + skillEndpoint;
+		// skill is registered to every OPS on which necessary module is registered
+		for (OpsDescription ops : opsList) {
 
-			int responseStatusCode = opsRequest(opsDescription, "POST", location, requestBody, "text/plain");
+			String location = ops.getBasePath() + ops.getModuleEndpoint() + "/" + encodeValue(moduleIri)
+					+ ops.getSkillEndpoint();
+
+			int responseStatusCode = opsRequest(ops, "POST", location, requestBody, "text/plain");
 
 			if (responseStatusCode == 201) {
 				logger.info("Skill " + object.getClass().getAnnotation(Skill.class).skillIri() + " registered to "
-						+ "OPS " + opsDescription.getId());
+						+ "OPS " + ops.getId());
+				ops.addSkill(object);
 			} else {
 				logger.info("Skill: " + object.getClass().getAnnotation(Skill.class).skillIri()
-						+ " couldn't be registered to " + "OPS " + opsDescription.getId());
+						+ " couldn't be registered to " + "OPS " + ops.getId());
 			}
 		}
 	}
 
+	/**
+	 * If skills state changed every OPS is informed
+	 * 
+	 * @param skill          skills object whose state has changed
+	 * @param stateIri       new state
+	 * @param moduleRegistry to get OPS list etc.
+	 */
 	public void stateChanged(Object skill, String stateIri, ModuleRegistry moduleRegistry) {
 
 		String moduleIri = skill.getClass().getAnnotation(Skill.class).moduleIri();
-		List<OpsDescription> opsList = moduleRegistry.skillRegisterOpsList(moduleIri);
 
-		for (OpsDescription opsDescription : opsList) {
-			String location = opsDescription.getBasePath() + opsDescription.getModuleEndpoint() + "/"
-					+ URLEncoder.encode(moduleIri, StandardCharsets.UTF_8) + opsDescription.getSkillEndpoint() + "/"
-					+ URLEncoder.encode(skill.getClass().getAnnotation(Skill.class).skillIri(), StandardCharsets.UTF_8);
+		// new state is sent to every OPS on which skill is registered
+		for (OpsDescription ops : moduleRegistry.getOpsDescriptionList()) {
 
-//			String json = "{ \"newState\":" + " \"" + stateIri + "\" " + "}";
+			Object skillChanged = ops.getSkills().stream().filter(object -> object.equals(skill)).findFirst().get();
+
+			String location = ops.getBasePath() + ops.getModuleEndpoint() + "/" + encodeValue(moduleIri)
+					+ ops.getSkillEndpoint() + "/"
+					+ encodeValue(skillChanged.getClass().getAnnotation(Skill.class).skillIri());
+
 			ChangedState newState = new ChangedState();
 			newState.newState = stateIri;
 
 			String json = gson.toJson(newState);
 			logger.info(json);
 
-			opsRequest(opsDescription, "PATCH", location, json, "application/json");
+			opsRequest(ops, "PATCH", location, json, "application/json");
 		}
 	}
 
 	@Override
 	public void delete(Object object, ModuleRegistry moduleRegistry) {
 		// TODO Auto-generated method stub
-		String skill = object.getClass().getAnnotation(Skill.class).skillIri();
-		logger.info("Unregistering Skill " + skill + "...");
+		String skillIri = object.getClass().getAnnotation(Skill.class).skillIri();
+		logger.info("Unregistering Skill " + skillIri + "...");
 
-		List<OpsDescription> opsList = moduleRegistry
-				.skillRegisterOpsList(object.getClass().getAnnotation(Skill.class).moduleIri());
+		// skill is deleted from every OPS on which skill is registered
+		for (OpsDescription ops : moduleRegistry.getOpsDescriptionList()) {
 
-		for (OpsDescription myOpsDescription : opsList) {
+			try {
+				Object deleteSkill = ops.getSkills().stream().filter(skill -> skill.equals(object)).findFirst().get();
 
-			String basePath = myOpsDescription.getBasePath();
-			String moduleEndpoint = myOpsDescription.getModuleEndpoint();
-			String moduleIriEncoded = encodeValue(object.getClass().getAnnotation(Skill.class).moduleIri());
-			String skillEndpoint = myOpsDescription.getSkillEndpoint();
-			String skillIri = encodeValue(skill);
-			String location = basePath + moduleEndpoint + "/" + moduleIriEncoded + skillEndpoint + "/" + skillIri;
+				String location = ops.getBasePath() + ops.getModuleEndpoint() + "/"
+						+ encodeValue(deleteSkill.getClass().getAnnotation(Skill.class).moduleIri())
+						+ ops.getSkillEndpoint() + "/" + encodeValue(skillIri);
 
-			int responseStatusCode = opsRequest(myOpsDescription, "DELETE", location, "", "text/plain");
-
-			if (responseStatusCode == 200) {
-				logger.info("Skill " + skill + " removed from " + myOpsDescription.getId());
-			} else {
-				logger.info("Skill: " + object.getClass().getAnnotation(Skill.class).skillIri()
-						+ " couldn't be deleted from " + "OPS " + myOpsDescription.getId());
+				int responseStatusCode = opsRequest(ops, "DELETE", location, "", "text/plain");
+				if (responseStatusCode == 200) {
+					logger.info("Skill " + skillIri + " removed from " + ops.getId());
+					ops.deleteSkill(deleteSkill);
+				} else {
+					logger.info("Skill: " + object.getClass().getAnnotation(Skill.class).skillIri()
+							+ " couldn't be deleted from " + "OPS " + ops.getId());
+				}
+			} catch (NullPointerException e) {
+				e.printStackTrace();
 			}
 		}
 	}

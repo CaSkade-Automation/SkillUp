@@ -17,12 +17,30 @@ import java.nio.charset.StandardCharsets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Class with some relevant methods as well for module registration as for skill
+ * registration
+ * 
+ */
 public abstract class RegistrationMethods {
 
 	private Logger logger = LoggerFactory.getLogger(RegistrationMethods.class);
 
+	/**
+	 * Method to register module/skill
+	 * 
+	 * @param requestBody    rdf description of module/skill
+	 * @param object         skills/modules object which should be registered
+	 * @param moduleRegistry to get list of OPS etc.
+	 */
 	public abstract void register(String requestBody, Object object, ModuleRegistry moduleRegistry);
 
+	/**
+	 * Method to delete module/skill from OPS
+	 * 
+	 * @param object         skills/modules object which should be deleted
+	 * @param moduleRegistry to get list of OPS etc.
+	 */
 	public abstract void delete(Object object, ModuleRegistry moduleRegistry);
 
 	/**
@@ -30,7 +48,8 @@ public abstract class RegistrationMethods {
 	 * 
 	 * @param host corresponds to IP address of OPS
 	 * @param port port of OPS
-	 * @param path corresponds to the moduleEndpoint of OPS
+	 * @param path corresponds to the endpoint of OPS whether its module or skill
+	 *             endpoint
 	 * @return if its successful: URL of OPS <br>
 	 *         else: null
 	 */
@@ -63,12 +82,14 @@ public abstract class RegistrationMethods {
 	}
 
 	/**
-	 * Method to send SPARQL query to OPS
+	 * Method to send rdf description to OPS
 	 * 
 	 * @param opsDescription OPS description
 	 * @param requestType    POST, DELETE etc.
 	 * @param location       path of OPS
-	 * @param requestBody    String which is send in the body of the request
+	 * @param requestBody    rdf description which is send in the body of the
+	 *                       request
+	 * @param contentType    if its text/plain or application/json etc.
 	 * @return status code of the received response
 	 */
 	public int opsRequest(OpsDescription opsDescription, String requestType, String location, String requestBody,
@@ -98,10 +119,9 @@ public abstract class RegistrationMethods {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		int responseStatusCode = response.statusCode();
-		logger.info("Response status code: " + responseStatusCode);
+		logger.info("Response status code: " + response.statusCode());
 		logger.info("Response body: " + response.body());
 
-		return responseStatusCode;
+		return response.statusCode();
 	}
 }

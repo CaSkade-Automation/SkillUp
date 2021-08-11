@@ -16,14 +16,25 @@ import org.eclipse.milo.opcua.stack.core.types.structured.Argument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import annotations.SkillOutput;
+import skillup.annotations.Helper;
 
-public class GetResultMethod extends AbstractMethodInvocationHandler {
+/**
+ * Class is used to reflect the skill method getOutputs to be added to the
+ * server
+ */
+public class GetOutputsMethod extends AbstractMethodInvocationHandler {
 
-	private final Logger logger = LoggerFactory.getLogger(GetResultMethod.class);
+	private final Logger logger = LoggerFactory.getLogger(GetOutputsMethod.class);
 	private Object skill;
+	private Helper helper = new Helper();
 
-	public GetResultMethod(UaMethodNode node, Object skill) {
+	/**
+	 * Constructor of class {@link GetOutputsMethod}
+	 * 
+	 * @param node  method node
+	 * @param skill instance of skill
+	 */
+	public GetOutputsMethod(UaMethodNode node, Object skill) {
 		super(node);
 		// TODO Auto-generated constructor stub
 		this.skill = skill;
@@ -43,48 +54,50 @@ public class GetResultMethod extends AbstractMethodInvocationHandler {
 		return outputArguments;
 	}
 
+	/**
+	 * Method to create an output argument for every skill output
+	 * 
+	 * @return list of output arguments
+	 */
 	public List<Argument> createOutputArgument() {
 		List<Argument> outputArgumentsList = new ArrayList<Argument>();
-		Field[] fields = skill.getClass().getDeclaredFields();
-		for (Field field : fields) {
-			if (field.isAnnotationPresent(SkillOutput.class)) {
 
-				field.setAccessible(true);
-				Class<?> type = field.getType();
-				NodeId typeId = new NodeId(0, BuiltinDataType.getBuiltinTypeId(type));
-				Argument outputArgument = new Argument(field.getName(), typeId, ValueRanks.Scalar, null,
-						new LocalizedText(field.getName()));
+		List<Field> outputFields = helper.getVariables(skill, false);
 
-				outputArgumentsList.add(outputArgument);
-			}
+		for (Field field : outputFields) {
+			field.setAccessible(true);
+			Class<?> type = field.getType();
+			NodeId typeId = new NodeId(0, BuiltinDataType.getBuiltinTypeId(type));
+			Argument outputArgument = new Argument(field.getName(), typeId, ValueRanks.Scalar, null,
+					new LocalizedText(field.getName()));
+
+			outputArgumentsList.add(outputArgument);
 		}
 		return outputArgumentsList;
 	}
 
+	/**
+	 * When this method is invoked, values of skill outputs are shown
+	 */
 	@Override
 	protected Variant[] invoke(InvocationContext invocationContext, Variant[] inputValues) throws UaException {
-		// TODO Auto-generated method stub
-		Field[] fields = skill.getClass().getDeclaredFields();
+
+		List<Field> outputFields = helper.getVariables(skill, false);
 		List<Variant> variants = new ArrayList<Variant>();
 
-		for (Field field : fields) {
-			if (field.isAnnotationPresent(SkillOutput.class)) {
+		for (Field field : outputFields) {
 
-				field.setAccessible(true);
-				try {
-					logger.info("Output: " + field.get(skill));
-					Variant variant = new Variant(field.get(skill));
-					variants.add(variant);
-				} catch (IllegalArgumentException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+			field.setAccessible(true);
+			try {
+				logger.info("Output: " + field.get(skill));
+				Variant variant = new Variant(field.get(skill));
+				variants.add(variant);
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
+		logger.info("Get Outputs" + variants.toString());
 		return variants.toArray(new Variant[variants.size()]);
 	}
-
 }

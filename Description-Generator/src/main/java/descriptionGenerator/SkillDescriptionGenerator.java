@@ -1,32 +1,40 @@
 package descriptionGenerator;
 
-import java.io.IOException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import descriptionGenerator.DescriptionGenerator;
-import statemachine.Isa88StateMachine;
 
-public class SkillDescriptionGenerator extends DescriptionGenerator{
+/**
+ * Class extends from {@link DescriptionGenerator} and has method that is equal
+ * for every skill independent of its type (e.g. REST)
+ *
+ */
+public class SkillDescriptionGenerator extends DescriptionGenerator {
 
-	private Logger logger = LoggerFactory.getLogger(SkillDescriptionGenerator.class);
+	/**
+	 * Method to generate the stateMachine description or rather get the turtle
+	 * snippet of stateMachine from resources folder
+	 * 
+	 * @return turtle snippet of stateMachine as String
+	 */
+	public String generateStateMachineDescription() {
 
-	public String generateStateMachineDescription(Isa88StateMachine stateMachine) {
+		String stateMachineDescription = getFileFromResources(null, "stateMachine.ttl");
+		return stateMachineDescription;
+	}
 
-		String stateMachineDescription = null;
+	public Object convertOption(String option, Class<?> type) {
 
-		try {
-			stateMachineDescription = getFileFromResources(SkillDescriptionGenerator.class.getClassLoader(), "stateMachine.ttl");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		if (stateMachineDescription != null) {
-			return stateMachineDescription;
+		if (type == boolean.class) {
+			return Boolean.parseBoolean(option);
+		} else if (type == int.class) {
+			return Integer.parseInt(option);
+		} else if (type == float.class) {
+			return Float.parseFloat(option);
+		} else if (type == double.class) {
+			return Double.parseDouble(option);
+		} else if (type == long.class) {
+			return Long.parseLong(option);
 		} else {
-			logger.error("Couldn't get stateMachineDescription from resources folder.");
-			return null;
+			return option;
 		}
 	}
 }

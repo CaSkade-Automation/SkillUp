@@ -11,9 +11,9 @@ import org.slf4j.LoggerFactory;
 
 import restResource.RestResource;
 import skillGeneratorInterface.SkillGeneratorInterface;
-import statemachine.StateMachine;
+import statemachine.Isa88StateMachine;
 
-@Component(immediate = true, property = "name=Rest")
+@Component(immediate = true, property = "type:String=RestSkillType")
 public class RestSkillGenerator implements SkillGeneratorInterface {
 
 	private static Logger logger = LoggerFactory.getLogger(RestSkillGenerator.class);
@@ -34,7 +34,7 @@ public class RestSkillGenerator implements SkillGeneratorInterface {
 	}
 
 	@Override
-	public void generateSkill(Object skill, StateMachine stateMachine) {
+	public void generateSkill(Object skill, Isa88StateMachine stateMachine) {
 		if (resource != null) {
 			logger.info(getClass().getSimpleName() + ": Trying to generate skill...");
 			resource.generateSkill(skill, stateMachine);
@@ -44,7 +44,7 @@ public class RestSkillGenerator implements SkillGeneratorInterface {
 	}
 
 	@Override
-	public String generateDescription(Object skill, StateMachine stateMachine, Enumeration<String> userFiles) {
+	public String generateDescription(Object skill, Isa88StateMachine stateMachine, Enumeration<String> userFiles) {
 		logger.info(getClass().getSimpleName() + ": Trying to generate REST skill description...");
 		String description = restSkillDescriptionGenerator.generateRestDescription(resource, skill, stateMachine,
 				userFiles);

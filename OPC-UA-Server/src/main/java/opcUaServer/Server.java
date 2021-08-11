@@ -5,6 +5,9 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.Enumeration;
@@ -12,6 +15,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.eclipse.milo.opcua.sdk.server.OpcUaServer;
@@ -30,6 +36,7 @@ import org.eclipse.milo.opcua.stack.core.types.builtin.LocalizedText;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.MessageSecurityMode;
 import org.eclipse.milo.opcua.stack.core.types.structured.BuildInfo;
 import org.eclipse.milo.opcua.stack.core.util.CertificateUtil;
+import org.eclipse.milo.opcua.stack.core.util.NonceUtil;
 import org.eclipse.milo.opcua.stack.server.EndpointConfiguration;
 import org.eclipse.milo.opcua.stack.server.security.DefaultServerCertificateValidator;
 import org.osgi.service.component.annotations.Activate;
@@ -44,6 +51,8 @@ import static org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig.USE
 import static org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig.USER_TOKEN_POLICY_X509;
 
 /**
+ * OPC-UA-Server
+ * 
  * @Component Indicates that annotated class is intended to be an OSGi
  *            component. <br>
  *            immediate=true, component configuration activates immediately <br>
@@ -61,6 +70,13 @@ public class Server {
 	static {
 		// Required for SecurityPolicy.Aes256_Sha256_RsaPss
 		Security.addProvider(new BouncyCastleProvider());
+
+		try {
+			NonceUtil.blockUntilSecureRandomSeeded(10, TimeUnit.SECONDS);
+		} catch (ExecutionException | InterruptedException | TimeoutException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
 	}
 
 	/**
@@ -90,26 +106,29 @@ public class Server {
 	/**
 	 * Constructor uses/creates security file, loads keystoreloader, sets username
 	 * and password and builds server while setting endpoints etc. and starts
-	 * namespace
+	 * namespace. For more details take a look at eclipse milo on github.
 	 * 
 	 * @throws Exception
 	 */
 	public Server() throws Exception {
 
-		File securityTempDir = new File(System.getProperty("security-server"), "security");
-		if (!securityTempDir.exists() && !securityTempDir.mkdirs()) {
+		Path securityTempDir = Paths.get(System.getProperty("java.io.tmpdir"), "server", "security");
+		Files.createDirectories(securityTempDir);
+		if (!Files.exists(securityTempDir)) {
 			throw new Exception("unable to create security temp dir: " + securityTempDir);
 		}
-		LoggerFactory.getLogger(getClass()).info("security temp dir: {}", securityTempDir.getAbsolutePath());
+
+		File pkiDir = securityTempDir.resolve("pki").toFile();
+
+		LoggerFactory.getLogger(getClass()).info("security dir: {}", securityTempDir.toAbsolutePath());
+		LoggerFactory.getLogger(getClass()).info("security pki dir: {}", pkiDir.getAbsolutePath());
 
 		KeyStoreLoader loader = new KeyStoreLoader().load(securityTempDir);
 
 		DefaultCertificateManager certificateManager = new DefaultCertificateManager(loader.getServerKeyPair(),
 				loader.getServerCertificateChain());
 
-		File pkiDir = securityTempDir.toPath().resolve("pki").toFile();
 		DefaultTrustListManager trustListManager = new DefaultTrustListManager(pkiDir);
-		LoggerFactory.getLogger(getClass()).info("pki dir: {}", pkiDir.getAbsolutePath());
 
 		DefaultServerCertificateValidator certificateValidator = new DefaultServerCertificateValidator(
 				trustListManager);
@@ -153,10 +172,11 @@ public class Server {
 	}
 
 	/**
-	 * Method creates TCP endpoints with and without security
+	 * Method creates TCP endpoints (without localhost because OPS have no access to
+	 * OPC-UA Server via localhost) with and without security
 	 * 
 	 * @param certificate
-	 * @return
+	 * @return endpoint configurations
 	 */
 	private Set<EndpointConfiguration> createEndpointConfigurations(X509Certificate certificate) {
 		Set<EndpointConfiguration> endpointConfigurations = new LinkedHashSet<>();
@@ -165,7 +185,7 @@ public class Server {
 		bindAddresses.add("0.0.0.0");
 
 		Set<String> hostnames = new LinkedHashSet<>();
-		// hostnames.add(HostnameUtil.getHostname());
+// 		hostnames.add(HostnameUtil.getHostname());
 //		hostnames.addAll(HostnameUtil.getHostnames("0.0.0.0"));
 
 		try {
@@ -188,6 +208,7 @@ public class Server {
 			throw new RuntimeException(e);
 		}
 
+		// add every address to endpoint configuration
 		for (String bindAddress : bindAddresses) {
 			for (String hostname : hostnames) {
 				EndpointConfiguration.Builder builder = EndpointConfiguration.newBuilder().setBindAddress(bindAddress)
@@ -197,12 +218,17 @@ public class Server {
 				EndpointConfiguration.Builder noSecurityBuilder = builder.copy().setSecurityPolicy(SecurityPolicy.None)
 						.setSecurityMode(MessageSecurityMode.None);
 
+				// every address added as endpoint with and without security
 				endpointConfigurations.add(buildTcpEndpoint(noSecurityBuilder));
-
 				// TCP Basic256Sha256 / SignAndEncrypt
 				endpointConfigurations
 						.add(buildTcpEndpoint(builder.copy().setSecurityPolicy(SecurityPolicy.Basic256Sha256)
 								.setSecurityMode(MessageSecurityMode.SignAndEncrypt)));
+
+				/*
+				 * discovery path taken out, because by creating description of server every
+				 * endpoint is added and this endpoint is not usable for OPS to execute methods.
+				 */
 
 				/*
 				 * It's good practice to provide a discovery-specific endpoint with no security.
@@ -225,14 +251,30 @@ public class Server {
 		return endpointConfigurations;
 	}
 
+	/**
+	 * Method to have access to user name for endpoint with security
+	 * 
+	 * @return userName
+	 */
 	public String getUserName() {
 		return this.userName;
 	}
 
+	/**
+	 * Method to have access to user password for endpoint with security
+	 * 
+	 * @return userPassword
+	 */
 	public String getUserPassword() {
 		return this.userPassword;
 	}
 
+	/**
+	 * Method to build tcp endpoint
+	 * 
+	 * @param base endpoint configuration builder
+	 * @return endpoint configuration
+	 */
 	private static EndpointConfiguration buildTcpEndpoint(EndpointConfiguration.Builder base) {
 		return base.copy().setTransportProfile(TransportProfile.TCP_UASC_UABINARY).setBindPort(TCP_BIND_PORT).build();
 	}
@@ -257,6 +299,6 @@ public class Server {
 	@Deactivate
 	public void deactivate() {
 		logger.info("OPC-UA-Server wird deaktiviert");
-		// hier: server.shutdown();
+		server.shutdown();
 	}
 }

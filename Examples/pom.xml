@@ -14,6 +14,8 @@
 		<module>OPC-UA-Skill</module>
 		<module>OPC-UA-Skill2</module>
 		<module>REST-Simple-Skill</module>
+		<module>REST-Simple-Concat</module>
+		<module>REST-Simple-Multiplier</module>
 		<module>LED-Skill</module>
 		<module>RandomGenerator</module>
 	</modules>

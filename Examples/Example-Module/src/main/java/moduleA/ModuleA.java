@@ -1,8 +1,11 @@
 package moduleA;
 
-import annotations.Module;
+import skillup.annotations.Module;
 
-@Module(name = "ModuleA", description = "MyModule", moduleIri = "https://hsu-hh.de/modules#ModuleA")
+/**
+ * An module example which has to be provided with annotation @Module
+ */
+@Module(description = "MyModule", moduleIri = "https://hsu-hh.de/modules#ModuleA")
 public class ModuleA {
 
 }

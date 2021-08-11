@@ -1,12 +1,13 @@
 package registration;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import annotations.Module;
+import skillup.annotations.Module;
 
+/**
+ * Class to register/delete modules on/from OPS
+ */
 public class ModuleRegistration extends RegistrationMethods {
 
 	private Logger logger = LoggerFactory.getLogger(ModuleRegistration.class);
@@ -15,20 +16,20 @@ public class ModuleRegistration extends RegistrationMethods {
 	public void register(String requestBody, Object object, ModuleRegistry moduleRegistry) {
 		// TODO Auto-generated method stub
 
-		for (OpsDescription opsDescription : moduleRegistry.getOpsDescriptionList()) {
+		// module is registered to every available OPS
+		for (OpsDescription ops : moduleRegistry.getOpsDescriptionList()) {
 			logger.info("Registering Module " + object.getClass().getAnnotation(Module.class).moduleIri()
-					+ " with description in rdf syntax to " + opsDescription.getId());
+					+ " with description in rdf syntax to " + ops.getId());
 
-			String basePath = opsDescription.getBasePath(); 
-			String moduleEndpoint = opsDescription.getModuleEndpoint();
+			String location = ops.getBasePath() + ops.getModuleEndpoint();
 
-			String location = basePath + moduleEndpoint; 
-			
-			int responseStatusCode = opsRequest(opsDescription, "POST", location, requestBody, "text/plain");
+			int responseStatusCode = opsRequest(ops, "POST", location, requestBody, "text/plain");
 
+			// if module successfully registered to OPS, it is added to module list of this
+			// OPS
 			if (responseStatusCode == 201) {
 				logger.info("Module successfully registered...");
-				moduleRegistry.addModule(opsDescription, object);
+				ops.addModule(object);
 			} else {
 				logger.error("Module couldn't be registered...");
 			}
@@ -40,28 +41,28 @@ public class ModuleRegistration extends RegistrationMethods {
 		// TODO Auto-generated method stub
 		logger.info("Unregistering Module " + object.getClass().getAnnotation(Module.class).moduleIri());
 
-		List<OpsDescription> delete = new ArrayList<OpsDescription>();
-
+		// module is deleted from every OPS, on which module is registered
 		for (OpsDescription myOps : moduleRegistry.getOpsDescriptionList()) {
 
-			logger.info("Delete Module from " + myOps.getId());
-			String basePath = myOps.getBasePath(); 
-			String moduleEndpoint = myOps.getModuleEndpoint();
-			String moduleIriEncoded = encodeValue(object.getClass().getAnnotation(Module.class).moduleIri());
-			String location = basePath + moduleEndpoint + "/" + moduleIriEncoded;
+			try {
+				Object deleteModule = myOps.getModules().stream()
+						.filter(moduleToDelete -> moduleToDelete.equals(object)).findFirst().get();
 
-			int responseStatusCode = opsRequest(myOps, "DELETE", location, "", "text/plain");
+				logger.info("Delete Module from " + myOps.getId());
 
-			if (responseStatusCode == 200) {
-				delete.add(myOps);
-				moduleRegistry.deleteModule(myOps, object);
-			}
-			else {
-				logger.info("Module couldn't be deleted from OPS...");
+				String location = myOps.getBasePath() + myOps.getModuleEndpoint() + "/"
+						+ encodeValue(deleteModule.getClass().getAnnotation(Module.class).moduleIri());
+
+				int responseStatusCode = opsRequest(myOps, "DELETE", location, "", "text/plain");
+
+				if (responseStatusCode == 200) {
+					myOps.deleteModule(deleteModule);
+				} else {
+					logger.error("Module couldn't be deleted from OPS...");
+				}
+			} catch (Exception e) {
+				logger.error("No such module found...");
 			}
 		}
-		logger.info("Remove every OPS which received DELETE from Module from OPS-List...");
-		moduleRegistry.getOpsDescriptionList().removeAll(delete);
-		moduleRegistry.opsListMessage();
 	}
 }

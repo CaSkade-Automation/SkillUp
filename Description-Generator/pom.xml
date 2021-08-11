@@ -16,11 +16,6 @@
 			<artifactId>slf4j-api</artifactId>
 			<version>1.7.26</version>
 		</dependency>
-		<dependency>
-			<groupId>de.hsu-hh.ifa.skillUp</groupId>
-			<artifactId>Action-Generator</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
