@@ -129,8 +129,14 @@ public class RestResource {
 			field.setAccessible(true);
 			SkillOutput annotation = field.getAnnotation(SkillOutput.class);
 			SkillVariable output;
+			String name;
 			try {
-				output = new SkillVariable(annotation.name(), annotation.description(), annotation.isRequired(),
+				if (annotation.name().isEmpty() || annotation.name() == null) {
+					name = field.getName();
+				} else {
+					name = annotation.name();
+				}
+				output = new SkillVariable(name, annotation.description(), annotation.isRequired(),
 						field.getType().getSimpleName(), field.get(skill.getSkillObject()));
 				skillVariables.add(output);
 			} catch (IllegalArgumentException | IllegalAccessException e) {

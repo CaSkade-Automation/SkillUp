@@ -44,7 +44,6 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 					continue;
 				}
 			} catch (SocketException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 			List<InterfaceAddress> i = e.getInterfaceAddresses();
@@ -75,7 +74,6 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 		try {
 			encodedIri = URLEncoder.encode(skillAnnotation.skillIri(), StandardCharsets.UTF_8.toString());
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -197,7 +195,13 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 			skillOutputCounter++;
 			restSkillDescription.append("<${SkillIri}_Output" + skillOutputCounter + "> a Cap:SkillOutput ;\n");
 			restSkillDescription.append("	a WADL:QueryParameter ;\n");
-			restSkillDescription.append("	Cap:hasVariableName \"" + field.getName() + "\" ;\n");
+			if (field.getAnnotation(SkillOutput.class).name().isEmpty()
+					|| field.getAnnotation(SkillOutput.class).name() == null) {
+				restSkillDescription.append("	Cap:hasVariableName \"" + field.getName() + "\" ;\n");
+			} else {
+				restSkillDescription
+						.append("	Cap:hasVariableName \"" + field.getAnnotation(SkillOutput.class).name() + "\" ;\n");
+			}
 			restSkillDescription.append("	Cap:hasVariableType xsd:" + field.getType().getSimpleName() + " ;\n");
 			restSkillDescription.append("	Cap:isRequired "
 					+ Boolean.toString(field.getAnnotation(SkillOutput.class).isRequired()) + " ;\n");
