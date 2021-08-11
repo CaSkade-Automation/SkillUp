@@ -39,7 +39,7 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
 	public static final String URI = "urn:my:server:namespace";
 	private final SubscriptionModel subscriptionModel;
 	private UaFolderNode parentFolder = null;
-	private List<UaVariableNode> skillOutputs = new ArrayList<UaVariableNode>();
+	private List<UaVariableNode> skillOutputs;
 	private GenericMethod newSkill;
 	private Helper helper = new Helper();
 
@@ -122,16 +122,21 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
 	 */
 	public void addVariableNodes(Object skill, UaFolderNode folder) {
 		// for every new skill outputs are cleared
-		skillOutputs.clear();
+		skillOutputs = new ArrayList<UaVariableNode>();
 
 		List<Field> paramFields = helper.getVariables(skill, true);
 		List<Field> outputFields = helper.getVariables(skill, false);
 
+		FolderDescription paramFolderDescription = new FolderDescription("SkillParameters", "SkillParameters",
+				"SkillParameters", folder);
+		UaFolderNode paramFolder = addFolder(paramFolderDescription);
+
+		FolderDescription outputFolderDescription = new FolderDescription("SkillOutputs", "SkillOutputs",
+				"SkillOutputs", folder);
+		UaFolderNode outputFolder = addFolder(outputFolderDescription);
+
 		for (Field field : paramFields) {
 
-			FolderDescription paramFolderDescription = new FolderDescription("SkillParameters", "SkillParameters",
-					"SkillParameters", folder);
-			UaFolderNode paramFolder = addFolder(paramFolderDescription);
 			OpcUaVariableDescription variableDescription = setVariableDescription(field, skill, true);
 			UaVariableNode node = createVariableNode(variableDescription, folder, paramFolder, true);
 			// node is monitored to change value of skill parameter when value of variable
@@ -141,9 +146,6 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
 
 		for (Field field : outputFields) {
 
-			FolderDescription outputFolderDescription = new FolderDescription("SkillOutputs", "SkillOutputs",
-					"SkillOutputs", folder);
-			UaFolderNode outputFolder = addFolder(outputFolderDescription);
 			OpcUaVariableDescription variableDescription = setVariableDescription(field, skill, false);
 			UaVariableNode node = createVariableNode(variableDescription, folder, outputFolder, false);
 			// add this node to list with skills outputs
@@ -173,7 +175,6 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
 		try {
 			variant = new Variant(field.get(skill));
 		} catch (IllegalArgumentException | IllegalAccessException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

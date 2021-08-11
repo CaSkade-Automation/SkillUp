@@ -398,11 +398,13 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 	public UaFolderNode getFolder(UaFolderNode skillFolder, String folderName) {
 
 		List<Node> skillNodes = skillFolder.getOrganizesNodes();
+
 		Node searchedNode = skillNodes.stream().filter(node -> node.getBrowseName().getName().equals(folderName))
 				.findFirst().get();
 
 		UaFolderNode searchedFolder = (UaFolderNode) searchedNode;
 		return searchedFolder;
+
 	}
 
 	public String generateOpcUaVariableDescription(UaVariableNode variableNode, String variableDescription) {
