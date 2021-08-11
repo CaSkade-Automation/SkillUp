@@ -1,15 +1,27 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>io.github.aljoshakoecher.skillup</groupId>
-		<artifactId>skillup.parent</artifactId>
+		<artifactId>skillup.examples</artifactId>
 		<version>1.0.0</version>
 	</parent>
-	<artifactId>skillup.annotations</artifactId>
+	<artifactId>skillup.examples.rest-simple-multiplier</artifactId>
 	<packaging>bundle</packaging>
-	<name>SkillUp-Annotations</name>
+	<name>REST-Simple-Multiplier</name>
+	<dependencies>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>1.7.28</version>
+		</dependency>
+		<dependency>
+			<groupId>io.github.aljoshakoecher.skillup</groupId>
+			<artifactId>skillup.annotations</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
 	<build>
 		<plugins>
 			<plugin>

@@ -7,9 +7,26 @@
 		<artifactId>skillup.parent</artifactId>
 		<version>1.0.0</version>
 	</parent>
-	<artifactId>skillup.annotations</artifactId>
+	<artifactId>skillup.module-generator</artifactId>
 	<packaging>bundle</packaging>
-	<name>SkillUp-Annotations</name>
+	<name>Module Generator</name>
+	<dependencies>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.service.component.annotations</artifactId>
+			<version>1.4.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.github.aljoshakoecher.skillup</groupId>
+			<artifactId>skillup.description-generator</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.github.aljoshakoecher.skillup</groupId>
+			<artifactId>skillup.annotations</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
 	<build>
 		<plugins>
 			<plugin>

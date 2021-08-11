@@ -1,0 +1,22 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>io.github.aljoshakoecher.skillup</groupId>
+		<artifactId>skillup.parent</artifactId>
+		<version>1.0.0</version>
+	</parent>
+	<artifactId>skillup.examples</artifactId>
+	<packaging>pom</packaging>
+	<modules>
+		<module>skillup.examples.module</module>
+		<module>skillup.examples.opc-ua-skill</module>
+		<module>skillup.examples.opc-ua-skill2</module>
+		<module>skillup.examples.rest-simple-skill</module>
+		<module>skillup.examples.rest-simple-concat</module>
+		<module>skillup.examples.rest-simple-multiplier</module>
+		<module>skillup.examples.led-skill</module>
+		<module>skillup.examples.random-generator</module>
+	</modules>
+</project>
