@@ -2,22 +2,22 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>de.hsu-hh.ifa.skillUp</groupId>
-	<artifactId>Parent-Project</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<groupId>io.github.aljoshakoecher.skillup</groupId>
+	<artifactId>skillup.parent</artifactId>
+	<version>1.0.0</version>
 	<packaging>pom</packaging>
 	<modules>
-		<module>skillup.annotations</module>
-		<module>Action-Generator</module>
-		<module>Description-Generator</module>
-		<module>Module-Generator</module>
-		<module>OPC-UA-Server</module>
-		<module>REST-Resource</module>
-		<module>Skill-Generator-Interface</module>
-		<module>OPC-UA-Skill-Generator</module>
-		<module>REST-Skill-Generator</module>
-		<module>Registration</module>
-		<module>Smart-Tracker</module>
-		<module>Examples</module>
+		<module>annotations</module>
+		<module>action-generator</module>
+		<module>description-generator</module>
+		<module>module-generator</module>
+		<module>opc-ua-server</module>
+		<module>rest-resource</module>
+		<module>skill-generator-interface</module>
+		<module>opc-ua-skill-generator</module>
+		<module>rest-skill-generator</module>
+		<module>registration</module>
+		<module>smart-tracker</module>
+		<module>examples</module>
 	</modules>
 </project>
