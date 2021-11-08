@@ -1,11 +1,13 @@
-<p align="center">
-    <img width="500px" src="https://github.com/aljoshakoecher/skill-up/blob/documentation/images/images/SkillUp-Icon.png?raw=true">
-</p>
+<div align="center">
+    <img width="400px" src="https://github.com/aljoshakoecher/skill-up/blob/documentation/images/images/SkillUp-Icon.png?raw=true">
+</div>
 <h1 align="center">Skill Development Framework</h1>
-<br>
-*Skill-based engineering* is a term used in automation research for a couple of approaches trying to describe machines and their functionalities as skills. *Semantic Web Technologies* like ontologies using the Web Ontology Language (OWL) are seen as a promising solution to create such descriptions in a machine-readable and vendor-neutral way. But using OWL models places high demands on machine engineers and software developers involved in developing a machine. In addition to programming the machine behavior - which has to be done anyway - they have to provide an interface to invoke this machine behavior and they have to create an ontological description for this interface. This leads to many challenges: There are very few ontology experts in automation industry and these tasks are both tedious and error-prone when done manually.<br>
-**This is where Skill-Up comes into play.** <br>
+
+
+*Skill-based engineering* is a term used in automation research for a couple of approaches trying to describe machines and their functionalities as skills. *Semantic Web Technologies* like ontologies using the Web Ontology Language (OWL) are seen as a promising solution to create such descriptions in a machine-readable and vendor-neutral way. But using OWL models places high demands on machine engineers and software developers involved in developing a machine. In addition to programming the machine behavior - which has to be done anyway - they have to provide an interface to invoke this machine behavior and they have to create an ontological description for this interface. This leads to many challenges: There are very few ontology experts in automation industry and these tasks are both tedious and error-prone when done manually. **This is where Skill-Up comes into play.**
+
 Skill-Up is a Java-framework which can be used to develop machine skills without any additional effort. You can implement your machine behavior as plain Java classes only adding a few annotations, everything else will be generated automatically. In a bit more detail, these things that are generated are:
+
 * A [state machine according to ISA 88]([https://link](https://github.com/aljoshakoecher/ISA88-StateMachine)) containing your behavior. The state machine makes sure the behavior is only executed in the right state.
 * An invocation interface (either via RESTful webservices or OPC UA) which can be used to interact with the state machine (trigger commands, get current state)
 * An ontological description of the state machine and the invocation interface. This description can be consumed by other systems that want to interact with a machine.
@@ -83,7 +85,7 @@ We are excited about everyone using SkillUp in their own applications. If you us
 
 ```
 @inproceedings{KHC+_AutomatingtheDevelopmentof_2020,
- author = {Köcher, Aljosha and Hildebrandt, Constantin and Caesar, Birte and Bakakeu, Jupiter and Peschke, Jorn and Scholz, Andre and Fay, Alexander},
+ author = {KÃ¶cher, Aljosha and Hildebrandt, Constantin and Caesar, Birte and Bakakeu, Jupiter and Peschke, Joern and Scholz, Andre and Fay, Alexander},
  title = {{Automating the Development of Machine Skills and their Semantic Description}},
  pages = {1013--1018},
  publisher = {IEEE},
