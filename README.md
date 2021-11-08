@@ -16,12 +16,18 @@ Skill-Up is based on this [Machine Capability and Skill Model](https://github.co
 
 :construction: Please note that SkillUp is best used in combination with SkillMEx which is published to Github soon :construction:
 
-## Setup
-Skill-Up is implemented as a collection of OSGi bundles. You can start a *SkillUp Runtime* (i.e. an OSGi container running certain necessary bundles as well as Skill-Up) on a machine's controller and manage (add, start, stop) skills while others are running.
-A preconfigured OSGi container based on *Apache Felix* is provided in the releases. If you want to setup your own OSGi container, you need to have all the bundles of SkillUp along with their dependencies. A dedicated list of required bundles will be provided soon:
+## Develop Modules and Skills
+SkillUp distinguishes between *modules* (i.e., machines that may provide skills) and *skills* (i.e., machine functionality that is provided by a module and can be executed). 
+In order to develop your own modules and skills, all you need to do is create a Maven project and import the following dependency in order to use the necessary annotations:
 
-## Usage
-SkillUp distinguishes between *modules* (i.e., machines that may provide skills) and *skills* (i.e., machine functionality that is provided by a module and can be executed). Both modules and skills can be run inside a SkillUp runtime. Note that you have to have an OSGi bundle of a module running inside your SkillUp runtime before you can add skills.
+```xml
+<dependency>
+	<groupId>io.github.aljoshakoecher.skillup</groupId>
+	<artifactId>skillup.annotations</artifactId>
+	<version>1.0.0</version>
+</dependency>
+```
+After building a module or skill, you can deploy both`inside a SkillUp runtime. Note that you have to have an OSGi bundle of a module running inside your SkillUp runtime before you can add skills.
 After setting up your OSGi container, you can develop your own modules and skills and deploy them inside a SkillUp runtime. Please check the wiki articles on [how to develop your own module](https://github.com/aljoshakoecher/skill-up/wiki/Step-by-step-instructions-for-creating-a-module) as well as [how to develop your own skill](https://github.com/aljoshakoecher/skill-up/wiki/Step-by-step-instructions-for-creating-a-skill)
 Furthermore, there are example projects to help you get started. If you look at these examples, you can see that you just have to add some annotations to your otherwise conventional Java class. There are annotations to create modules and skills that are shown below.
 
@@ -31,7 +37,6 @@ Furthermore, there are example projects to help you get started. If you look at 
 * `capabilityIri`(optional): Currently not used
 * `description` (optional): A human-readable description of this module
 
-	
 
 ### @Skill
 `@Skill` is a class annotation which is mandatory in order to mark your class as a skill. It is needed by Skill-Up to get notified about a newly deployed skill in a SkillUp runtime.
@@ -73,6 +78,11 @@ Together with `@Skill` these annotations are important to create a functioning s
 
 Build your module and skill classes as OSGi bundles and fire up your SkillUp runtime. You can then deploy a module by dropping the according bundle into the *include*-directory of your SkillUp runtime. Skill-Up will pick up the module and register it to SkillMEx.
 After deploying a module, you can deploy skills of that module (i.e., with the same `moduleIri`). SkillUp will pick up every skill and register it to SkillMEx from where skills can be executed.
+
+## Deployment
+Skill-Up is implemented as a collection of OSGi bundles that create a runtime in which modules and skills can be deployed dynamically. A preconfigured *SkillUp-Runtime* (i.e. an OSGi container running certain necessary bundles as well as Skill-Up) is provided with the releases. You can use this preconfigured runtime on a machine's controller and manage (add, start, stop) skills while others are running.
+
+If you want to setup your own OSGi container to be used as a runtime for SkillUp, you need to compile all the bundles of SkillUp. This is best done by executing a `mvn install` from the project root. Furthermore, the dependencies of the SkillUP bundles are needed. A list of required bundles will be provided soon.
 
 ## Examples
 Check out the example module and skills in the examples folder to get started. Feel free to create an issue if necessary. 
