@@ -7,18 +7,18 @@
 		<artifactId>skillup.parent</artifactId>
 		<version>1.0.0</version>
 	</parent>
-	
+
 	<artifactId>skillup.annotations</artifactId>
-	
+
 	<packaging>bundle</packaging>
 	<name>SkillUp Annotations</name>
 	<description>Contains annotations that are needed to develop modules and skills using SkillUp</description>
 	<url>https://github.com/aljoshakoecher/skill-up</url>
-	
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-	
+
 	<developers>
 		<developer>
 			<name>Aljosha Koecher</name>
@@ -33,31 +33,31 @@
 			<organizationUrl>http://www.hsu-hh.de/aut</organizationUrl>
 		</developer>
 	</developers>
-	
+
 	<licenses>
 		<license>
 			<name>MIT License</name>
 			<url>http://www.opensource.org/licenses/mit-license.php</url>
 		</license>
 	</licenses>
-	
+
 	<distributionManagement>
 		<snapshotRepository>
 			<id>ossrh</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+			<url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
 		</snapshotRepository>
 		<repository>
 			<id>ossrh</id>
-			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+			<url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 		</repository>
 	</distributionManagement>
-	
+
 	<scm>
 		<connection>scm:git:git://github.com/aljoshakoecher/skill-up</connection>
 		<developerConnection>scm:git:ssh://github.com/aljoshakoecher/skill-up</developerConnection>
 		<url>https://github.com/aljoshakoecher/skill-up</url>
 	</scm>
-	
+
 	<build>
 		<plugins>
 			<plugin>
@@ -78,7 +78,7 @@
 					</instructions>
 				</configuration>
 			</plugin>
-			
+
 			<plugin>
 				<groupId>org.sonatype.plugins</groupId>
 				<artifactId>nexus-staging-maven-plugin</artifactId>
@@ -86,7 +86,7 @@
 				<extensions>true</extensions>
 				<configuration>
 					<serverId>ossrh</serverId>
-					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+					<nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
 					<autoReleaseAfterClose>true</autoReleaseAfterClose>
 				</configuration>
 			</plugin>
@@ -118,7 +118,7 @@
 			</plugin>
 		</plugins>
 	</build>
-	
+
 	<profiles>
 		<profile>
 			<id>release-sign-artifacts</id>
@@ -148,5 +148,5 @@
 			</build>
 		</profile>
 	</profiles>
-	
+
 </project>
