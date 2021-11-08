@@ -1,0 +1,44 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Koecher"
+  given-names: "Aljosha"
+  orcid: "https://orcid.org/0000-0002-7228-8387"
+- family-names: "Vieira da Silva"
+  given-names: "Luis Miguel"
+- family-names: "Kaltwasser"
+  given-names: "Marco"
+title: "SkillUp - The skill development framework"
+version: 1.0.0
+date-released: 2021-11-08
+url: "https://github.com/aljoshakoecher/skill-up"
+preferred-citation:
+  type: conference-paper
+  authors:
+  - family-names: "Koecher"
+    given-names: "Aljosha"
+    orcid: "https://orcid.org/0000-0002-7228-8387"
+  - family-names: "Hildebrandt"
+    given-names: "Constantin"
+  - family-names: "Caesar"
+    given-names: "Birte"
+  - family-names: "Bakakeu"
+    given-names: "Jupiter"
+  - family-names: "Peschke"
+    given-names: "Joern"
+  - family-names: "Scholz"
+    given-names: "Andre"
+  - family-names: "Fay"
+    given-names: "Alexander"  
+  doi: "10.1109/ETFA46521.2020.9211933"
+  collection-title: "2020 25th IEEE International Conference on Emerging Technologies and Factory Automation (ETFA)"
+  year: 2020
+  isbn: 978-1-7281-8956-7
+  conference:
+    name: 2020 25th IEEE International Conference on Emerging Technologies and Factory Automation (ETFA)
+    location: Vienna, Austria
+    date-start: 2020-09-08
+    date-end: 2020-09-11
+  start: 1013 # First page number
+  end: 1018 # Last page number
+  title: "Automating the Development of Machine Skills and their Semantic Description"
