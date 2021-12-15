@@ -89,7 +89,7 @@ public abstract class RegistrationMethods {
 	 * @param location       path of OPS
 	 * @param requestBody    rdf description which is send in the body of the
 	 *                       request
-	 * @param contentType    if its text/plain or application/json etc.
+	 * @param contentType    Content-Type header (e.g. application/rdf-xml or application/x-turtle)
 	 * @return status code of the received response
 	 */
 	public int opsRequest(OpsDescription opsDescription, String requestType, String location, String requestBody,

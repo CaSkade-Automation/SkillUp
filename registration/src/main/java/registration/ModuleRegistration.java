@@ -14,8 +14,6 @@ public class ModuleRegistration extends RegistrationMethods {
 
 	@Override
 	public void register(String requestBody, Object object, ModuleRegistry moduleRegistry) {
-		// TODO Auto-generated method stub
-
 		// module is registered to every available OPS
 		for (OpsDescription ops : moduleRegistry.getOpsDescriptionList()) {
 			logger.info("Registering Module " + object.getClass().getAnnotation(Module.class).moduleIri()
@@ -23,7 +21,7 @@ public class ModuleRegistration extends RegistrationMethods {
 
 			String location = ops.getBasePath() + ops.getModuleEndpoint();
 
-			int responseStatusCode = opsRequest(ops, "POST", location, requestBody, "text/plain");
+			int responseStatusCode = opsRequest(ops, "POST", location, requestBody, "application/x-turtle; charset=UTF-8");
 
 			// if module successfully registered to OPS, it is added to module list of this
 			// OPS
