@@ -33,7 +33,7 @@ public class SkillRegistration extends RegistrationMethods {
 			String location = ops.getBasePath() + ops.getModuleEndpoint() + "/" + encodeValue(moduleIri)
 					+ ops.getSkillEndpoint();
 
-			int responseStatusCode = opsRequest(ops, "POST", location, requestBody, "text/plain");
+			int responseStatusCode = opsRequest(ops, "POST", location, requestBody, "application/x-turtle; charset=UTF-8");
 
 			if (responseStatusCode == 201) {
 				logger.info("Skill " + object.getClass().getAnnotation(Skill.class).skillIri() + " registered to "
