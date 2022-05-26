@@ -13,8 +13,7 @@ Skill-Up is a Java-framework which can be used to develop machine skills without
 * An ontological description of the state machine and the invocation interface. This description can be consumed by other systems that want to interact with a machine.
 
 Skill-Up is based on this [Machine Capability and Skill Model](https://github.com/aljoshakoecher/machine-capability-model). For more details about the model, please visit this repository.
-
-:construction: Please note that SkillUp is best used in combination with SkillMEx which is published to Github soon :construction:
+SkillUp is best used in combination with SkillMEx which is also available on Github: https://github.com/aljoshakoecher/SkillMEx
 
 ## Develop Modules and Skills
 SkillUp distinguishes between *modules* (i.e., machines that may provide skills) and *skills* (i.e., machine functionality that is provided by a module and can be executed). 
