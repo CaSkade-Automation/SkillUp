@@ -7,9 +7,12 @@
 		<artifactId>skillup.parent</artifactId>
 		<version>1.0.0</version>
 	</parent>
+	
 	<artifactId>skillup.action-generator</artifactId>
+	<version>1.0.0</version>
 	<packaging>bundle</packaging>
 	<name>Action Generator</name>
+	
 	<dependencies>
 		<dependency>
 			<groupId>org.osgi</groupId>
@@ -19,7 +22,7 @@
 		<dependency>
 			<groupId>io.github.aljoshakoecher.skillup</groupId>
 			<artifactId>skillup.annotations</artifactId>
-			<version>${project.version}</version>
+			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.aljoshakoecher</groupId>

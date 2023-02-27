@@ -7,24 +7,27 @@
 		<artifactId>skillup.parent</artifactId>
 		<version>1.0.0</version>
 	</parent>
+	
 	<artifactId>skillup.opc-ua-skill-generator</artifactId>
+	<version>1.0.0</version>
 	<packaging>bundle</packaging>
 	<name>OPC-UA-Skill-Generator</name>
+	
 	<dependencies>
 		<dependency>
 			<groupId>io.github.aljoshakoecher.skillup</groupId>
 			<artifactId>skillup.skill-generator-interface</artifactId>
-			<version>${project.version}</version>
+			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>io.github.aljoshakoecher.skillup</groupId>
 			<artifactId>skillup.description-generator</artifactId>
-			<version>${project.version}</version>
+			<version>1.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>io.github.aljoshakoecher.skillup</groupId>
 			<artifactId>skillup.opc-ua-server</artifactId>
-			<version>${project.version}</version>
+			<version>1.0.0</version>
 		</dependency>
 	</dependencies>
 	<build>

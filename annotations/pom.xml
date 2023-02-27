@@ -9,7 +9,8 @@
 	</parent>
 
 	<artifactId>skillup.annotations</artifactId>
-
+	<version>1.0.0</version>
+	
 	<packaging>bundle</packaging>
 	<name>SkillUp Annotations</name>
 	<description>Contains annotations that are needed to develop modules and skills using SkillUp</description>

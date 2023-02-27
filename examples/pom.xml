@@ -5,10 +5,13 @@
 	<parent>
 		<groupId>io.github.aljoshakoecher.skillup</groupId>
 		<artifactId>skillup.parent</artifactId>
-		<version>1.0.0</version>
+		<version>1.0.1</version>
 	</parent>
+	
 	<artifactId>examples</artifactId>
 	<packaging>pom</packaging>
+	<version>1.0.0</version>
+	
 	<modules>
 		<module>module</module>
 		<module>opc-ua-skill</module>

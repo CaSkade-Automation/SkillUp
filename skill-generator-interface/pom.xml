@@ -7,9 +7,12 @@
 		<artifactId>skillup.parent</artifactId>
 		<version>1.0.0</version>
 	</parent>
+	
 	<artifactId>skillup.skill-generator-interface</artifactId>
+	<version>1.0.0</version>
 	<packaging>bundle</packaging>
 	<name>Skill-Generator-Interface</name>
+	
 	<dependencies>
 		<dependency>
 			<groupId>com.github.aljoshakoecher</groupId>

@@ -7,9 +7,12 @@
 		<artifactId>skillup.parent</artifactId>
 		<version>1.0.0</version>
 	</parent>
+
 	<artifactId>skillup.description-generator</artifactId>
+	<version>1.0.0</version>
 	<packaging>bundle</packaging>
 	<name>Description Generator</name>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -17,6 +20,7 @@
 			<version>1.7.26</version>
 		</dependency>
 	</dependencies>
+
 	<build>
 		<plugins>
 			<plugin>
