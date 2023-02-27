@@ -31,33 +31,49 @@ import states.TransitionName;
 public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 
 	// Snippets to create OpcUa description
-	private String opcUaSkillSnippet = "<${ModuleIri}> Cap:providesOpcUaMethodSkill <${SkillIri}> .\r\n"
-			+ "<${SkillIri}> a Cap:OpcUaMethodSkill,\r\n" + "							owl:NamedIndividual.\r\n"
-			+ "<${SkillIri}> OpcUa:browseName \"${BrowseName}\";  \r\n"
+	private String opcUaSkillSnippet = "<${ModuleIri}> CSS:providesSkill <${SkillIri}> .\r\n"
+			+ "<${SkillIri}> a CaSkMan:JavaSkill, owl:NamedIndividual;\r\n"
+			+ "						CaSkMan:accessibleThroughOpcUaInterface <${SkillIri}_UaInterface>.\r\n"
+			+ "						CSS:behaviorConformsTo <${SkillIri}_StateMachine>;\r\n"
+			+ "						CaSk:hasCurrentState <${SkillIri}_StateMachine_${StateName}>.\r\n"
+			+ "<${SkillIri}_UaInterface> a CaSkMan:OpcUaInterface."
+			+ "<${SkillIri}_UaInterface> OpcUa:browseName \"${BrowseName}\";  \r\n"
 			+ "						OpcUa:browseNamespace ${BrowseNamespace};\r\n"
 			+ "						OpcUa:nodeId \"${NodeId}\";\r\n"
 			+ "						OpcUa:nodeNamespace ${NodeNamespace};\r\n"
 			+ "						OpcUa:displayName \"${DisplayName}\" ;\r\n"
-			+ "						Cap:hasStateMachine <${SkillIri}_StateMachine>;\r\n"
-			+ "						Cap:hasCurrentState <${SkillIri}_StateMachine_${StateName}>.\r\n"
-			+ "<${ModuleIri}_${ServerName}_NodeSet> OpcUa:containsNode <${SkillIri}> .";
+			+ "						CSS:exposes <${SkillIri}_StateMachine>.\r\n"
+			+ "<${ModuleIri}_${ServerName}_NodeSet> OpcUa:containsNode <${SkillIri}_UaInterface> .";
 
-	private String capabilitySnippet = "<${CapabilityIri}> Cap:isExecutableViaOpcUaMethodSkill <${SkillIri}>;\r\n"
-			+ "					a Cap:Capability,\r\n" + "					owl:NamedIndividual. \r\n"
-			+ "<${ModuleIri}> Cap:hasCapability <${CapabilityIri}> .";
+	private String capabilitySnippet = "<${CapabilityIri}> CSS:isRealizedBy <${SkillIri}>;\r\n"
+			+ "					a CaSk:ProvidedCapability, owl:NamedIndividual. \r\n"
+			+ "<${ModuleIri}> CSS:providesCapability <${CapabilityIri}> .";
 
-	private String opcUaMethodSnippet = "<${SkillIri}_${MethodName}> a OpcUa:UAMethod,\r\n"
-			+ "										Cap:${MethodName},\r\n"
+	private String opcUaMethodSnippet = "<${SkillIri}_UaInterface_${MethodName}> a OpcUa:UAMethod,\r\n"
+			+ "										CaSk:${MethodName},\r\n"
 			+ "										owl:NamedIndiviual;\r\n"
 			+ "									OpcUa:browseName \"${BrowseName}\";  \r\n"
 			+ "									OpcUa:browseNamespace ${BrowseNamespace};\r\n"
 			+ "									OpcUa:nodeId \"${NodeId}\";\r\n"
 			+ "									OpcUa:nodeNamespace ${NodeNamespace};\r\n"
 			+ "									OpcUa:displayName \"${DisplayName}\".   \r\n"
-			+ "<${SkillIri}> Cap:hasSkillMethod <${SkillIri}_${MethodName}>; \r\n"
+			+ "<${SkillIri}_UaInterface> CaSk:hasSkillMethod <${SkillIri}_${MethodName}>; \r\n"
 			+ "									OpcUa:hasComponent <${SkillIri}_${MethodName}>. \r\n";
 
-	private String opcUaMethodInvokesTransitionSnippet = "<${SkillIri}_${MethodName}> Cap:invokes <${SkillIri}_StateMachine_${CommandName}_Command> .   \r\n";
+	private String opcUaMethodInvokesTransitionSnippet = "<${SkillIri}_UaInterface_${MethodName}> CaSk:invokes <${SkillIri}_StateMachine_${CommandName}_Command> .   \r\n";
+
+	private String skillParameterSnippet = "<${SkillIri}_${VariableName}> a CaSk:SkillParameter,\r\n"
+			+ "										owl:NamedIndividual;\r\n"
+			+ "								CaSk:hasVariableName \"${BrowseName}\";\r\n"
+			+ "								CaSk:hasVariableType xsd:${VariableType};\r\n"
+			+ "								CaSk:isRequired ${Required};\r\n"
+			+ "								CaSk:hasDefaultValue ${DefaultValue}.\r\n"
+			+ "<${SkillIri}> CaSk:hasSkillParameter <${SkillIri}_${VariableName}>.";
+
+	private String skillParameterOptionSnippet = "<${SkillIri}_${VariableName}_Option${Number}> a CaSk:SkillVariableOption,\r\n"
+			+ "										owl:NamedIndividual;\r\n"
+			+ "								CaSk:hasOptionValue ${OptionValue}.\r\n"
+			+ "<${SkillIri}_${VariableName}> CaSk:hasSkillVariableOption <${SkillIri}_${VariableName}_Option${Number}>.";
 
 	private String opcUaVariableSnippet = "<${SkillIri}_${VariableName}> a OpcUa:UAVariable,\r\n"
 			+ "										owl:NamedIndividual;\r\n"
@@ -71,27 +87,15 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 			+ "									OpcUa:historizing ${Historizing};\r\n"
 			+ "									OpcUa:userAccessLevel ${UserAccessLevel};\r\n"
 			+ "									OpcUa:valueRank ${ValueRank}.\r\n"
-			+ "<${SkillIri}> OpcUa:organizes <${SkillIri}_${VariableName}>. \r\n";
-
-	private String opcUaSkillParameterSnippet = "<${SkillIri}_${VariableName}> a Cap:SkillParameter,\r\n"
+			+ "<${SkillIri}_UaInterface> OpcUa:organizes <${SkillIri}_${VariableName}>; \r\n"
+			+ "							CSS:exposes <${SkillIri}_${VariableName}>. \r\n";
+	
+	private String skillOutputSnippet = "<${SkillIri}_${VariableName}> a CaSk:SkillOutput,\r\n"
 			+ "										owl:NamedIndividual;\r\n"
-			+ "								Cap:hasVariableName \"${BrowseName}\";\r\n"
-			+ "								Cap:hasVariableType xsd:${VariableType};\r\n"
-			+ "								Cap:isRequired ${Required};\r\n"
-			+ "								Cap:hasDefaultValue ${DefaultValue}.\r\n"
-			+ "<${SkillIri}> Cap:hasSkillParameter <${SkillIri}_${VariableName}>.";
-
-	private String opcUaSkillParameterOptionSnippet = "<${SkillIri}_${VariableName}_Option${Number}> a Cap:SkillVariableOption,\r\n"
-			+ "										owl:NamedIndividual;\r\n"
-			+ "								Cap:hasOptionValue ${OptionValue}.\r\n"
-			+ "<${SkillIri}_${VariableName}> Cap:hasSkillVariableOption <${SkillIri}_${VariableName}_Option${Number}>.";
-
-	private String opcUaSkillOutputSnippet = "<${SkillIri}_${VariableName}> a Cap:SkillOutput,\r\n"
-			+ "										owl:NamedIndividual;\r\n"
-			+ "								Cap:hasVariableName \"${BrowseName}\";\r\n"
-			+ "								Cap:hasVariableType xsd:${VariableType};\r\n"
-			+ "								Cap:isRequired ${Required}.\r\n"
-			+ "<${SkillIri}> Cap:hasSkillOutput <${SkillIri}_${VariableName}>.";
+			+ "								CaSk:hasVariableName \"${BrowseName}\";\r\n"
+			+ "								CaSk:hasVariableType xsd:${VariableType};\r\n"
+			+ "								CaSk:isRequired ${Required}.\r\n"
+			+ "<${SkillIri}> CaSk:hasSkillOutput <${SkillIri}_${VariableName}>.";
 
 	private String opcUaServerSnippet = "<${ModuleIri}_${ServerName}> a OpcUa:UAServer,\r\n"
 			+ "						owl:NamedIndividual;\r\n"
@@ -328,7 +332,7 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 				boolean isRequired = paramField.getAnnotation(SkillParameter.class).isRequired();
 
 				skillParameterDescription = skillParameterDescription
-						+ opcUaSkillParameterSnippet.replace("${Required}", Boolean.toString(isRequired))
+						+ skillParameterSnippet.replace("${Required}", Boolean.toString(isRequired))
 								.replace("${DefaultValue}", paramField.get(skill).toString());
 				// add parameter options to description
 				skillParameterDescription = generateOptionValuesDescription(paramField, skillParameterDescription);
@@ -359,7 +363,7 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 				boolean isRequiredOutput = outputField.getAnnotation(SkillOutput.class).isRequired();
 
 				skillOutputDescription = skillOutputDescription
-						+ opcUaSkillOutputSnippet.replace("${Required}", Boolean.toString(isRequiredOutput));
+						+ skillOutputSnippet.replace("${Required}", Boolean.toString(isRequiredOutput));
 			} catch (NoSuchElementException e) {
 				e.printStackTrace();
 			}
@@ -387,7 +391,7 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 			return skillParameterDescription;
 		for (String option : options) {
 			if (!option.isEmpty()) {
-				skillParameterDescription = skillParameterDescription + opcUaSkillParameterOptionSnippet
+				skillParameterDescription = skillParameterDescription + skillParameterOptionSnippet
 						.replace("${Number}", Integer.toString(i)).replace("${OptionValue}", option);
 				i++;
 			}
