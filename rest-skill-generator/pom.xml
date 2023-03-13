@@ -5,29 +5,28 @@
 	<parent>
 		<groupId>io.github.aljoshakoecher.skillup</groupId>
 		<artifactId>skillup.parent</artifactId>
-		<version>1.0.0</version>
+		<version>${revision}</version>
 	</parent>
 	
 	<artifactId>skillup.rest-skill-generator</artifactId>
 	<packaging>bundle</packaging>
-	<version>1.0.0</version>
 	<name>REST-Skill-Generator</name>
 	
 	<dependencies>
 		<dependency>
 			<groupId>io.github.aljoshakoecher.skillup</groupId>
 			<artifactId>skillup.skill-generator-interface</artifactId>
-			<version>1.0.0</version>
+			<version>${revision}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.github.aljoshakoecher.skillup</groupId>
 			<artifactId>skillup.description-generator</artifactId>
-			<version>1.0.0</version>
+			<version>${revision}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.github.aljoshakoecher.skillup</groupId>
 			<artifactId>skillup.rest-resource</artifactId>
-			<version>1.0.0</version>
+			<version>${revision}</version>
 		</dependency>
 	</dependencies>
 	<build>

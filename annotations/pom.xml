@@ -5,11 +5,10 @@
 	<parent>
 		<groupId>io.github.aljoshakoecher.skillup</groupId>
 		<artifactId>skillup.parent</artifactId>
-		<version>1.0.0</version>
+		<version>${revision}</version>
 	</parent>
 
 	<artifactId>skillup.annotations</artifactId>
-	<version>1.0.0</version>
 	
 	<packaging>bundle</packaging>
 	<name>SkillUp Annotations</name>

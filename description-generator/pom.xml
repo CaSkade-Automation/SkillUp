@@ -5,11 +5,10 @@
 	<parent>
 		<groupId>io.github.aljoshakoecher.skillup</groupId>
 		<artifactId>skillup.parent</artifactId>
-		<version>1.0.0</version>
+		<version>${revision}</version>
 	</parent>
 
 	<artifactId>skillup.description-generator</artifactId>
-	<version>1.0.0</version>
 	<packaging>bundle</packaging>
 	<name>Description Generator</name>
 
@@ -34,6 +33,7 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
+				<version>5.1.8</version>
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>

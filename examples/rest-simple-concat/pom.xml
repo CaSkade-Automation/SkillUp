@@ -5,11 +5,13 @@
 	<parent>
 		<groupId>io.github.aljoshakoecher.skillup</groupId>
 		<artifactId>examples</artifactId>
-		<version>1.0.0</version>
+		<version>${revision}</version>
 	</parent>
+	
 	<artifactId>skillup.examples.rest-simple-concat</artifactId>
 	<packaging>bundle</packaging>
 	<name>REST-Simple-Concat</name>
+	
 	<dependencies>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -19,7 +21,7 @@
 		<dependency>
 			<groupId>io.github.aljoshakoecher.skillup</groupId>
 			<artifactId>skillup.annotations</artifactId>
-			<version>1.0.0</version>
+			<version>${revision}</version>
 		</dependency>
 	</dependencies>
 	<build>

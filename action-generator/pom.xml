@@ -5,11 +5,10 @@
 	<parent>
 		<groupId>io.github.aljoshakoecher.skillup</groupId>
 		<artifactId>skillup.parent</artifactId>
-		<version>1.0.0</version>
+		<version>${revision}</version>
 	</parent>
 	
 	<artifactId>skillup.action-generator</artifactId>
-	<version>1.0.0</version>
 	<packaging>bundle</packaging>
 	<name>Action Generator</name>
 	
@@ -22,7 +21,7 @@
 		<dependency>
 			<groupId>io.github.aljoshakoecher.skillup</groupId>
 			<artifactId>skillup.annotations</artifactId>
-			<version>1.0.0</version>
+			<version>${revision}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.aljoshakoecher</groupId>
