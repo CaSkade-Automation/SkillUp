@@ -33,10 +33,10 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 	// Snippets to create OpcUa description
 	private String opcUaSkillSnippet = "<${ModuleIri}> CSS:providesSkill <${SkillIri}> .\r\n"
 			+ "<${SkillIri}> a CaSkMan:JavaSkill, owl:NamedIndividual;\r\n"
-			+ "						CaSkMan:accessibleThroughOpcUaInterface <${SkillIri}_UaInterface>.\r\n"
+			+ "						CaSkMan:accessibleThroughOpcUaInterface <${SkillIri}_UaInterface>;\r\n"
 			+ "						CSS:behaviorConformsTo <${SkillIri}_StateMachine>;\r\n"
 			+ "						CaSk:hasCurrentState <${SkillIri}_StateMachine_${StateName}>.\r\n"
-			+ "<${SkillIri}_UaInterface> a CaSkMan:OpcUaInterface."
+			+ "<${SkillIri}_UaInterface> a CaSkMan:OpcUaMethodSkillInterface."
 			+ "<${SkillIri}_UaInterface> OpcUa:browseName \"${BrowseName}\";  \r\n"
 			+ "						OpcUa:browseNamespace ${BrowseNamespace};\r\n"
 			+ "						OpcUa:nodeId \"${NodeId}\";\r\n"
