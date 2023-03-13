@@ -60,7 +60,7 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 			+ "<${SkillIri}_UaInterface> CaSk:hasSkillMethod <${SkillIri}_UaInterface_${MethodName}>; \r\n"
 			+ "									OpcUa:hasComponent <${SkillIri}_UaInterface_${MethodName}>. \r\n";
 
-	private String opcUaMethodInvokesTransitionSnippet = "<${SkillIri}_UaInterface_${MethodName}> CaSk:invokes <${SkillIri}_StateMachine_${CommandName}_Command> .   \r\n";
+	private String opcUaMethodInvokesTransitionSnippet = "<${SkillIri}_UaInterface_${MethodName}> CaSk:invokes <${SkillIri}_StateMachine_${CommandName}Command> .   \r\n";
 
 	private String skillParameterSnippet = "<${SkillIri}_${VariableName}> a CSS:SkillParameter,\r\n"
 			+ "										owl:NamedIndividual;\r\n"
