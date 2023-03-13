@@ -57,8 +57,8 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 			+ "									OpcUa:nodeId \"${NodeId}\";\r\n"
 			+ "									OpcUa:nodeNamespace ${NodeNamespace};\r\n"
 			+ "									OpcUa:displayName \"${DisplayName}\".   \r\n"
-			+ "<${SkillIri}_UaInterface> CaSk:hasSkillMethod <${SkillIri}_${MethodName}>; \r\n"
-			+ "									OpcUa:hasComponent <${SkillIri}_${MethodName}>. \r\n";
+			+ "<${SkillIri}_UaInterface> CaSk:hasSkillMethod <${SkillIri}_UaInterface_${MethodName}>; \r\n"
+			+ "									OpcUa:hasComponent <${SkillIri}_UaInterface_${MethodName}>. \r\n";
 
 	private String opcUaMethodInvokesTransitionSnippet = "<${SkillIri}_UaInterface_${MethodName}> CaSk:invokes <${SkillIri}_StateMachine_${CommandName}_Command> .   \r\n";
 
