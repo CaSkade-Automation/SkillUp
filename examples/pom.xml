@@ -13,12 +13,12 @@
 	
 	<modules>
 		<module>module</module>
-		<module>opc-ua-skill</module>
-		<module>opc-ua-skill2</module>
-		<module>rest-simple-skill</module>
-		<module>rest-simple-concat</module>
-		<module>rest-simple-multiplier</module>
-		<module>led-skill</module>
-		<module>random-generator</module>
+		<module>opcua-add-skill</module>
+		<module>opcua-led-skill</module>
+		<module>opcua-random-generator</module>
+		<module>opcua-subtract-skill</module>
+		<module>rest-concat</module>
+		<module>rest-doubler</module>
+		<module>rest-multiplier</module>
 	</modules>
 </project>
