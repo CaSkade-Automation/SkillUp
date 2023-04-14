@@ -188,7 +188,7 @@ public class RestResource {
 		return Response.status(Response.Status.OK).entity(json).build();
 	}
 
-	// Caution: Matches the SkillParams by Cap:hasVariableName
+	// Caution: Matches the SkillParams by CaSk:hasVariableName
 	// Example Input = { "i": "HelloParam", "j": 42 }
 	// Able to process:
 	// Strings

@@ -5,16 +5,18 @@
 	<parent>
 		<groupId>io.github.aljoshakoecher.skillup</groupId>
 		<artifactId>examples</artifactId>
-		<version>1.0.0</version>
+		<version>${revision}</version>
 	</parent>
+	
 	<artifactId>skillup.examples.module</artifactId>
 	<packaging>bundle</packaging>
 	<name>Example Module</name>
+	
 	<dependencies>
 		<dependency>
 			<groupId>io.github.aljoshakoecher.skillup</groupId>
 			<artifactId>skillup.annotations</artifactId>
-			<version>${project.version}</version>
+			<version>${revision}</version>
 		</dependency>
 	</dependencies>
 	<build>

@@ -1,7 +1,5 @@
 package descriptionGenerator;
 
-import descriptionGenerator.DescriptionGenerator;
-
 /**
  * Class extends from {@link DescriptionGenerator} and has method that is equal
  * for every skill independent of its type (e.g. REST)

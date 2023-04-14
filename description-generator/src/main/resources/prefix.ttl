@@ -1,4 +1,6 @@
-@prefix Cap: <http://www.hsu-ifa.de/ontologies/capability-model#> .
+@prefix CSS: <http://www.w3id.org/hsu-aut/css#> .
+@prefix CaSk: <http://www.w3id.org/hsu-aut/cask#> .
+@prefix CaSkMan: <http://www.w3id.org/hsu-aut/caskman#> .
 @prefix DIN8580: <http://www.hsu-ifa.de/ontologies/DIN8580#> .
 @prefix VDI3682: <http://www.hsu-ifa.de/ontologies/VDI3682#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .

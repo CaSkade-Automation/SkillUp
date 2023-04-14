@@ -5,11 +5,13 @@
 	<parent>
 		<groupId>io.github.aljoshakoecher.skillup</groupId>
 		<artifactId>skillup.parent</artifactId>
-		<version>1.0.0</version>
+		<version>${revision}</version>
 	</parent>
+	
 	<artifactId>skillup.skill-generator-interface</artifactId>
 	<packaging>bundle</packaging>
 	<name>Skill-Generator-Interface</name>
+	
 	<dependencies>
 		<dependency>
 			<groupId>com.github.aljoshakoecher</groupId>

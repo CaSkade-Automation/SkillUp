@@ -5,11 +5,13 @@
 	<parent>
 		<groupId>io.github.aljoshakoecher.skillup</groupId>
 		<artifactId>skillup.parent</artifactId>
-		<version>1.0.0</version>
+		<version>${revision}</version>
 	</parent>
+	
 	<artifactId>skillup.module-generator</artifactId>
 	<packaging>bundle</packaging>
 	<name>Module Generator</name>
+	
 	<dependencies>
 		<dependency>
 			<groupId>org.osgi</groupId>
@@ -19,12 +21,12 @@
 		<dependency>
 			<groupId>io.github.aljoshakoecher.skillup</groupId>
 			<artifactId>skillup.description-generator</artifactId>
-			<version>${project.version}</version>
+			<version>${revision}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.github.aljoshakoecher.skillup</groupId>
 			<artifactId>skillup.annotations</artifactId>
-			<version>${project.version}</version>
+			<version>${revision}</version>
 		</dependency>
 	</dependencies>
 	<build>

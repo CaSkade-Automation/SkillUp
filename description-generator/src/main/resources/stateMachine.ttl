@@ -1,144 +1,144 @@
 <${SkillIri}_StateMachine> a stateMachine:StateMachine.  
 <${SkillIri}_StateMachine_Aborting> a stateMachine:Aborting, 
 													owl:NamedIndividual; 
-											stateMachine:State_is_connected_with_Transition <${SkillIri}_StateMachine_Aborting_State_Complete>.  
+											stateMachine:State_is_connected_with_Transition <${SkillIri}_StateMachine_AbortingStateComplete>.  
 <${SkillIri}_StateMachine_Clearing> a stateMachine:Clearing,
 													owl:NamedIndividual;
-											stateMachine:State_is_connected_with_Transition <${SkillIri}_StateMachine_Abort_Command>,
-													<${SkillIri}_StateMachine_Clearing_State_Complete>. 
+											stateMachine:State_is_connected_with_Transition <${SkillIri}_StateMachine_AbortCommand>,
+													<${SkillIri}_StateMachine_ClearingStateComplete>. 
 <${SkillIri}_StateMachine_Complete> a stateMachine:Complete,
 													owl:NamedIndividual;
-											stateMachine:State_is_connected_with_Transition <${SkillIri}_StateMachine_Abort_Command>,
-													<${SkillIri}_StateMachine_Reset_Command>, 
-													<${SkillIri}_StateMachine_Stop_Command>. 
+											stateMachine:State_is_connected_with_Transition <${SkillIri}_StateMachine_AbortCommand>,
+													<${SkillIri}_StateMachine_ResetCommand>, 
+													<${SkillIri}_StateMachine_StopCommand>. 
 <${SkillIri}_StateMachine_Completing> a stateMachine:Completing,
 													owl:NamedIndividual;
-											stateMachine:State_is_connected_with_Transition <${SkillIri}_StateMachine_Abort_Command>,
-											<${SkillIri}_StateMachine_Completing_State_Complete>, 
-											<${SkillIri}_StateMachine_Stop_Command>. 
+											stateMachine:State_is_connected_with_Transition <${SkillIri}_StateMachine_AbortCommand>,
+											<${SkillIri}_StateMachine_CompletingStateComplete>, 
+											<${SkillIri}_StateMachine_StopCommand>. 
 <${SkillIri}_StateMachine_Execute> a stateMachine:Execute,
 													owl:NamedIndividual;
-											stateMachine:State_is_connected_with_Transition <${SkillIri}_StateMachine_Abort_Command>,
-													<${SkillIri}_StateMachine_Execute_State_Complete>, 
-													<${SkillIri}_StateMachine_Hold_Command>,
-													<${SkillIri}_StateMachine_Stop_Command>, 
-													<${SkillIri}_StateMachine_Suspend_Command>. 
+											stateMachine:State_is_connected_with_Transition <${SkillIri}_StateMachine_AbortCommand>,
+													<${SkillIri}_StateMachine_ExecuteStateComplete>, 
+													<${SkillIri}_StateMachine_HoldCommand>,
+													<${SkillIri}_StateMachine_StopCommand>, 
+													<${SkillIri}_StateMachine_SuspendCommand>. 
 <${SkillIri}_StateMachine_Holding> a stateMachine:Holding,
 													owl:NamedIndividual;
-											stateMachine:State_is_connected_with_Transition <${SkillIri}_StateMachine_Abort_Command>,
-													<${SkillIri}_StateMachine_Holding_State_Complete>, 
-													<${SkillIri}_StateMachine_Stop_Command>. 
+											stateMachine:State_is_connected_with_Transition <${SkillIri}_StateMachine_AbortCommand>,
+													<${SkillIri}_StateMachine_HoldingStateComplete>, 
+													<${SkillIri}_StateMachine_StopCommand>. 
 <${SkillIri}_StateMachine_Resetting> a stateMachine:Resetting,
 													owl:NamedIndividual;
-											stateMachine:State_is_connected_with_Transition <${SkillIri}_StateMachine_Abort_Command>,
-													<${SkillIri}_StateMachine_Resetting_State_Complete>, 
-													<${SkillIri}_StateMachine_Stop_Command>. 
+											stateMachine:State_is_connected_with_Transition <${SkillIri}_StateMachine_AbortCommand>,
+													<${SkillIri}_StateMachine_ResettingStateComplete>, 
+													<${SkillIri}_StateMachine_StopCommand>. 
 <${SkillIri}_StateMachine_Starting> a stateMachine:Starting,
 													owl:NamedIndividual;
-											stateMachine:State_is_connected_with_Transition <${SkillIri}_StateMachine_Abort_Command>,
-													<${SkillIri}_StateMachine_Starting_State_Complete>, 
-													<${SkillIri}_StateMachine_Stop_Command>. 
+											stateMachine:State_is_connected_with_Transition <${SkillIri}_StateMachine_AbortCommand>,
+													<${SkillIri}_StateMachine_StartingStateComplete>, 
+													<${SkillIri}_StateMachine_StopCommand>. 
 <${SkillIri}_StateMachine_Stopping> a stateMachine:Stopping,
 													owl:NamedIndividual;
-											stateMachine:State_is_connected_with_Transition <${SkillIri}_StateMachine_Abort_Command>,
-													<${SkillIri}_StateMachine_Stopping_State_Complete>. 
+											stateMachine:State_is_connected_with_Transition <${SkillIri}_StateMachine_AbortCommand>,
+													<${SkillIri}_StateMachine_StoppingStateComplete>. 
 <${SkillIri}_StateMachine_Suspending> a stateMachine:Suspending,
 													owl:NamedIndividual;
-											stateMachine:State_is_connected_with_Transition <${SkillIri}_StateMachine_Abort_Command>,
-													<${SkillIri}_StateMachine_Stop_Command>, 
-													<${SkillIri}_StateMachine_Suspending_State_Complete>. 
+											stateMachine:State_is_connected_with_Transition <${SkillIri}_StateMachine_AbortCommand>,
+													<${SkillIri}_StateMachine_StopCommand>, 
+													<${SkillIri}_StateMachine_SuspendingStateComplete>. 
 <${SkillIri}_StateMachine_Unholding> a stateMachine:Unholding,
 													owl:NamedIndividual;
-											stateMachine:State_is_connected_with_Transition <${SkillIri}_StateMachine_Abort_Command>,
-													<${SkillIri}_StateMachine_Stop_Command>, 
-													<${SkillIri}_StateMachine_Unholding_State_Complete>. 
+											stateMachine:State_is_connected_with_Transition <${SkillIri}_StateMachine_AbortCommand>,
+													<${SkillIri}_StateMachine_StopCommand>, 
+													<${SkillIri}_StateMachine_UnholdingStateComplete>. 
 <${SkillIri}_StateMachine_Unsuspending> a stateMachine:Unsuspending,
 													owl:NamedIndividual;
-											stateMachine:State_is_connected_with_Transition <${SkillIri}_StateMachine_Abort_Command>,
-													<${SkillIri}_StateMachine_Stop_Command>, 
-													<${SkillIri}_StateMachine_Unsuspending_State_Complete>. 
+											stateMachine:State_is_connected_with_Transition <${SkillIri}_StateMachine_AbortCommand>,
+													<${SkillIri}_StateMachine_StopCommand>, 
+													<${SkillIri}_StateMachine_UnsuspendingStateComplete>. 
 <${SkillIri}_StateMachine_Aborted> a stateMachine:Aborted,
 													owl:NamedIndividual;
-											stateMachine:State_is_connected_with_Transition <${SkillIri}_StateMachine_Clear_Command>. 
+											stateMachine:State_is_connected_with_Transition <${SkillIri}_StateMachine_ClearCommand>. 
 <${SkillIri}_StateMachine_Held> a stateMachine:Held,
 													owl:NamedIndividual;
-											stateMachine:State_is_connected_with_Transition <${SkillIri}_StateMachine_Abort_Command>,
-													<${SkillIri}_StateMachine_Stop_Command>, 
-													<${SkillIri}_StateMachine_Unhold_Command>. 
+											stateMachine:State_is_connected_with_Transition <${SkillIri}_StateMachine_AbortCommand>,
+													<${SkillIri}_StateMachine_StopCommand>, 
+													<${SkillIri}_StateMachine_UnholdCommand>. 
 <${SkillIri}_StateMachine_Idle> a stateMachine:Idle,
 													owl:NamedIndividual;
-											stateMachine:State_is_connected_with_Transition <${SkillIri}_StateMachine_Abort_Command>,
-													<${SkillIri}_StateMachine_Start_Command>, 
-													<${SkillIri}_StateMachine_Stop_Command>. 
+											stateMachine:State_is_connected_with_Transition <${SkillIri}_StateMachine_AbortCommand>,
+													<${SkillIri}_StateMachine_StartCommand>, 
+													<${SkillIri}_StateMachine_StopCommand>. 
 <${SkillIri}_StateMachine_Stopped> a stateMachine:Stopped,
 													owl:NamedIndividual;
-											stateMachine:State_is_connected_with_Transition <${SkillIri}_StateMachine_Abort_Command>,
-													<${SkillIri}_StateMachine_Reset_Command>. 
+											stateMachine:State_is_connected_with_Transition <${SkillIri}_StateMachine_AbortCommand>,
+													<${SkillIri}_StateMachine_ResetCommand>. 
 <${SkillIri}_StateMachine_Suspended> a stateMachine:Suspended,
 													owl:NamedIndividual;
-											stateMachine:State_is_connected_with_Transition <${SkillIri}_StateMachine_Abort_Command>,
-													<${SkillIri}_StateMachine_Stop_Command>, 
-													<${SkillIri}_StateMachine_Unsuspend_Command>. 
+											stateMachine:State_is_connected_with_Transition <${SkillIri}_StateMachine_AbortCommand>,
+													<${SkillIri}_StateMachine_StopCommand>, 
+													<${SkillIri}_StateMachine_UnsuspendCommand>. 
 													
-<${SkillIri}_StateMachine_Abort_Command> a stateMachine:Abort_Command,
+<${SkillIri}_StateMachine_AbortCommand> a stateMachine:AbortCommand,
 													owl:NamedIndividual;
 											stateMachine:Transition_is_connected_with_State <${SkillIri}_StateMachine_Aborting>. 
-<${SkillIri}_StateMachine_Clear_Command> a stateMachine:Clear_Command,
+<${SkillIri}_StateMachine_ClearCommand> a stateMachine:ClearCommand,
 													owl:NamedIndividual;
 											stateMachine:Transition_is_connected_with_State <${SkillIri}_StateMachine_Clearing>. 
-<${SkillIri}_StateMachine_Hold_Command> a stateMachine:Hold_Command,
+<${SkillIri}_StateMachine_HoldCommand> a stateMachine:HoldCommand,
 													owl:NamedIndividual;
 											stateMachine:Transition_is_connected_with_State <${SkillIri}_StateMachine_Holding>. 
-<${SkillIri}_StateMachine_Reset_Command> a stateMachine:Reset_Command,
+<${SkillIri}_StateMachine_ResetCommand> a stateMachine:ResetCommand,
 													owl:NamedIndividual;
 											stateMachine:Transition_is_connected_with_State <${SkillIri}_StateMachine_Resetting>. 
-<${SkillIri}_StateMachine_Start_Command> a stateMachine:Start_Command,
+<${SkillIri}_StateMachine_StartCommand> a stateMachine:StartCommand,
 													owl:NamedIndividual;
 											stateMachine:Transition_is_connected_with_State <${SkillIri}_StateMachine_Starting>. 
-<${SkillIri}_StateMachine_Stop_Command> a stateMachine:Stop_Command,
+<${SkillIri}_StateMachine_StopCommand> a stateMachine:StopCommand,
 													owl:NamedIndividual;
 											stateMachine:Transition_is_connected_with_State <${SkillIri}_StateMachine_Stopping>. 
-<${SkillIri}_StateMachine_Suspend_Command> a stateMachine:Suspend_Command,
+<${SkillIri}_StateMachine_SuspendCommand> a stateMachine:SuspendCommand,
 													owl:NamedIndividual;
 											stateMachine:Transition_is_connected_with_State <${SkillIri}_StateMachine_Suspending>. 
-<${SkillIri}_StateMachine_Unhold_Command> a stateMachine:Un-Hold_Command,
+<${SkillIri}_StateMachine_UnholdCommand> a stateMachine:Un-HoldCommand,
 													owl:NamedIndividual;
 											stateMachine:Transition_is_connected_with_State <${SkillIri}_StateMachine_Unholding>. 
-<${SkillIri}_StateMachine_Unsuspend_Command> a stateMachine:Unsuspend_Command,
+<${SkillIri}_StateMachine_UnsuspendCommand> a stateMachine:UnsuspendCommand,
 													owl:NamedIndividual;
 											stateMachine:Transition_is_connected_with_State <${SkillIri}_StateMachine_Unsuspending>. 
 
-<${SkillIri}_StateMachine_Aborting_State_Complete> a stateMachine:Aborting_State_Complete,
+<${SkillIri}_StateMachine_AbortingStateComplete> a stateMachine:AbortingStateComplete,
 													owl:NamedIndividual;
 											stateMachine:Transition_is_connected_with_State <${SkillIri}_StateMachine_Aborted>. 
-<${SkillIri}_StateMachine_Clearing_State_Complete> a stateMachine:Clearing_State_Complete,
+<${SkillIri}_StateMachine_ClearingStateComplete> a stateMachine:ClearingStateComplete,
 													owl:NamedIndividual;
 											stateMachine:Transition_is_connected_with_State <${SkillIri}_StateMachine_Stopped>. 
-<${SkillIri}_StateMachine_Completing_State_Complete> a stateMachine:Completing_State_Complete,
+<${SkillIri}_StateMachine_CompletingStateComplete> a stateMachine:CompletingStateComplete,
 													owl:NamedIndividual;
 											stateMachine:Transition_is_connected_with_State <${SkillIri}_StateMachine_Complete>. 
-<${SkillIri}_StateMachine_Execute_State_Complete> a stateMachine:Execute_State_Complete,
+<${SkillIri}_StateMachine_ExecuteStateComplete> a stateMachine:ExecuteStateComplete,
 													owl:NamedIndividual;
 											stateMachine:Transition_is_connected_with_State <${SkillIri}_StateMachine_Completing>. 
-<${SkillIri}_StateMachine_Holding_State_Complete> a stateMachine:Holding_State_Complete,
+<${SkillIri}_StateMachine_HoldingStateComplete> a stateMachine:HoldingStateComplete,
 													owl:NamedIndividual;
 											stateMachine:Transition_is_connected_with_State <${SkillIri}_StateMachine_Held>. 
-<${SkillIri}_StateMachine_Resetting_State_Complete> a stateMachine:Resetting_State_Complete,
+<${SkillIri}_StateMachine_ResettingStateComplete> a stateMachine:ResettingStateComplete,
 													owl:NamedIndividual;
 											stateMachine:Transition_is_connected_with_State <${SkillIri}_StateMachine_Idle>. 
-<${SkillIri}_StateMachine_Starting_State_Complete> a stateMachine:Starting_State_Complete,
+<${SkillIri}_StateMachine_StartingStateComplete> a stateMachine:StartingStateComplete,
 													owl:NamedIndividual;
 											stateMachine:Transition_is_connected_with_State <${SkillIri}_StateMachine_Execute>. 
-<${SkillIri}_StateMachine_Stopping_State_Complete> a stateMachine:Stopping_State_Complete,
+<${SkillIri}_StateMachine_StoppingStateComplete> a stateMachine:StoppingStateComplete,
 													owl:NamedIndividual;
 											stateMachine:Transition_is_connected_with_State <${SkillIri}_StateMachine_Stopped>. 
-<${SkillIri}_StateMachine_Suspending_State_Complete> a stateMachine:Suspending_State_Complete,
+<${SkillIri}_StateMachine_SuspendingStateComplete> a stateMachine:SuspendingStateComplete,
 													owl:NamedIndividual;
 											stateMachine:Transition_is_connected_with_State <${SkillIri}_StateMachine_Suspended>. 
-<${SkillIri}_StateMachine_Unholding_State_Complete> a stateMachine:Unholding_State_Complete,
+<${SkillIri}_StateMachine_UnholdingStateComplete> a stateMachine:UnholdingStateComplete,
 													owl:NamedIndividual;
 											stateMachine:Transition_is_connected_with_State <${SkillIri}_StateMachine_Execute>. 
-<${SkillIri}_StateMachine_Unsuspending_State_Complete> a stateMachine:Unsuspending_State_Complete,
+<${SkillIri}_StateMachine_UnsuspendingStateComplete> a stateMachine:UnsuspendingStateComplete,
 													owl:NamedIndividual;
 											stateMachine:Transition_is_connected_with_State <${SkillIri}_StateMachine_Execute>. 
 											
@@ -159,23 +159,23 @@
 															<${SkillIri}_StateMachine_Suspending>, 
 															<${SkillIri}_StateMachine_Unholding>,
 															<${SkillIri}_StateMachine_Unsuspending>;
-										stateMachine:hasTransition <${SkillIri}_StateMachine_Abort_Command>,
-																	<${SkillIri}_StateMachine_Aborting_State_Complete>, 
-																	<${SkillIri}_StateMachine_Clear_Command>,
-																	<${SkillIri}_StateMachine_Clearing_State_Complete>, 
-																	<${SkillIri}_StateMachine_Completing_State_Complete>,
-																	<${SkillIri}_StateMachine_Execute_State_Complete>, 
-																	<${SkillIri}_StateMachine_Hold_Command>,
-																	<${SkillIri}_StateMachine_Holding_State_Complete>, 
-																	<${SkillIri}_StateMachine_Reset_Command>,
-																	<${SkillIri}_StateMachine_Resetting_State_Complete>, 
-																	<${SkillIri}_StateMachine_Start_Command>,
-																	<${SkillIri}_StateMachine_Starting_State_Complete>, 
-																	<${SkillIri}_StateMachine_Stop_Command>,
-																	<${SkillIri}_StateMachine_Stopping_State_Complete>, 
-																	<${SkillIri}_StateMachine_Suspend_Command>,
-																	<${SkillIri}_StateMachine_Suspending_State_Complete>, 
-																	<${SkillIri}_StateMachine_Unhold_Command>,
-																	<${SkillIri}_StateMachine_Unholding_State_Complete>, 
-																	<${SkillIri}_StateMachine_Unsuspend_Command>,
-																	<${SkillIri}_StateMachine_Unsuspending_State_Complete>. 
+										stateMachine:hasTransition <${SkillIri}_StateMachine_AbortCommand>,
+																	<${SkillIri}_StateMachine_AbortingStateComplete>, 
+																	<${SkillIri}_StateMachine_ClearCommand>,
+																	<${SkillIri}_StateMachine_ClearingStateComplete>, 
+																	<${SkillIri}_StateMachine_CompletingStateComplete>,
+																	<${SkillIri}_StateMachine_ExecuteStateComplete>, 
+																	<${SkillIri}_StateMachine_HoldCommand>,
+																	<${SkillIri}_StateMachine_HoldingStateComplete>, 
+																	<${SkillIri}_StateMachine_ResetCommand>,
+																	<${SkillIri}_StateMachine_ResettingStateComplete>, 
+																	<${SkillIri}_StateMachine_StartCommand>,
+																	<${SkillIri}_StateMachine_StartingStateComplete>, 
+																	<${SkillIri}_StateMachine_StopCommand>,
+																	<${SkillIri}_StateMachine_StoppingStateComplete>, 
+																	<${SkillIri}_StateMachine_SuspendCommand>,
+																	<${SkillIri}_StateMachine_SuspendingStateComplete>, 
+																	<${SkillIri}_StateMachine_UnholdCommand>,
+																	<${SkillIri}_StateMachine_UnholdingStateComplete>, 
+																	<${SkillIri}_StateMachine_UnsuspendCommand>,
+																	<${SkillIri}_StateMachine_UnsuspendingStateComplete>. 

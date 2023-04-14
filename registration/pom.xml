@@ -5,11 +5,13 @@
 	<parent>
 		<groupId>io.github.aljoshakoecher.skillup</groupId>
 		<artifactId>skillup.parent</artifactId>
-		<version>1.0.0</version>
+		<version>${revision}</version>
 	</parent>
+	
 	<artifactId>skillup.registration</artifactId>
 	<packaging>bundle</packaging>
 	<name>Registration</name>
+	
 	<dependencies>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -24,7 +26,7 @@
 		<dependency>
 			<groupId>io.github.aljoshakoecher.skillup</groupId>
 			<artifactId>skillup.annotations</artifactId>
-			<version>${project.version}</version>
+			<version>${revision}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>

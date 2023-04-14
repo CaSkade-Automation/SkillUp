@@ -5,11 +5,13 @@
 	<parent>
 		<groupId>io.github.aljoshakoecher.skillup</groupId>
 		<artifactId>skillup.parent</artifactId>
-		<version>1.0.0</version>
+		<version>${revision}</version>
 	</parent>
+	
 	<artifactId>skillup.smart-tracker</artifactId>
 	<packaging>bundle</packaging>
 	<name>Smart Tracker</name>
+	
 	<dependencies>
 		<dependency>
 			<groupId>org.osgi</groupId>
@@ -20,27 +22,27 @@
 		<dependency>
 			<groupId>io.github.aljoshakoecher.skillup</groupId>
 			<artifactId>skillup.annotations</artifactId>
-			<version>${project.version}</version>
+			<version>${revision}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.github.aljoshakoecher.skillup</groupId>
 			<artifactId>skillup.action-generator</artifactId>
-			<version>${project.version}</version>
+			<version>${revision}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.github.aljoshakoecher.skillup</groupId>
 			<artifactId>skillup.opc-ua-skill-generator</artifactId>
-			<version>${project.version}</version>
+			<version>${revision}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.github.aljoshakoecher.skillup</groupId>
 			<artifactId>skillup.registration</artifactId>
-			<version>${project.version}</version>
+			<version>${revision}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.github.aljoshakoecher.skillup</groupId>
 			<artifactId>skillup.module-generator</artifactId>
-			<version>${project.version}</version>
+			<version>${revision}</version>
 		</dependency>
 	</dependencies>
 	<build>
@@ -56,6 +58,7 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
+				<version>5.1.8</version>
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>

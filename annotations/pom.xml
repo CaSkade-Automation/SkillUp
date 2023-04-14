@@ -5,11 +5,11 @@
 	<parent>
 		<groupId>io.github.aljoshakoecher.skillup</groupId>
 		<artifactId>skillup.parent</artifactId>
-		<version>1.0.0</version>
+		<version>${revision}</version>
 	</parent>
 
 	<artifactId>skillup.annotations</artifactId>
-
+	
 	<packaging>bundle</packaging>
 	<name>SkillUp Annotations</name>
 	<description>Contains annotations that are needed to develop modules and skills using SkillUp</description>
