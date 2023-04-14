@@ -69,7 +69,8 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 		restSkillDescription.append("\n");
 
 		restSkillDescription.append("<${SkillIri}> a CaSkMan:JavaSkill ;\n");
-		restSkillDescription.append("	CSS:accessibleThroughRestInterface <${SkillIri}_RestInterface>.");
+		restSkillDescription.append("	CaSkMan:accessibleThroughRestInterface <${SkillIri}_RestInterface>.");
+		restSkillDescription.append("<${SkillIri}_RestInterface> a CaSkMan:RestSkillInterface.");
 
 		String encodedIri = null;
 		try {
@@ -86,15 +87,19 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 		restSkillDescription.append("<${SkillIri}> CSS:behaviorConformsTo <${SkillIri}_StateMachine> ;\n");
 		restSkillDescription.append("	CaSk:hasCurrentState <${SkillIri}_StateMachine_${InitialState}> .\n");
 
-		restSkillDescription.append("<${CapabilityIri}> CSS:isRealizedBy <${SkillIri}> .\n");
-		restSkillDescription.append("<${ModuleIri}> CSS:providesSkill <${SkillIri}> .\n");
-
-		restSkillDescription.append("<${SkillIri}_RestInterface_Representation> a WADL:Representation ;\n");
+		restSkillDescription.append("<${CapabilityIri}> CSS:isRealizedBy <${SkillIri}>;\n");
+		restSkillDescription.append("	a CaSk:ProvidedCapability, owl:NamedIndividual.\n");
+		restSkillDescription.append("<${ModuleIri}> CSS:providesCapability <${CapabilityIri}> ;\n");
+		restSkillDescription.append("	CSS:providesSkill <${SkillIri}> .\n");
+		
+		restSkillDescription.append("<${SkillIri}_RestRequest_Representation> a WADL:Representation ;\n");
+		restSkillDescription.append("	WADL:hasMediaType \"${MediaType}\" .\n");
+		restSkillDescription.append("<${SkillIri}_RestResponse_Representation> a WADL:Representation ;\n");
 		restSkillDescription.append("	WADL:hasMediaType \"${MediaType}\" .\n");
 		restSkillDescription.append("<${SkillIri}_RestInterface_Request> a WADL:Request ;\n");
-		restSkillDescription.append("	WADL:hasRepresentation <${SkillIri}_Representation> .\n");
+		restSkillDescription.append("	WADL:hasRepresentation <${SkillIri}_RestRequest_Representation> .\n");
 		restSkillDescription.append("<${SkillIri}_RestInterface_Response> a WADL:201 ;\n");
-		restSkillDescription.append("	WADL:hasRepresentation <${SkillIri}_Representation> .\n");
+		restSkillDescription.append("	WADL:hasRepresentation <${SkillIri}_RestResponse_Representation> .\n");
 
 		for (TransitionName transition : TransitionName.values()) {
 			String transitionCapitalized = transition.toString().substring(0, 1).toUpperCase()
@@ -103,14 +108,15 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 			restSkillDescription.append("<${SkillIri}_RestInterface_" + transitionCapitalized + "Resource> a WADL:Resource ;\n");
 			restSkillDescription.append("	WADL:hasPath \"" + transition.toString() + "\" .\n");
 			restSkillDescription
-					.append("<${SkillIri}_RestInterface> WADL:hasResource <${SkillIri}_" + transitionCapitalized + "Resource> .\n");
+					.append("<${SkillIri}_RestInterface> WADL:hasResource <${SkillIri}_RestInterface_" + transitionCapitalized + "Resource> .\n");
 			restSkillDescription.append("<${SkillIri}_RestInterface_" + transitionCapitalized + "Method> a WADL:POST .\n");
-			restSkillDescription.append("<${SkillIri}_RestInterface_" + transitionCapitalized
-					+ "Resource> WADL:hasMethod <${SkillIri}_RestInterface_" + transitionCapitalized + "Method> .\n");
+			restSkillDescription.append("<${SkillIri}_RestInterface_" + transitionCapitalized + "Resource> WADL:hasMethod <${SkillIri}_RestInterface_" + transitionCapitalized + "Method> .\n");
+			restSkillDescription.append("<${SkillIri}> CaSk:hasSkillMethod <${SkillIri}_RestInterface_" + transitionCapitalized + "Method> .\n");
+			restSkillDescription.append("<${SkillIri}_RestInterface> CaSk:exposesSkillMethod <${SkillIri}_RestInterface_" + transitionCapitalized + "Method> .\n");
 			restSkillDescription.append(
 					"<${SkillIri}_RestInterface_" + transitionCapitalized + "Method> WADL:hasRequest <${SkillIri}_RestInterface_Request> .\n");
 			restSkillDescription.append("<${SkillIri}_RestInterface_" + transitionCapitalized
-					+ "Method> CaSk:invokes <${SkillIri}_StateMachine_" + transitionCapitalized + "_Command> .\n");
+					+ "Method> CaSk:invokes <${SkillIri}_StateMachine_" + transitionCapitalized + "Command> .\n");
 		}
 		// Resource for SkillParameter Queries
 		restSkillDescription.append("<${SkillIri}_RestInterface_SkillParameter_Resource> a WADL:Resource ;\n");
@@ -134,7 +140,7 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 		restSkillDescription.append("<${SkillIri}_RestInterface_getSkillOutput_Method> a WADL:GET ;\n");
 		restSkillDescription.append("	a CaSk:GetOutputs .\n");
 		restSkillDescription
-				.append("<${SkillIri_RestInterface}_SkillOutput_Resource> WADL:hasMethod <${SkillIri}_RestInterface_getSkillOutput_Method> .\n");
+				.append("<${SkillIri}_RestInterface_SkillOutput_Resource> WADL:hasMethod <${SkillIri}_RestInterface_getSkillOutput_Method> .\n");
 		restSkillDescription.append("<${SkillIri}_RestInterface_getSkillOutput_Method> WADL:hasResponse <${SkillIri}_RestInterface_Response> .\n");
 
 		// connect SkillParameters and SkillOutputs!
@@ -148,7 +154,7 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 
 			field.setAccessible(true);
 			skillParamCounter++;
-			restSkillDescription.append("<${SkillIri}_Param" + skillParamCounter + "> a CaSk:SkillParameter ;\n");
+			restSkillDescription.append("<${SkillIri}_Param" + skillParamCounter + "> a CSS:SkillParameter ;\n");
 			restSkillDescription.append("	a WADL:QueryParameter ;\n");
 			restSkillDescription.append("	CaSk:hasVariableName \"" + field.getName() + "\" ;\n");
 			restSkillDescription.append("	CaSk:hasVariableType xsd:" + field.getType().getSimpleName() + " ;\n");
@@ -166,10 +172,10 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 
 			// create connections to RestSkill and Representation
 			restSkillDescription
-					.append("<${SkillIri}> CaSk:hasSkillParameter <${SkillIri}_Param" + skillParamCounter + "> .\n")
+					.append("<${SkillIri}> CSS:hasParameter <${SkillIri}_Param" + skillParamCounter + "> .\n")
 					.append("<${SkillIri}_RestInterface> CSS:exposes <${SkillIri}_Param" + skillParamCounter + "> .\n");
 			restSkillDescription.append(
-					"<${SkillIri}_RestInterface_Representation> WADL:hasParameter <${SkillIri}_Param" + skillParamCounter + "> .\n");
+					"<${SkillIri}_RestRequest_Representation> WADL:hasParameter <${SkillIri}_Param" + skillParamCounter + "> .\n");
 
 			// create ParameterOptions
 			String options[] = field.getAnnotation(SkillParameter.class).option();
@@ -214,7 +220,7 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 			restSkillDescription
 					.append("<${SkillIri}> CaSk:hasSkillOutput <${SkillIri}_Output" + skillOutputCounter + "> .\n")
 					.append("<${SkillIri}_RestInterface> CSS:exposes <${SkillIri}_Output" + skillOutputCounter + "> .\n");
-			restSkillDescription.append("<${SkillIri}_RestInterface_Representation> WADL:hasParameter <${SkillIri}_Output"
+			restSkillDescription.append("<${SkillIri}_RestResponse_Representation> WADL:hasParameter <${SkillIri}_Output"
 					+ skillOutputCounter + "> .\n");
 		}
 
