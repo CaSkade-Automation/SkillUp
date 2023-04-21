@@ -33,7 +33,7 @@ public class AttributeLoggingFilter implements AttributeFilter {
 	/**
 	 * Constructor of class {@link AttributeLoggingFilter}
 	 * 
-	 * @param attributePredicate
+	 * @param attributePredicate Filter logic to apply
 	 * @param field              field whose value has to be updated
 	 * @param skill              instance of skill to get field
 	 */

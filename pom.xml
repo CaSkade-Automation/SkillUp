@@ -7,22 +7,88 @@
 	<version>${revision}</version>
 	<packaging>pom</packaging>
 
+
+	<name>SkillUp</name>
+	<description>A framework to easily implement skills with ontology descriptions and OPC UA or RESTful interfaces</description>
+	<url>https://github.com/aljoshakoecher/skill-up</url>
+
 	<properties>
-		<revision>2.0.0</revision>
+		<revision>2.0.1</revision>
+		<bundle-plugin-version>5.1.8</bundle-plugin-version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
+	<modules>
+		<module>annotations</module>
+		<module>action-generator</module>
+		<module>description-generator</module>
+		<module>module-generator</module>
+		<module>opc-ua-server</module>
+		<module>rest-resource</module>
+		<module>skill-generator-interface</module>
+		<module>opc-ua-skill-generator</module>
+		<module>rest-skill-generator</module>
+		<module>registration</module>
+		<module>smart-tracker</module>
+		<module>examples</module>
+	</modules>
 
-<build>
-    <pluginManagement>
+	<developers>
+		<developer>
+			<name>Aljosha Koecher</name>
+			<email>aljosha.koecher@hsu-hh.de</email>
+			<organization>Helmut-Schmidt-University, Institute of Automation</organization>
+			<organizationUrl>http://www.hsu-hh.de/aut</organizationUrl>
+		</developer>
+		<developer>
+			<name>Luis Miguel Vieira da Silva</name>
+			<email>miguel.vieira@hsu-hh.de</email>
+			<organization>Helmut-Schmidt-University, Institute of Automation</organization>
+			<organizationUrl>http://www.hsu-hh.de/aut</organizationUrl>
+		</developer>
+	</developers>
+
+
+	<licenses>
+		<license>
+			<name>MIT License</name>
+			<url>http://www.opensource.org/licenses/mit-license.php</url>
+		</license>
+	</licenses>
+
+	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
+
+	<scm>
+		<connection>scm:git:git://github.com/aljoshakoecher/skill-up</connection>
+		<developerConnection>scm:git:ssh://github.com/aljoshakoecher/skill-up</developerConnection>
+		<url>https://github.com/aljoshakoecher/skill-up</url>
+	</scm>
+
+	<build>
 		<plugins>
 			<plugin>
-				<!-- Flatten plugin is needed to resolve revision variable to correct numbers -->
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>flatten-maven-plugin</artifactId>
-				<version>1.1.0</version>
+				<version>1.4.1</version>
 				<configuration>
 					<updatePomFile>true</updatePomFile>
-					<flattenMode>resolveCiFriendliesOnly</flattenMode>
+					<pomElements>
+						<name />
+						<description />
+						<developers />
+						<contributors />
+						<url />
+						<scm />
+					</pomElements>
 				</configuration>
 				<executions>
 					<execution>
@@ -41,24 +107,74 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<version>1.6.13</version>
+				<extensions>true</extensions>
+				<configuration>
+					<serverId>ossrh</serverId>
+					<nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+					<autoReleaseAfterClose>true</autoReleaseAfterClose>
+				</configuration>
+			</plugin>
 		</plugins>
-    </pluginManagement>
-</build>
+	</build>
 
-	
+	<profiles>
+		<profile>
+			<id>release-sign-artifacts</id>
+			<activation>
+				<property>
+					<name>performRelease</name>
+					<value>true</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>3.0.1</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<version>3.2.1</version>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<goals>
+									<goal>jar-no-fork</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<version>3.5.0</version>
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 
-	<modules>
-		<module>annotations</module>
-		<module>action-generator</module>
-		<module>description-generator</module>
-		<module>module-generator</module>
-		<module>opc-ua-server</module>
-		<module>rest-resource</module>
-		<module>skill-generator-interface</module>
-		<module>opc-ua-skill-generator</module>
-		<module>rest-skill-generator</module>
-		<module>registration</module>
-		<module>smart-tracker</module>
-		<module>examples</module>
-	</modules>
 </project>

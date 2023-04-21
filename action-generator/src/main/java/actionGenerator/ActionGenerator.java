@@ -16,11 +16,9 @@ import statemachine.StateMachineBuilder;
 /**
  * Class to generate stateMachine for a skill
  * 
- * @Component Indicates that annotated class is intended to be an OSGi
- *            component. <br>
- *            immediate=true, component configuration activates immediately.
- *            <br>
- *            After becoming satisfied component is registered as a service.
+ * Component decorator indicates that annotated class is intended to be an OSGi component. <br>
+ * immediate=true, component configuration activates immediately. <br>
+ * After becoming satisfied component is registered as a service.
  */
 @Component(immediate = true, service = ActionGenerator.class)
 public class ActionGenerator {
@@ -44,8 +42,7 @@ public class ActionGenerator {
 
 			// if method has annotation of the state like @Execute then a new SkillAction is
 			// build and added to the stateMachine for the corresponding state
-			List<Method> skillActions = methods.stream().filter(method -> method.isAnnotationPresent(state.getKey()))
-					.collect(Collectors.toList());
+			List<Method> skillActions = methods.stream().filter(method -> method.isAnnotationPresent(state.getKey())).collect(Collectors.toList());
 
 			for (Method method : skillActions) {
 				SkillAction action = new SkillAction(method, skill);
@@ -63,8 +60,7 @@ public class ActionGenerator {
 		// is set to this stateMachine so that the stateMachine of the skill is known by
 		// the skill and transitions can be used (e.g. machine got too hot and has to be
 		// stopped)
-		List<Field> stateMachineFields = fields.stream().filter(
-				field -> field.isAnnotationPresent(StateMachine.class) && field.getType() == Isa88StateMachine.class)
+		List<Field> stateMachineFields = fields.stream().filter(field -> field.isAnnotationPresent(StateMachine.class) && field.getType() == Isa88StateMachine.class)
 				.collect(Collectors.toList());
 
 		for (Field field : stateMachineFields) {

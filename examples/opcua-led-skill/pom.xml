@@ -21,7 +21,7 @@
 		<dependency>
 			<groupId>io.github.aljoshakoecher.skillup</groupId>
 			<artifactId>skillup.annotations</artifactId>
-			<version>${revision}</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.pi4j</groupId>
@@ -42,6 +42,7 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
+				<version>${bundle-plugin-version}</version>
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>

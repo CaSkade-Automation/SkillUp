@@ -13,7 +13,7 @@ import statemachine.Isa88StateMachine;
 /**
  * Skill Generator for OpcUa technology
  * 
- * @Component Indicates that annotated class is intended to be an OSGi
+ * Component decorator indicates that annotated class is intended to be an OSGi
  *            component. <br>
  *            immediate=true, component configuration activates immediately <br>
  *            property type to differentiate the skill generators for different

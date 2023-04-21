@@ -7,10 +7,9 @@ import org.osgi.service.component.annotations.Component;
 /**
  * Registration class to register/delete modules and skills on OPS
  * 
- * @Component Indicates that annotated class is intended to be an OSGi
- *            component. <br>
- *            immediate=true, component configuration activates immediately <br>
- *            after becoming satisfied component is registered as a service
+ * Component decorator indicates that annotated class is intended to be an OSGi component. <br>
+ * immediate=true, component configuration activates immediately <br>
+ * after becoming satisfied component is registered as a service
  */
 @Component(immediate = true, service = Registration.class)
 public class Registration {

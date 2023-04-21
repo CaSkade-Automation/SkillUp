@@ -78,7 +78,7 @@ public class DescriptionGenerator {
 		return userSnippet;
 	}
 
-	// nur zu Testzwecken, danach löschen
+	// nur zu Testzwecken, danach lÃ¶schen
 	public void createFile(String turtleFile, String localFileName) throws IOException {
 
 		FileOutputStream fileOutputStream = new FileOutputStream("turtle-files/" + localFileName);

@@ -9,8 +9,9 @@
 	</parent>
 	
 	<artifactId>skillup.examples.rest-simple-multiplier</artifactId>
-	<packaging>bundle</packaging>
 	<name>REST-Simple-Multiplier</name>
+	<description>A simple multiplication skill deployed as a skill with a RESTful interface</description>
+	<packaging>bundle</packaging>
 	
 	<dependencies>
 		<dependency>
@@ -21,7 +22,7 @@
 		<dependency>
 			<groupId>io.github.aljoshakoecher.skillup</groupId>
 			<artifactId>skillup.annotations</artifactId>
-			<version>${revision}</version>
+			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 	<build>
@@ -37,6 +38,7 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
+				<version>${bundle-plugin-version}</version>
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>

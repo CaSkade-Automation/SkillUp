@@ -12,27 +12,23 @@ import skillup.annotations.Module;
 /**
  * Class to generate module description
  * 
- * @Component Indicates that annotated class is intended to be an OSGi
- *            component. <br>
- *            immediate=true, component configuration activates immediately.
- *            <br>
- *            After becoming satisfied component is registered as a service.
+ * Component decorator indicates that annotated class is intended to be an OSGi component. <br>
+ * immediate=true, component configuration activates immediately. <br>
+ * After becoming satisfied component is registered as a service.
  */
 @Component(immediate = true, service = ModuleGenerator.class)
 public class ModuleGenerator extends DescriptionGenerator {
 
 	// neessary/possible snippets for a module description
 	private String moduleSnippet = "<${ModuleIri}> a VDI2206:Module,\r\n" + "					owl:NamedIndividual. ";
-	private String capabilitySnippet = "<${ModuleIri}> CaSkMan:providesCapability <${CapabilityIri}> .\r\n"
-			+ "<${CapabilityIri}> a CaSk:ProvidedCapability,\r\n" + "					owl:NamedIndividual. ";
+	private String capabilitySnippet = "<${ModuleIri}> CaSkMan:providesCapability <${CapabilityIri}> .\r\n" + "<${CapabilityIri}> a CaSk:ProvidedCapability,\r\n"
+			+ "					owl:NamedIndividual. ";
 
 	/**
-	 * Method to generate rdf description. Takes moduleSnippet and replaces dummies
-	 * like module IRI.
+	 * Method to generate rdf description. Takes moduleSnippet and replaces dummies like module IRI.
 	 * 
 	 * @param module    object necessary to e.g. get module IRI
-	 * @param userFiles if user has it own snippets, they are added to the
-	 *                  description
+	 * @param userFiles if user has it own snippets, they are added to the description
 	 * @return
 	 */
 	public String generateModuleDescription(Object module, Enumeration<String> userFiles) {
@@ -52,8 +48,7 @@ public class ModuleGenerator extends DescriptionGenerator {
 		}
 
 		// replace dummies
-		moduleDescription = moduleDescription.replace("${ModuleIri}", moduleAnnotation.moduleIri())
-				.replace("${CapabilityIri}", moduleAnnotation.capabilityIri());
+		moduleDescription = moduleDescription.replace("${ModuleIri}", moduleAnnotation.moduleIri()).replace("${CapabilityIri}", moduleAnnotation.capabilityIri());
 
 		try {
 			createFile(moduleDescription, "moduleDescription.ttl");
