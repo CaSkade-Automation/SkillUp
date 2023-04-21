@@ -7,56 +7,16 @@
 	<version>${revision}</version>
 	<packaging>pom</packaging>
 
+
+	<name>SkillUp</name>
+	<description>A framework to easily implement skills with ontology descriptions and OPC UA or RESTful interfaces</description>
+	<url>https://github.com/aljoshakoecher/skill-up</url>
+
 	<properties>
-		<revision>2.0.1</revision>
+		<revision>1.0.4</revision>
+		<bundle-plugin-version>5.1.8</bundle-plugin-version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-
-
-	<build>
-		<pluginManagement>
-			<plugins>
-			<!-- Make sure to not deploy parent folder (skip = true), but don't skip children (inherited = false) -->
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-deploy-plugin</artifactId>
-					<version>3.1.1</version>
-					<configuration>
-						<skip>true</skip>
-					</configuration>
-					<inherited>false</inherited>
-				</plugin>
-				<plugin>
-					<!-- Flatten plugin is needed to resolve revision variable to correct 
-						numbers -->
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>flatten-maven-plugin</artifactId>
-					<version>1.1.0</version>
-					<configuration>
-						<updatePomFile>true</updatePomFile>
-						<flattenMode>resolveCiFriendliesOnly</flattenMode>
-					</configuration>
-					<executions>
-						<execution>
-							<id>flatten</id>
-							<phase>process-resources</phase>
-							<goals>
-								<goal>flatten</goal>
-							</goals>
-						</execution>
-						<execution>
-							<id>flatten.clean</id>
-							<phase>clean</phase>
-							<goals>
-								<goal>clean</goal>
-							</goals>
-						</execution>
-					</executions>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-	</build>
-
-
 
 	<modules>
 		<module>annotations</module>
@@ -72,4 +32,149 @@
 		<module>smart-tracker</module>
 		<module>examples</module>
 	</modules>
+
+	<developers>
+		<developer>
+			<name>Aljosha Koecher</name>
+			<email>aljosha.koecher@hsu-hh.de</email>
+			<organization>Helmut-Schmidt-University, Institute of Automation</organization>
+			<organizationUrl>http://www.hsu-hh.de/aut</organizationUrl>
+		</developer>
+		<developer>
+			<name>Luis Miguel Vieira da Silva</name>
+			<email>miguel.vieira@hsu-hh.de</email>
+			<organization>Helmut-Schmidt-University, Institute of Automation</organization>
+			<organizationUrl>http://www.hsu-hh.de/aut</organizationUrl>
+		</developer>
+	</developers>
+
+
+	<licenses>
+		<license>
+			<name>MIT License</name>
+			<url>http://www.opensource.org/licenses/mit-license.php</url>
+		</license>
+	</licenses>
+
+	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
+
+	<scm>
+		<connection>scm:git:git://github.com/aljoshakoecher/skill-up</connection>
+		<developerConnection>scm:git:ssh://github.com/aljoshakoecher/skill-up</developerConnection>
+		<url>https://github.com/aljoshakoecher/skill-up</url>
+	</scm>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>flatten-maven-plugin</artifactId>
+				<version>1.4.1</version>
+				<configuration>
+					<updatePomFile>true</updatePomFile>
+					<pomElements>
+						<name />
+						<description />
+						<developers />
+						<contributors />
+						<url />
+						<scm />
+					</pomElements>
+				</configuration>
+				<executions>
+					<execution>
+						<id>flatten</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>flatten</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>flatten.clean</id>
+						<phase>clean</phase>
+						<goals>
+							<goal>clean</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<version>1.6.13</version>
+				<extensions>true</extensions>
+				<configuration>
+					<serverId>ossrh</serverId>
+					<nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+					<autoReleaseAfterClose>false</autoReleaseAfterClose>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<profiles>
+		<profile>
+			<id>release-sign-artifacts</id>
+			<activation>
+				<property>
+					<name>performRelease</name>
+					<value>true</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>3.0.1</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<version>3.2.1</version>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<goals>
+									<goal>jar-no-fork</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<version>3.5.0</version>
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 </project>
