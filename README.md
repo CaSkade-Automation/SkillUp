@@ -23,10 +23,10 @@ In order to develop your own modules and skills, all you need to do is create a 
 <dependency>
 	<groupId>io.github.aljoshakoecher.skillup</groupId>
 	<artifactId>skillup.annotations</artifactId>
-	<version>1.0.0</version>
+	<version>2.0.1</version>
 </dependency>
 ```
-After building a module or skill, you can deploy both`inside a SkillUp runtime. Note that you have to have an OSGi bundle of a module running inside your SkillUp runtime before you can add skills.
+After building a module or skill, you can deploy both inside a SkillUp runtime. :warning: Note that you have to have an OSGi bundle of a module running inside your SkillUp runtime before you can add skills.
 After setting up your OSGi container, you can develop your own modules and skills and deploy them inside a SkillUp runtime. Please check the wiki articles on [how to develop your own module](https://github.com/aljoshakoecher/skill-up/wiki/Step-by-step-instructions-for-creating-a-module) as well as [how to develop your own skill](https://github.com/aljoshakoecher/skill-up/wiki/Step-by-step-instructions-for-creating-a-skill)
 Furthermore, there are example projects to help you get started. If you look at these examples, you can see that you just have to add some annotations to your otherwise conventional Java class. There are annotations to create modules and skills that are shown below.
 
@@ -84,7 +84,7 @@ Skill-Up is implemented as a collection of OSGi bundles that create a runtime in
 If you want to setup your own OSGi container to be used as a runtime for SkillUp, you need to compile all the bundles of SkillUp. This is best done by executing a `mvn install` from the project root. Furthermore, the dependencies of the SkillUP bundles are needed. A list of required bundles will be provided soon.
 
 ## Examples
-Check out the example module and skills in the examples folder to get started. Feel free to create an issue if necessary. 
+Check out the example module and skills in the examples folder to see an example module and different skills. The latest release also has a pre-built version of these examples that are ready to be used. Feel free to create an issue if you have questions. 
 
 ## How it works
 :construction: The way SkillUp works will be explained soon :construction:
