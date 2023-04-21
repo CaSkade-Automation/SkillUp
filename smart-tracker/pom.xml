@@ -22,27 +22,27 @@
 		<dependency>
 			<groupId>io.github.aljoshakoecher.skillup</groupId>
 			<artifactId>skillup.annotations</artifactId>
-			<version>${revision}</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.github.aljoshakoecher.skillup</groupId>
 			<artifactId>skillup.action-generator</artifactId>
-			<version>${revision}</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.github.aljoshakoecher.skillup</groupId>
 			<artifactId>skillup.opc-ua-skill-generator</artifactId>
-			<version>${revision}</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.github.aljoshakoecher.skillup</groupId>
 			<artifactId>skillup.registration</artifactId>
-			<version>${revision}</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.github.aljoshakoecher.skillup</groupId>
 			<artifactId>skillup.module-generator</artifactId>
-			<version>${revision}</version>
+			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 	<build>
@@ -58,7 +58,7 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
-				<version>5.1.8</version>
+				<version>${bundle-plugin-version}</version>
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
