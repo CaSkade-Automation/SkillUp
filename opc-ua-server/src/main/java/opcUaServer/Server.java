@@ -53,10 +53,9 @@ import static org.eclipse.milo.opcua.sdk.server.api.config.OpcUaServerConfig.USE
 /**
  * OPC-UA-Server
  * 
- * @Component Indicates that annotated class is intended to be an OSGi
- *            component. <br>
- *            immediate=true, component configuration activates immediately <br>
- *            after becoming satisfied component is registered as a service
+ * Component decorrator indicates that annotated class is intended to be an OSGi component. <br>
+ * immediate=true, component configuration activates immediately <br>
+ * after becoming satisfied component is registered as a service
  */
 @Component(immediate = true, service = Server.class)
 public class Server {
@@ -82,12 +81,11 @@ public class Server {
 	/**
 	 * Server is started <br>
 	 * 
-	 * Constructor hasn't to be added to activate method, because an OSGi bundle
-	 * starts constructor automatically. Without future.get so that the activate
+	 * Constructor hasn't to be added to activate method, because an OSGi bundle starts constructor automatically. Without future.get so that the activate
 	 * method doesn't block until the future is reached.
 	 * 
-	 * @Activate method that should be called on component activation
-	 * @throws Exception
+	 * Activate decorator indicates method that should be called on component activation
+	 * @throws Exception On problems with the server future
 	 */
 	@Activate
 	public void activate() throws Exception {
@@ -104,11 +102,10 @@ public class Server {
 	private final OpcUaServer server;
 
 	/**
-	 * Constructor uses/creates security file, loads keystoreloader, sets username
-	 * and password and builds server while setting endpoints etc. and starts
+	 * Constructor uses/creates security file, loads keystoreloader, sets username and password and builds server while setting endpoints etc. and starts
 	 * namespace. For more details take a look at eclipse milo on github.
 	 * 
-	 * @throws Exception
+	 * @throws Exception Thrown if the temporary security directory wasn't created
 	 */
 	public Server() throws Exception {
 
@@ -125,13 +122,11 @@ public class Server {
 
 		KeyStoreLoader loader = new KeyStoreLoader().load(securityTempDir);
 
-		DefaultCertificateManager certificateManager = new DefaultCertificateManager(loader.getServerKeyPair(),
-				loader.getServerCertificateChain());
+		DefaultCertificateManager certificateManager = new DefaultCertificateManager(loader.getServerKeyPair(), loader.getServerCertificateChain());
 
 		DefaultTrustListManager trustListManager = new DefaultTrustListManager(pkiDir);
 
-		DefaultServerCertificateValidator certificateValidator = new DefaultServerCertificateValidator(
-				trustListManager);
+		DefaultServerCertificateValidator certificateValidator = new DefaultServerCertificateValidator(trustListManager);
 
 		UsernameIdentityValidator identityValidator = new UsernameIdentityValidator(true, authChallenge -> {
 			String username = authChallenge.getUsername();
@@ -151,19 +146,14 @@ public class Server {
 
 		// The configured application URI must match the one in the certificate(s)
 		String applicationUri = CertificateUtil.getSanUri(certificate)
-				.orElseThrow(() -> new UaRuntimeException(StatusCodes.Bad_ConfigurationError,
-						"certificate is missing the application URI"));
+				.orElseThrow(() -> new UaRuntimeException(StatusCodes.Bad_ConfigurationError, "certificate is missing the application URI"));
 
 		Set<EndpointConfiguration> endpointConfigurations = createEndpointConfigurations(certificate);
 
-		OpcUaServerConfig serverConfig = OpcUaServerConfig.builder().setApplicationUri(applicationUri)
-				.setApplicationName(LocalizedText.english("OPC_UA_Server")).setEndpoints(endpointConfigurations)
-				.setBuildInfo(new BuildInfo("urn:my:server:", "HSU", "OPC_UA_Server", OpcUaServer.SDK_VERSION, "",
-						DateTime.now()))
-				.setCertificateManager(certificateManager).setTrustListManager(trustListManager)
-				.setCertificateValidator(certificateValidator)
-				.setIdentityValidator(new CompositeValidator(identityValidator, x509IdentityValidator))
-				.setProductUri("urn:my:server").build();
+		OpcUaServerConfig serverConfig = OpcUaServerConfig.builder().setApplicationUri(applicationUri).setApplicationName(LocalizedText.english("OPC_UA_Server"))
+				.setEndpoints(endpointConfigurations).setBuildInfo(new BuildInfo("urn:my:server:", "HSU", "OPC_UA_Server", OpcUaServer.SDK_VERSION, "", DateTime.now()))
+				.setCertificateManager(certificateManager).setTrustListManager(trustListManager).setCertificateValidator(certificateValidator)
+				.setIdentityValidator(new CompositeValidator(identityValidator, x509IdentityValidator)).setProductUri("urn:my:server").build();
 
 		server = new OpcUaServer(serverConfig);
 
@@ -172,8 +162,7 @@ public class Server {
 	}
 
 	/**
-	 * Method creates TCP endpoints (without localhost because OPS have no access to
-	 * OPC-UA Server via localhost) with and without security
+	 * Method creates TCP endpoints (without localhost because OPS have no access to OPC-UA Server via localhost) with and without security
 	 * 
 	 * @param certificate
 	 * @return endpoint configurations
@@ -211,34 +200,29 @@ public class Server {
 		// add every address to endpoint configuration
 		for (String bindAddress : bindAddresses) {
 			for (String hostname : hostnames) {
-				EndpointConfiguration.Builder builder = EndpointConfiguration.newBuilder().setBindAddress(bindAddress)
-						.setHostname(hostname).setPath("/hsu").setCertificate(certificate).addTokenPolicies(
-								USER_TOKEN_POLICY_ANONYMOUS, USER_TOKEN_POLICY_USERNAME, USER_TOKEN_POLICY_X509);
+				EndpointConfiguration.Builder builder = EndpointConfiguration.newBuilder().setBindAddress(bindAddress).setHostname(hostname).setPath("/hsu")
+						.setCertificate(certificate).addTokenPolicies(USER_TOKEN_POLICY_ANONYMOUS, USER_TOKEN_POLICY_USERNAME, USER_TOKEN_POLICY_X509);
 
-				EndpointConfiguration.Builder noSecurityBuilder = builder.copy().setSecurityPolicy(SecurityPolicy.None)
-						.setSecurityMode(MessageSecurityMode.None);
+				EndpointConfiguration.Builder noSecurityBuilder = builder.copy().setSecurityPolicy(SecurityPolicy.None).setSecurityMode(MessageSecurityMode.None);
 
 				// every address added as endpoint with and without security
 				endpointConfigurations.add(buildTcpEndpoint(noSecurityBuilder));
 				// TCP Basic256Sha256 / SignAndEncrypt
-				endpointConfigurations
-						.add(buildTcpEndpoint(builder.copy().setSecurityPolicy(SecurityPolicy.Basic256Sha256)
-								.setSecurityMode(MessageSecurityMode.SignAndEncrypt)));
+				endpointConfigurations.add(buildTcpEndpoint(builder.copy().setSecurityPolicy(SecurityPolicy.Basic256Sha256).setSecurityMode(MessageSecurityMode.SignAndEncrypt)));
 
 				/*
-				 * discovery path taken out, because by creating description of server every
-				 * endpoint is added and this endpoint is not usable for OPS to execute methods.
+				 * discovery path taken out, because by creating description of server every endpoint is added and this endpoint is not usable for OPS to execute
+				 * methods.
 				 */
 
 				/*
-				 * It's good practice to provide a discovery-specific endpoint with no security.
-				 * It's required practice if all regular endpoints have security configured.
+				 * It's good practice to provide a discovery-specific endpoint with no security. It's required practice if all regular endpoints have security
+				 * configured.
 				 *
 				 * Usage of the "/discovery" suffix is defined by OPC UA Part 6:
 				 *
-				 * Each OPC UA Server Application implements the Discovery Service Set. If the
-				 * OPC UA Server requires a different address for this Endpoint it shall create
-				 * the address by appending the path "/discovery" to its base address.
+				 * Each OPC UA Server Application implements the Discovery Service Set. If the OPC UA Server requires a different address for this Endpoint it shall
+				 * create the address by appending the path "/discovery" to its base address.
 				 */
 
 //				EndpointConfiguration.Builder discoveryBuilder = builder.copy().setPath("/discovery")

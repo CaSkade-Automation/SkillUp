@@ -208,7 +208,8 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
 	 * Method creates variable nodes for skill parameters or outputs.
 	 * 
 	 * @param variableDescription description with name, description, type and value
-	 * @param folder              node to which variable should be added
+	 * @param skillFolder         folder of the skill
+	 * @param skillVariableFolder folder of the variable
 	 * @param skillParameter      boolean value to differentiate between skill
 	 *                            parameter and output
 	 * @return the created variable node
@@ -279,6 +280,7 @@ public class Namespace extends ManagedNamespaceWithLifecycle {
 	 * skill folder.
 	 * 
 	 * @param folder skills folder to which method should be added
+	 * @param skillMethodFolder folder to be created for the skill
 	 * @param skill  object of skill to get actual value of skill output (which is a
 	 *               field of skills object)
 	 */

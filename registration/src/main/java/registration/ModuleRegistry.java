@@ -87,8 +87,6 @@ public class ModuleRegistry {
 	 * Method to remove OPS from OPS-list (when OPS no longer available)
 	 * 
 	 * @param remoteAddr IP address of OPS
-	 * @return If OPS could be removed: true <br>
-	 *         else: false
 	 */
 	public void removeOps(String remoteAddr) {
 		OpsDescription deleteOps = getOpsDescriptionByIp(remoteAddr);

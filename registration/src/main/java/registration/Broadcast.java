@@ -27,12 +27,10 @@ public class Broadcast {
 	private List<String> opsIDs = new ArrayList<String>();
 
 	/**
-	 * Method to send broadcast message and to wait for answers of possible
-	 * different OPSes.
+	 * Method to send broadcast message and to wait for answers of possible different OPSes.
 	 * 
-	 * @param moduleRegistry to add OPS to an list to know to to whom modules and
-	 *                       skills has to register
-	 * @throws IOException
+	 * @param moduleRegistry to add OPS to an list to know to to whom modules and skills has to register
+	 * @throws IOException On problems with the socket
 	 */
 	public void broadcast(ModuleRegistry moduleRegistry) throws IOException {
 
@@ -98,21 +96,19 @@ public class Broadcast {
 
 		// after 20 seconds without any OPS answering to the broadcast the thread is
 		// closed and no more answers are accepted
-		CompletableFuture.runAsync(receivingBroadcastResponseThread::run).orTimeout(20, TimeUnit.SECONDS)
-				.exceptionally(throwable -> {
-					logger.info("No more OPS found");
-					// list is cleared for future broadcasts
-					opsIDs.clear();
-					return null;
-				});
+		CompletableFuture.runAsync(receivingBroadcastResponseThread::run).orTimeout(20, TimeUnit.SECONDS).exceptionally(throwable -> {
+			logger.info("No more OPS found");
+			// list is cleared for future broadcasts
+			opsIDs.clear();
+			return null;
+		});
 	}
 
 	/**
 	 * The description of OPS is converted from string to OpsDescription
 	 * 
 	 * @param receivePacket  response to broadcast
-	 * @param moduleRegistry to add OPS to an list to know to to whom modules and
-	 *                       skills has to register
+	 * @param moduleRegistry to add OPS to an list to know to to whom modules and skills has to register
 	 */
 	public void getOpsDescriptionFromResponse(DatagramPacket receivePacket, ModuleRegistry moduleRegistry) {
 

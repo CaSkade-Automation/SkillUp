@@ -32,13 +32,10 @@ import skillup.annotations.Skill;
 import statemachine.Isa88StateMachine;
 
 /**
- * Superior class which tracks new bundles and generates/deletes modules/skills
- * by using references to necessary components
+ * Superior class which tracks new bundles and generates/deletes modules/skills by using references to necessary components
  * 
- * @Component Indicates that annotated class is intended to be an OSGi
- *            component. <br>
- *            immediate=true, component configuration activates immediately
- *            after becoming satisfied
+ * Component decorator indicates that annotated class is intended to be an OSGi component. <br>
+ * immediate=true, component configuration activates immediately after becoming satisfied
  */
 @Component(immediate = true)
 public class SmartTracker {
@@ -71,8 +68,7 @@ public class SmartTracker {
 	@Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
 	void addSkillGeneratorInterface(SkillGeneratorInterface skillGenerator, Map<String, Object> properties) {
 		try {
-			this.skillGeneratorPropertyList.put(skillGenerator,
-					Class.forName("skillup.annotations." + properties.get("type").toString()));
+			this.skillGeneratorPropertyList.put(skillGenerator, Class.forName("skillup.annotations." + properties.get("type").toString()));
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -80,8 +76,7 @@ public class SmartTracker {
 	}
 
 	/**
-	 * Removes skill generator from list and stops every skill bundle corresponding
-	 * to this skill generator (same technology type)
+	 * Removes skill generator from list and stops every skill bundle corresponding to this skill generator (same technology type)
 	 * 
 	 * @param skillGenerator
 	 * @param properties     to get technology type of skill generator
@@ -90,8 +85,7 @@ public class SmartTracker {
 		this.skillGeneratorPropertyList.remove(skillGenerator);
 		for (Map.Entry<Bundle, Object> me : skillClassObjects.entrySet()) {
 			try {
-				if (me.getValue().getClass().getAnnotation(Skill.class).type()
-						.equals(Class.forName("actionGenerator." + properties.get("type").toString()))) {
+				if (me.getValue().getClass().getAnnotation(Skill.class).type().equals(Class.forName("actionGenerator." + properties.get("type").toString()))) {
 
 					me.getKey().stop();
 				}
@@ -110,8 +104,7 @@ public class SmartTracker {
 
 	/**
 	 * When all references are met an broadcast is send to get every OPS <br>
-	 * Method tracks new bundles and generates modules or skills. By removing a
-	 * bundle which is an module or skill, it will be deleted
+	 * Method tracks new bundles and generates modules or skills. By removing a bundle which is an module or skill, it will be deleted
 	 * 
 	 * @param context
 	 */
@@ -120,78 +113,73 @@ public class SmartTracker {
 
 		registration.broadcast();
 
-		this.bundleTracker = new org.osgi.util.tracker.BundleTracker<Bundle>(context, Bundle.ACTIVE,
-				new org.osgi.util.tracker.BundleTrackerCustomizer<Bundle>() {
+		this.bundleTracker = new org.osgi.util.tracker.BundleTracker<Bundle>(context, Bundle.ACTIVE, new org.osgi.util.tracker.BundleTrackerCustomizer<Bundle>() {
 
-					@Override
-					public Bundle addingBundle(Bundle bundle, BundleEvent event) {
-						// TODO Auto-generated method stub
+			@Override
+			public Bundle addingBundle(Bundle bundle, BundleEvent event) {
+				// TODO Auto-generated method stub
 
-						if (bundle.getLocation().contains("include")) {
+				if (bundle.getLocation().contains("include")) {
 
-							BundleWiring wiring = bundle.adapt(BundleWiring.class);
+					BundleWiring wiring = bundle.adapt(BundleWiring.class);
 
-							Collection<String> resources = wiring.listResources("/", "*class",
-									BundleWiring.LISTRESOURCES_RECURSE);
+					Collection<String> resources = wiring.listResources("/", "*class", BundleWiring.LISTRESOURCES_RECURSE);
 
-							for (String resource : resources) {
+					for (String resource : resources) {
 
-								try {
-									resource = resource.replace("/", ".");
-									resource = resource.substring(0, resource.lastIndexOf("."));
-									Class<?> bundleClass = bundle.loadClass(resource);
+						try {
+							resource = resource.replace("/", ".");
+							resource = resource.substring(0, resource.lastIndexOf("."));
+							Class<?> bundleClass = bundle.loadClass(resource);
 
-									addModule(bundleClass, bundle);
-									addSkill(bundleClass, bundle);
+							addModule(bundleClass, bundle);
+							addSkill(bundleClass, bundle);
 
-								} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
-										| IllegalArgumentException | InvocationTargetException | NoSuchMethodException
-										| SecurityException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-							}
-						}
-						return bundle;
-					}
-
-					@Override
-					public void modifiedBundle(Bundle bundle, BundleEvent event, Bundle object) {
-						// TODO Auto-generated method stub
-					}
-
-					@Override
-					public void removedBundle(Bundle bundle, BundleEvent event, Bundle object) {
-
-						BundleWiring wiring = bundle.adapt(BundleWiring.class);
-
-						Collection<String> resources = wiring.listResources("/", "*class",
-								BundleWiring.LISTRESOURCES_RECURSE);
-
-						for (String resource : resources) {
-							try {
-								resource = resource.replace("/", ".");
-								resource = resource.substring(0, resource.lastIndexOf("."));
-								Class<?> bundleClass = bundle.loadClass(resource);
-								// Class.forName(resource);
-
-								deleteModule(bundleClass, bundle);
-								deleteSkill(bundleClass, bundle);
-
-							} catch (ClassNotFoundException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
+						} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+								| NoSuchMethodException | SecurityException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
 						}
 					}
-				});
+				}
+				return bundle;
+			}
+
+			@Override
+			public void modifiedBundle(Bundle bundle, BundleEvent event, Bundle object) {
+				// TODO Auto-generated method stub
+			}
+
+			@Override
+			public void removedBundle(Bundle bundle, BundleEvent event, Bundle object) {
+
+				BundleWiring wiring = bundle.adapt(BundleWiring.class);
+
+				Collection<String> resources = wiring.listResources("/", "*class", BundleWiring.LISTRESOURCES_RECURSE);
+
+				for (String resource : resources) {
+					try {
+						resource = resource.replace("/", ".");
+						resource = resource.substring(0, resource.lastIndexOf("."));
+						Class<?> bundleClass = bundle.loadClass(resource);
+						// Class.forName(resource);
+
+						deleteModule(bundleClass, bundle);
+						deleteSkill(bundleClass, bundle);
+
+					} catch (ClassNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		});
 		this.bundleTracker.open();
 
 	}
 
 	/**
-	 * This method checks if the new bundle is a module and if it is the module
-	 * description is generated and registered.
+	 * This method checks if the new bundle is a module and if it is the module description is generated and registered.
 	 * 
 	 * @param bundleClass class of the new bundle
 	 * @param bundle      the tracked bundle
@@ -202,8 +190,8 @@ public class SmartTracker {
 	 * @throws NoSuchMethodException
 	 * @throws SecurityException
 	 */
-	public void addModule(Class<?> bundleClass, Bundle bundle) throws InstantiationException, IllegalAccessException,
-			IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+	public void addModule(Class<?> bundleClass, Bundle bundle)
+			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 
 		Module module = bundleClass.getAnnotation(Module.class);
 		if (module == null)
@@ -237,12 +225,9 @@ public class SmartTracker {
 	}
 
 	/**
-	 * This method checks if the new bundle is a skill. Then the necessary module
-	 * has to be registered otherwise the skill can't be generated. If the module is
-	 * registered, a stateMachine for the skill is created and an observer is added
-	 * to the skill (to know when its state changes). Corresponding to the
-	 * technology the suitable skill generator is used to generate the skill and the
-	 * description. Finally the skill is registered.
+	 * This method checks if the new bundle is a skill. Then the necessary module has to be registered otherwise the skill can't be generated. If the
+	 * module is registered, a stateMachine for the skill is created and an observer is added to the skill (to know when its state changes). Corresponding
+	 * to the technology the suitable skill generator is used to generate the skill and the description. Finally the skill is registered.
 	 * 
 	 * @param bundleClass class of the new bundle
 	 * @param bundle      new bundle
@@ -253,8 +238,8 @@ public class SmartTracker {
 	 * @throws NoSuchMethodException
 	 * @throws SecurityException
 	 */
-	public void addSkill(Class<?> bundleClass, Bundle bundle) throws InstantiationException, IllegalAccessException,
-			IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+	public void addSkill(Class<?> bundleClass, Bundle bundle)
+			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 		Skill skill = bundleClass.getAnnotation(Skill.class);
 		if (skill == null)
 			return;
@@ -302,8 +287,7 @@ public class SmartTracker {
 	}
 
 	/**
-	 * Method checks if removed bundle is a module. If it is the module is deleted
-	 * from OPS
+	 * Method checks if removed bundle is a module. If it is the module is deleted from OPS
 	 * 
 	 * @param bundleClass class of the removed bundle
 	 * @param bundle      removed bundle
@@ -319,8 +303,7 @@ public class SmartTracker {
 	}
 
 	/**
-	 * Method checks if removed bundle is a skill. If it is the skill is first
-	 * deleted and then removed from OPS
+	 * Method checks if removed bundle is a skill. If it is the skill is first deleted and then removed from OPS
 	 * 
 	 * @param bundleClass class of removed bundle
 	 * @param bundle      removed bundle
