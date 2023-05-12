@@ -70,7 +70,7 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 
 		restSkillDescription.append("<${SkillIri}> a CaSkMan:JavaSkill ;\n");
 		restSkillDescription.append("	CaSkMan:accessibleThroughRestInterface <${SkillIri}_RestInterface>.");
-		restSkillDescription.append("<${SkillIri}_RestInterface> a CaSkMan:RestSkillInterface.");
+		restSkillDescription.append("<${SkillIri}_RestInterface> a CaSkMan:RestSkillInterface, WADL:Resources");
 
 		String encodedIri = null;
 		try {
@@ -81,8 +81,7 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 
 		ArrayList<String> ipAddresses = getIpAddress();
 		for (String ipAddress : ipAddresses) {
-			restSkillDescription
-					.append("<${SkillIri}_RestInterface> WADL:hasBase \"http://" + ipAddress + ":8181/skills/" + encodedIri + "/\" .\n");
+			restSkillDescription.append("<${SkillIri}_RestInterface> WADL:hasBase \"http://" + ipAddress + ":8181/skills/" + encodedIri + "/\" .\n");
 		}
 		restSkillDescription.append("<${SkillIri}> CSS:behaviorConformsTo <${SkillIri}_StateMachine> ;\n");
 		restSkillDescription.append("	CaSk:hasCurrentState <${SkillIri}_StateMachine_${InitialState}> .\n");
