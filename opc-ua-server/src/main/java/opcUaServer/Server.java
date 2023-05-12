@@ -90,7 +90,7 @@ public class Server {
 	@Activate
 	public void activate() throws Exception {
 
-		logger.info("OPC-UA-Server wird aktiviert");
+		logger.info("Activating OPC UA server...");
 
 		server.startup().get();
 
