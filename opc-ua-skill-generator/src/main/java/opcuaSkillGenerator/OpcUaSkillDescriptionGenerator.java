@@ -13,7 +13,9 @@ import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaNode;
 import org.eclipse.milo.opcua.sdk.server.nodes.UaVariableNode;
 import org.eclipse.milo.opcua.stack.core.BuiltinDataType;
+import org.eclipse.milo.opcua.stack.core.types.enumerated.UserTokenType;
 import org.eclipse.milo.opcua.stack.core.types.structured.EndpointDescription;
+import org.eclipse.milo.opcua.stack.core.types.structured.UserTokenPolicy;
 
 import skillup.annotations.Helper;
 import skillup.annotations.Skill;
@@ -104,12 +106,17 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 			+ "<${ModuleIri}_${ServerName}_NodeSet> a OpcUa:UANodeSet, \r\n"
 			+ "									owl:NamedIndividual. \r\n" + "";
 
-	private String opcUaServerSecuritySnippet = "<${ModuleIri}_${ServerName}> OpcUa:hasEndpointUrl \"${EndpointUrl}\";\r\n"
-			+ "					OpcUa:hasMessageSecurityMode OpcUa:MessageSecurityMode_${MessageSecurityMode}; \r\n"
-			+ "					OpcUa:hasSecurityPolicy OpcUa:${SecurityPolicy} .";
-
-	private String opcUaServerUserSnippet = "<${ModuleIri}_${ServerName}> OpcUa:requiresUserName \"${UserName}\";\r\n"
-			+ "					OpcUa:requiresPassword \"${Password}\" .";
+	private String opcUaEndpointSnippet = "<${ModuleIri}_${ServerName}> OpcUa:hasEndpointDescription <${ModuleIri}_${ServerName}_Endpoint_${EndpointIndex}>.\r\n"
+			+ "	<${ModuleIri}_${ServerName}_Endpoint_${EndpointIndex}> a OpcUa:EndpointDescription;\r\n"
+			+ "		OpcUa:hasEndpointUrl \"${EndpointUrl}\";\r\n"
+			+ "		OpcUa:hasMessageSecurityMode OpcUa:MessageSecurityMode_${MessageSecurityMode}; \r\n"
+			+ "		OpcUa:hasSecurityPolicy OpcUa:${SecurityPolicy}.\r\n";
+	
+	private String tokenSnippet = "<${ModuleIri}_${ServerName}_Endpoint_${EndpointIndex}> OpcUa:hasUserIdentityToken <${ModuleIri}_${ServerName}_Endpoint_${EndpointIndex}_UserIdentityToken_${TokenIndex}>.\r\n"
+			+ "		<${ModuleIri}_${ServerName}_Endpoint_${EndpointIndex}_UserIdentityToken_${TokenIndex}> a ${TokenType}.\r\n";
+	
+	private String opcUaUserTokenSnippet = "<${ModuleIri}_${ServerName}_Endpoint_${EndpointIndex}_UserIdentityToken_${TokenIndex}> OpcUa:requiresUserName \"${UserName}\";\r\n"
+			+ "		OpcUa:requiresPassword \"${Password}\" .";
 
 	private boolean serverDescription = false;
 	private Helper helper = new Helper();
@@ -126,11 +133,14 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 	public String generateOpcUaDescription(Server server, Object skill, Isa88StateMachine stateMachine,
 			Enumeration<String> userFiles) {
 		Skill skillAnnotation = skill.getClass().getAnnotation(Skill.class);
+		String moduleIri = skillAnnotation.moduleIri();
+		String capabiliyIri = skillAnnotation.capabilityIri();
+		String skillIri = skillAnnotation.skillIri();
 
 		String opcUaServerDescription = "";
 		// if OpcUa server description already set, its not written another time
 		if (!serverDescription) {
-			opcUaServerDescription = generateOpcUaServerDescription(server);
+			opcUaServerDescription = generateOpcUaServerDescription(server, moduleIri);
 			serverDescription = true;
 		}
 
@@ -144,10 +154,10 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 				+ opcUaSkillDescription + stateMachineDescription + userSnippet;
 
 		// replace some dummies in description
-		completeSkillDescription = completeSkillDescription.replace("${ModuleIri}", skillAnnotation.moduleIri())
+		completeSkillDescription = completeSkillDescription.replace("${ModuleIri}", moduleIri)
 				.replace("${ServerName}", server.getServer().getConfig().getApplicationName().getText())
-				.replace("${CapabilityIri}", skillAnnotation.capabilityIri())
-				.replace("${SkillIri}", skillAnnotation.skillIri());
+				.replace("${CapabilityIri}", capabiliyIri)
+				.replace("${SkillIri}", skillIri);
 
 		try {
 			createFile(completeSkillDescription, "opcUaDescription.ttl");
@@ -172,7 +182,7 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 	 * @param server OpcUa server for the rdf description has to be created
 	 * @return OpcUa server description
 	 */
-	public String generateOpcUaServerDescription(Server server) {
+	public String generateOpcUaServerDescription(Server server, String moduleIri) {
 
 		OpcUaServer opcUaServer = server.getServer();
 		String opcUaServerDescription = opcUaServerSnippet;
@@ -180,26 +190,59 @@ public class OpcUaSkillDescriptionGenerator extends SkillDescriptionGenerator {
 		List<EndpointDescription> endpointDescriptions = opcUaServer.getEndpointDescriptions();
 
 		// every endpoint description is added to the rdf descripiton
-		for (EndpointDescription endpointDescription : endpointDescriptions) {
+		for (int i = 0; i < endpointDescriptions.size(); i++) {
+			EndpointDescription endpointDescription = endpointDescriptions.get(i);
+			
 			String securityPolicy = endpointDescription.getSecurityPolicyUri();
 			securityPolicy = securityPolicy.substring(securityPolicy.lastIndexOf("/") + 1);
 			securityPolicy = securityPolicy.replace("#", "_");
 
 			// some dummies are replaced
-			String opcUaServerSecurity = opcUaServerSecuritySnippet
+			String endpointText = opcUaEndpointSnippet
+					.replace("${EndpointIndex}", Integer.toString(i))
 					.replace("${EndpointUrl}", endpointDescription.getEndpointUrl())
 					.replace("${MessageSecurityMode}", endpointDescription.getSecurityMode().name())
 					.replace("${SecurityPolicy}", securityPolicy);
 
-			// if an password is necessary this is added to the description
-			if (endpointDescription.getSecurityMode().name().equals("SignAndEncrypt")) {
-				String opcUaServerUser = opcUaServerUserSnippet.replace("${UserName}", server.getUserName())
-						.replace("${Password}", server.getUserPassword());
-				opcUaServerDescription = opcUaServerDescription + opcUaServerUser;
+			
+			UserTokenPolicy[] tokens = endpointDescription.getUserIdentityTokens();
+			for (int tokenIndex = 0; tokenIndex < tokens.length; tokenIndex++) {
+				UserTokenPolicy token = tokens[tokenIndex];
+				String tokenType = this.convertTokenType(token.getTokenType());
+				String tokenText = tokenSnippet.replace("${TokenType}", tokenType)
+						.replace("${EndpointIndex}", Integer.toString(i))
+						.replace("${TokenIndex}", Integer.toString(tokenIndex));
+
+				// if a password is necessary this is added to the description
+				if (token.getTokenType().equals(UserTokenType.UserName)) {
+					String userTokenText = opcUaUserTokenSnippet
+							.replace("${EndpointIndex}", Integer.toString(i))
+							.replace("${TokenIndex}", Integer.toString(tokenIndex))
+							.replace("${UserName}", server.getUserName())
+							.replace("${Password}", server.getUserPassword());
+					tokenText += userTokenText;
+				}
+				endpointText += tokenText;
+				opcUaServerDescription += endpointText;
 			}
-			opcUaServerDescription = opcUaServerDescription + opcUaServerSecurity;
+			
 		}
 		return opcUaServerDescription;
+	}
+	
+	private String convertTokenType(UserTokenType tokenType) {
+		switch (tokenType) {
+		case Anonymous:
+			return "OpcUa:AnonymousIdentityToken";
+		case Certificate:
+			return "OpcUa:X509IdentityToken";
+		case IssuedToken:
+			return "OpcUa:IssuedIdentityToken";
+		case UserName:
+			return "OpcUa:UserNameIdentityToken";
+		default: return "OpcUa:X509IdentityToken";
+		}
+		
 	}
 
 	/**
