@@ -70,7 +70,7 @@ public class RestSkillDescriptionGenerator extends SkillDescriptionGenerator {
 
 		restSkillDescription.append("<${SkillIri}> a CaSkMan:JavaSkill ;\n");
 		restSkillDescription.append("	CaSkMan:accessibleThroughRestInterface <${SkillIri}_RestInterface>.");
-		restSkillDescription.append("<${SkillIri}_RestInterface> a CaSkMan:RestSkillInterface, WADL:Resources");
+		restSkillDescription.append("<${SkillIri}_RestInterface> a CaSkMan:RestSkillInterface, WADL:Resources.");
 
 		String encodedIri = null;
 		try {
