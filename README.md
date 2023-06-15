@@ -23,7 +23,7 @@ In order to develop your own modules and skills, all you need to do is create a 
 <dependency>
 	<groupId>io.github.aljoshakoecher.skillup</groupId>
 	<artifactId>skillup.annotations</artifactId>
-	<version>2.0.1</version>
+	<version>2.0.3</version>
 </dependency>
 ```
 After building a module or skill, you can deploy both inside a SkillUp runtime. :warning: Note that you have to have an OSGi bundle of a module running inside your SkillUp runtime before you can add skills.
